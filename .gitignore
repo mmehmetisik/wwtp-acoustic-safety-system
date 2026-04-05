@@ -4,6 +4,7 @@ wwtp-acoustic-demo/node_modules/
 
 # Build output
 wwtp-acoustic-demo/dist/
+dist/
 
 # IDE
 .idea/
@@ -19,6 +20,7 @@ Thumbs.db
 __pycache__/
 *.pyc
 .env
+.env.*
 
 # Large WAV files (use MP3 in demo)
 *.wav
@@ -34,5 +36,9 @@ __pycache__/
 # Temp/notes
 yorumlar.txt
 
-# Claude Code temp files
-.claude/
+# Logs
+*.log
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
