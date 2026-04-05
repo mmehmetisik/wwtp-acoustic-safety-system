@@ -71,7 +71,7 @@ The system converts audio into spectrogram images and uses Gemma 4 E4B's vision 
 
 ## Live Demo
 
-**[https://wwtp-acoustic-demo.vercel.app](https://wwtp-acoustic-demo.vercel.app)**
+**[https://wwtp-acoustic-safety-system.vercel.app](https://wwtp-acoustic-safety-system.vercel.app)**
 
 Interactive web demo with chunk-by-chunk analysis, real spectrograms, audio playback, and survival verdict animation. Pre-computed results from 5 verified identical runs. Live inference requires local installation.
 
