@@ -1,0 +1,196 @@
+{
+  "benchmark": "WWTP Acoustic Safety Benchmark",
+  "version": "1.0",
+  "author": "Mehmet ISIK | Data Scientist | Adana ASKI | Kaggle Grandmaster",
+  "date": "March 2026",
+  "description": "Scene configuration for 5 acoustic scenarios simulating real WWTP environments. Each scene is a 60-second WAV file split into 5-second chunks and fed sequentially to LLM models.",
+
+  "global_settings": {
+    "audio_duration_sec": 60,
+    "chunk_size_sec": 5,
+    "chunks_per_scene": 12,
+    "sample_rate_hz": 16000,
+    "channels": 1,
+    "format": "WAV",
+    "audio_seed": 42,
+    "survival_threshold_weak_swimmer_sec": 15,
+    "survival_threshold_strong_swimmer_sec": 30,
+    "clarifier_note": "Clarifier pools have reduced buoyancy due to low suspended solid density. Sinking speed is significantly higher than normal water."
+  },
+
+  "modes": {
+    "BARE": {
+      "description": "Audio only. No context provided to the model.",
+      "system_prompt_hint": "You are an AI safety monitoring system. Analyze the audio and report what you hear."
+    },
+    "CONTEXT": {
+      "description": "Audio + location and operational context provided.",
+      "system_prompt_hint": "You are an AI safety monitoring system integrated into SCADA at Ceyhan WWTP. You are listening to microphone feed from {location}. Current operation: {operation}."
+    },
+    "PROTOCOL": {
+      "description": "Audio + context + safety protocol document provided.",
+      "system_prompt_hint": "You are an AI safety monitoring system integrated into SCADA at Ceyhan WWTP. You are listening to microphone feed from {location}. Current operation: {operation}. Safety protocol: {protocol}."
+    }
+  },
+
+  "scenes": [
+    {
+      "scene_id": "S1",
+      "file": "S1_pump_room_normal.wav",
+      "title": "Pump Room — Normal Operation",
+      "location": "Pump station, basement level, Ceyhan WWTP",
+      "difficulty": "easy",
+      "human_present": false,
+      "distress_present": false,
+      "false_positive_risk": true,
+      "duration_sec": 60,
+      "description": "Baseline scene. Only mechanical pump noise. No human present. Model must correctly report NO human distress. Tests false positive rate.",
+      "audio_composition": {
+        "0_60": {
+          "label": "pump_operation",
+          "sounds": ["centrifugal_pump_hum", "pipe_vibration", "motor_drone"],
+          "human_voice": false
+        }
+      },
+      "expected_detection_chunk": null,
+      "expected_detection_sec": null,
+      "operation_context": "Routine wastewater pumping. Duty pump 1 and 2 running at 85% capacity. Saturday morning shift.",
+      "safety_protocol": "Normal operation. No restricted access zones active. Standard monitoring."
+    },
+    {
+      "scene_id": "S2",
+      "file": "S2_construction_human.wav",
+      "title": "Construction Zone — Human Distress Under Noise",
+      "location": "Construction site adjacent to aeration tanks, Ceyhan WWTP",
+      "difficulty": "medium",
+      "human_present": true,
+      "distress_present": true,
+      "false_positive_risk": false,
+      "duration_sec": 60,
+      "description": "Heavy construction noise throughout. Human starts shouting for help at second 25. Model must detect distress signal buried under 90dB construction noise.",
+      "audio_composition": {
+        "0_25": {
+          "label": "construction_only",
+          "sounds": ["concrete_mixer", "excavator", "pneumatic_drill", "metal_clanging"],
+          "human_voice": false
+        },
+        "25_60": {
+          "label": "construction_plus_distress",
+          "sounds": ["concrete_mixer", "excavator", "pneumatic_drill", "human_shouting_help"],
+          "human_voice": true,
+          "distress_type": "shouting_help",
+          "snr_db": -3
+        }
+      },
+      "expected_detection_chunk": 6,
+      "expected_detection_sec": 30,
+      "survival_verdict": "Would survive — detection at 30s within strong swimmer threshold",
+      "operation_context": "Weekend construction work on new sludge press building. 12-person crew on site. High noise environment. Saturday 10:00.",
+      "safety_protocol": "Construction zone active. PPE required. Noise level exceeds 85dB — hearing protection mandatory. Restricted access to operational areas."
+    },
+    {
+      "scene_id": "S3",
+      "file": "S3_pool_false_alarm.wav",
+      "title": "Pool Edge — Metallic Sound (False Alarm)",
+      "location": "Secondary clarifier pool edge, Ceyhan WWTP",
+      "difficulty": "medium",
+      "human_present": false,
+      "distress_present": false,
+      "false_positive_risk": true,
+      "duration_sec": 60,
+      "description": "Pool ambient sound with metallic scraping and banging from bridge scraper mechanism. Sound pattern resembles human distress but is mechanical. Model must NOT trigger alarm — tests contextual understanding.",
+      "audio_composition": {
+        "0_60": {
+          "label": "pool_with_mechanical_noise",
+          "sounds": ["pool_water_ambient", "scraper_bridge_motor", "metal_scraping_sludge", "chain_rattle"],
+          "human_voice": false,
+          "deceptive_sounds": ["metal_bang_resembling_cry", "irregular_scraping_resembling_voice"]
+        }
+      },
+      "expected_detection_chunk": null,
+      "expected_detection_sec": null,
+      "operation_context": "Secondary clarifier sludge scraper bridge running normal cycle. Automatic operation. No personnel in restricted zone.",
+      "safety_protocol": "Pool edge restricted zone. Scraper bridge active — no personnel permitted within 2 meters of pool edge during bridge operation."
+    },
+    {
+      "scene_id": "S4",
+      "file": "S4_manhole_masked.wav",
+      "title": "Manhole Gallery — Masked Worker, Weak Signal",
+      "location": "Underground sewer gallery, manhole access point MH-07, Ceyhan WWTP",
+      "difficulty": "hard",
+      "human_present": true,
+      "distress_present": true,
+      "false_positive_risk": false,
+      "duration_sec": 60,
+      "description": "Confined space entry scenario. Worker wearing respirator mask entered underground gallery. External microphone placed at manhole opening. Worker becomes trapped or injured at second 20. Voice is heavily muffled by mask and attenuated by deep gallery acoustics. Reverb/echo effect from tunnel geometry makes signal hard to classify.",
+      "audio_composition": {
+        "0_20": {
+          "label": "gallery_ambient",
+          "sounds": ["underground_drip", "distant_flow", "ventilation_hum"],
+          "human_voice": false
+        },
+        "20_60": {
+          "label": "masked_distress_with_reverb",
+          "sounds": ["underground_drip", "ventilation_hum", "human_voice_masked_reverb"],
+          "human_voice": true,
+          "distress_type": "masked_muffled_call",
+          "snr_db": -12,
+          "reverb": true,
+          "reverb_decay_sec": 1.8,
+          "reverb_note": "Simulates 6-meter deep cylindrical concrete gallery. Impulse response convolution applied."
+        }
+      },
+      "expected_detection_chunk": 6,
+      "expected_detection_sec": 30,
+      "survival_verdict": "Marginal — confined space rescue window is longer than pool, but gas risk increases every second",
+      "operation_context": "Confined space entry permit issued for gallery inspection. Single worker with respirator. Entry logged at 09:45. Buddy system in place — surface attendant monitoring.",
+      "safety_protocol": "CONFINED SPACE PROTOCOL ACTIVE. Continuous atmospheric monitoring required. Worker check-in every 10 minutes. If no response within 15 minutes, initiate rescue. Microphone monitoring active at manhole MH-07."
+    },
+    {
+      "scene_id": "S5",
+      "file": "S5_pool_critical.wav",
+      "title": "Clarifier Pool — REAL INCIDENT SCENARIO",
+      "location": "Primary clarifier pool, Ceyhan WWTP",
+      "difficulty": "critical",
+      "human_present": true,
+      "distress_present": true,
+      "false_positive_risk": false,
+      "duration_sec": 60,
+      "score_weight": 0.40,
+      "duration_sec": 60,
+      "description": "The benchmark's core scene. Recreates the real incident at Ceyhan WWTP. Worker climbed onto clarifier pool wall — a restricted area — during noisy construction work. Lost balance at second 20. Fell into clarifier pool. Pool has low buoyancy (clarifier density). Worker screaming for help from second 25, but construction noise at 95dB masks the signal. This is the scene that answers the question: would he have survived?",
+      "critical_note": "Clarifier pools use flocculation chemistry that reduces water density. A person falling in sinks significantly faster than in normal water. Strong swimmer: 30 seconds. Weak swimmer: 15 seconds.",
+      "audio_composition": {
+        "0_20": {
+          "label": "construction_normal",
+          "sounds": ["concrete_mixer", "excavator", "pneumatic_drill", "metal_clanging"],
+          "human_voice": false
+        },
+        "20_25": {
+          "label": "fall_event",
+          "sounds": ["concrete_mixer", "excavator", "body_impact_wall", "water_splash_large"],
+          "human_voice": false,
+          "event": "FALL_INTO_POOL"
+        },
+        "25_60": {
+          "label": "drowning_distress",
+          "sounds": ["concrete_mixer", "excavator", "human_screaming_help", "water_splashing_panic"],
+          "human_voice": true,
+          "distress_type": "drowning_scream",
+          "snr_db": -6,
+          "urgency": "MAXIMUM"
+        }
+      },
+      "expected_detection_chunk": 5,
+      "expected_detection_sec": 25,
+      "survival_thresholds": {
+        "certain_survival": "Detection ≤ 15 sec (weak swimmer saved)",
+        "probable_survival": "Detection 15–30 sec (strong swimmer saved)",
+        "unlikely_survival": "Detection 30–45 sec (too late for most)",
+        "no_survival": "Detection > 45 sec or no detection"
+      },
+      "operation_context": "Saturday construction work on new press building. Heavy machinery operating adjacent to clarifier pool. Worker observed climbing pool wall at approximately 09:52. Clarifier bridge scraper in automatic operation. No safety observer assigned to pool perimeter.",
+      "safety_protocol": "RESTRICTED ZONE. Pool edge access prohibited during construction operations. Clarifier pool: low buoyancy water — standard swimming survival times do not apply. IMMEDIATE RESPONSE REQUIRED if any person enters pool. E-STOP: clarifier bridge, initiate rescue protocol, call emergency services."
+    }
+  ]
+}

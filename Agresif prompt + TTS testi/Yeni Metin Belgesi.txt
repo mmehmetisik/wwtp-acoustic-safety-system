@@ -1,0 +1,3 @@
+python acoustic_engine.py PROTOCOL
+
+--spectrogram flag'i yok, ses tabanlı çalışacak. Agresif prompt + TTS sesler + debouncing.

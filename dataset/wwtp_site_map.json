@@ -1,0 +1,226 @@
+{
+  "benchmark": "WWTP Acoustic Safety Benchmark",
+  "version": "1.0",
+  "author": "Mehmet ISIK | Data Scientist | Adana ASKI | Kaggle Grandmaster",
+  "date": "March 2026",
+  "description": "Virtual site map of Ceyhan WWTP with microphone placement locations for the acoustic safety benchmark. All coordinates are relative to plant origin point (main gate). Distances in meters.",
+
+  "facility": {
+    "name": "Ceyhan Wastewater Treatment Plant",
+    "operator": "Adana ASKI (Water and Sewerage Administration)",
+    "location": "Ceyhan, Adana, Turkey",
+    "capacity_m3_day": 34896,
+    "area_m2": 42000,
+    "established": 2008,
+    "processes": [
+      "Preliminary treatment (screening, grit removal)",
+      "Primary clarification",
+      "Biological treatment (activated sludge)",
+      "Secondary clarification",
+      "Sludge thickening and dewatering",
+      "Anaerobic digestion",
+      "Biogas utilization (CHP)"
+    ]
+  },
+
+  "coordinate_system": {
+    "origin": "Main gate — southwest corner of facility",
+    "x_axis": "East (positive = towards river)",
+    "y_axis": "North (positive = towards processing units)",
+    "z_axis": "Elevation (positive = above ground level)",
+    "unit": "meters"
+  },
+
+  "zones": {
+    "Z1": {
+      "name": "Mechanical & Pump Station",
+      "description": "Underground pump station, blower room, and mechanical equipment area",
+      "coordinates": {"x_min": 10, "x_max": 60, "y_min": 20, "y_max": 80},
+      "access": "restricted",
+      "noise_level_typical_dba": 75
+    },
+    "Z2": {
+      "name": "Primary Treatment",
+      "description": "Primary clarifiers, grit chambers, screening",
+      "coordinates": {"x_min": 60, "x_max": 150, "y_min": 20, "y_max": 120},
+      "access": "restricted_operational",
+      "noise_level_typical_dba": 65
+    },
+    "Z3": {
+      "name": "Biological Treatment",
+      "description": "Aeration tanks, activated sludge basins",
+      "coordinates": {"x_min": 150, "x_max": 280, "y_min": 20, "y_max": 150},
+      "access": "restricted_operational",
+      "noise_level_typical_dba": 70
+    },
+    "Z4": {
+      "name": "Secondary Clarification",
+      "description": "Secondary clarifier pools with rotating scraper bridges",
+      "coordinates": {"x_min": 280, "x_max": 380, "y_min": 40, "y_max": 160},
+      "access": "restricted_operational",
+      "noise_level_typical_dba": 62
+    },
+    "Z5": {
+      "name": "Sludge Treatment & Biogas",
+      "description": "Anaerobic digesters, sludge press building (under construction), CHP units",
+      "coordinates": {"x_min": 60, "x_max": 200, "y_min": 150, "y_max": 240},
+      "access": "restricted_hazardous",
+      "noise_level_typical_dba": 68,
+      "construction_note": "New sludge press building under construction at time of incident. Active construction zone."
+    },
+    "Z6": {
+      "name": "Underground Gallery Network",
+      "description": "Subsurface sewer galleries, inspection manholes, pipe access tunnels",
+      "coordinates": {"x_min": 0, "x_max": 400, "y_min": 0, "y_max": 240},
+      "z_elevation": -6.0,
+      "access": "confined_space_permit_required",
+      "noise_level_typical_dba": 52
+    }
+  },
+
+  "microphones": {
+    "MIC_01": {
+      "scene": "S1",
+      "label": "Pump Station — Basement Level",
+      "location_zone": "Z1",
+      "coordinates": {"x": 35, "y": 45, "z": -3.5},
+      "mounting": "wall_mounted",
+      "height_m": 2.0,
+      "type": "industrial_omnidirectional",
+      "frequency_response_hz": [20, 20000],
+      "ip_rating": "IP67",
+      "cable_length_m": 45,
+      "scada_tag": "MIC_PS_01",
+      "description": "Monitors pump station basement. Primary pump noise environment. High mechanical noise baseline.",
+      "nearest_hazard": "Rotating pump impellers, pressurized pipes",
+      "incident_scene": false
+    },
+    "MIC_02": {
+      "scene": "S2",
+      "label": "Construction Zone — New Press Building Perimeter",
+      "location_zone": "Z5",
+      "coordinates": {"x": 125, "y": 195, "z": 0},
+      "mounting": "temporary_pole_mount",
+      "height_m": 3.0,
+      "type": "directional_cardioid",
+      "frequency_response_hz": [50, 16000],
+      "ip_rating": "IP65",
+      "cable_length_m": 30,
+      "scada_tag": "MIC_CS_02",
+      "description": "Temporary installation monitoring construction zone adjacent to sludge press building. High ambient noise from active construction.",
+      "nearest_hazard": "Construction machinery, open excavation, falling objects",
+      "incident_scene": false,
+      "installation_note": "Temporary safety monitoring installation. Cable routed to SCADA panel via conduit."
+    },
+    "MIC_03": {
+      "scene": "S3",
+      "label": "Secondary Clarifier Pool Edge — Bridge Side",
+      "location_zone": "Z4",
+      "coordinates": {"x": 320, "y": 100, "z": 0.5},
+      "mounting": "railing_clamp",
+      "height_m": 1.2,
+      "type": "industrial_omnidirectional",
+      "frequency_response_hz": [20, 20000],
+      "ip_rating": "IP68",
+      "cable_length_m": 60,
+      "scada_tag": "MIC_SC_03",
+      "description": "Monitors secondary clarifier pool edge. Picks up scraper bridge mechanism noise. Deceptive acoustic environment — metallic sounds may resemble human voice.",
+      "nearest_hazard": "Clarifier pool (low buoyancy water), rotating scraper bridge arm",
+      "incident_scene": false,
+      "acoustic_note": "Scraper bridge operates on 45-minute cycle. Metal-on-sludge scraping produces irregular broadband noise."
+    },
+    "MIC_04": {
+      "scene": "S4",
+      "label": "Manhole MH-07 — Gallery Access Point",
+      "location_zone": "Z6",
+      "coordinates": {"x": 180, "y": 90, "z": 0},
+      "mounting": "manhole_frame_external",
+      "height_m": 0.3,
+      "type": "weatherproof_boundary_layer",
+      "frequency_response_hz": [100, 12000],
+      "ip_rating": "IP68",
+      "cable_length_m": 25,
+      "scada_tag": "MIC_MH_04",
+      "description": "External microphone mounted at manhole frame opening. Monitors underground gallery for confined space worker safety. Signal attenuated by 6-meter depth and tunnel acoustics.",
+      "nearest_hazard": "Confined space (H2S, O2 deficiency), deep fall hazard",
+      "incident_scene": false,
+      "acoustic_note": "Gallery is 6m deep, 1.2m diameter concrete cylinder. Reverb decay time ~1.8 seconds. Respirator mask adds 15dB high-frequency attenuation to voice signal.",
+      "confined_space_protocol": "Microphone active whenever confined space entry permit issued for MH-07 or adjacent manholes."
+    },
+    "MIC_05": {
+      "scene": "S5",
+      "label": "Primary Clarifier Pool Edge — INCIDENT LOCATION",
+      "location_zone": "Z2",
+      "coordinates": {"x": 95, "y": 70, "z": 0.8},
+      "mounting": "wall_mounted_pool_edge",
+      "height_m": 1.5,
+      "type": "industrial_omnidirectional",
+      "frequency_response_hz": [20, 20000],
+      "ip_rating": "IP68",
+      "cable_length_m": 40,
+      "scada_tag": "MIC_PC_05",
+      "description": "Primary clarifier pool perimeter microphone. This is the INCIDENT LOCATION. Worker fell from pool wall into clarifier at approximately 09:52 on a Saturday during construction operations.",
+      "nearest_hazard": "Primary clarifier pool — LOW BUOYANCY WATER (suspended solids reduce density). Adjacent construction zone noise masks distress signals.",
+      "incident_scene": true,
+      "incident_date": "Saturday morning — exact date withheld for privacy",
+      "incident_description": "Worker climbed onto clarifier pool wall — restricted area — during noisy construction operations. Lost balance. Fell into pool. Construction noise prevented human operators from hearing distress calls.",
+      "pool_properties": {
+        "type": "primary_clarifier",
+        "diameter_m": 28,
+        "depth_m": 3.5,
+        "water_density": "reduced — flocculation chemistry",
+        "buoyancy_note": "Significantly lower than normal water. A person sinks 2-3x faster than in river or sea water.",
+        "survival_window_strong_swimmer_sec": 30,
+        "survival_window_weak_swimmer_sec": 15
+      },
+      "distance_to_construction_m": 18,
+      "construction_noise_at_mic_dba": 88
+    }
+  },
+
+  "scada_integration": {
+    "system": "Siemens WinCC SCADA",
+    "acoustic_module": "Custom Python bridge — microphone audio → SCADA tag → LLM API",
+    "polling_interval_sec": 5,
+    "chunk_duration_sec": 5,
+    "tags": {
+      "MIC_PS_01": {"description": "Pump station audio stream", "unit": "audio_chunk_base64"},
+      "MIC_CS_02": {"description": "Construction zone audio stream", "unit": "audio_chunk_base64"},
+      "MIC_SC_03": {"description": "Clarifier pool audio stream", "unit": "audio_chunk_base64"},
+      "MIC_MH_04": {"description": "Manhole gallery audio stream", "unit": "audio_chunk_base64"},
+      "MIC_PC_05": {"description": "Primary clarifier audio stream", "unit": "audio_chunk_base64"}
+    },
+    "alarm_tags": {
+      "ACOUSTIC_ALARM_01": "Human distress detected at pump station",
+      "ACOUSTIC_ALARM_02": "Human distress detected at construction zone",
+      "ACOUSTIC_ALARM_03": "Human distress detected at secondary clarifier",
+      "ACOUSTIC_ALARM_04": "Human distress detected at manhole MH-07",
+      "ACOUSTIC_ALARM_05": "CRITICAL — Human distress detected at primary clarifier pool"
+    },
+    "estop_tags": {
+      "ESTOP_CLARIFIER_BRIDGE": "Emergency stop — primary clarifier scraper bridge",
+      "ESTOP_POOL_PUMP": "Emergency stop — clarifier feed pumps"
+    }
+  },
+
+  "model_capabilities_note": {
+    "description": "As of March 2026, only Gemini models support native audio file analysis via API. This benchmark tests 8 Gemini models. Other model families excluded due to lack of audio modality support.",
+    "audio_capable_models": [
+      "Gemini 3.1 Pro Preview",
+      "Gemini 3.1 Flash-Lite Preview",
+      "Gemini 3 Pro Preview",
+      "Gemini 3 Flash Preview",
+      "Gemini 2.5 Pro",
+      "Gemini 2.5 Flash",
+      "Gemini 2.0 Flash",
+      "Gemini 2.0 Flash Lite"
+    ],
+    "excluded_families": {
+      "Claude": "No native audio file API support",
+      "Qwen": "No native audio file API support",
+      "DeepSeek": "No native audio file API support",
+      "Gemma": "No native audio file API support"
+    },
+    "industry_finding": "In 2026, industrial acoustic AI capability remains concentrated in a single model family. This itself is a benchmark finding — the sector's readiness gap is measurable."
+  }
+}

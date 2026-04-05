@@ -1,0 +1,1 @@
+bu eski ses dosyalrı bunları modeller kulladnı ama çok hayal gördüğü için tts ile yeni sesler ürettik gtts ile. audio dosyasını içinde var yeni sesler.

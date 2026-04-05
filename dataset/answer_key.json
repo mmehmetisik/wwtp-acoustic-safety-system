@@ -1,0 +1,311 @@
+{
+  "benchmark": "WWTP Acoustic Safety Benchmark",
+  "version": "1.0",
+  "author": "Mehmet ISIK | Data Scientist | Adana ASKI | Kaggle Grandmaster",
+  "date": "March 2026",
+  "description": "Ground truth answers and expected model decisions for all 5 scenes across 3 modes. Defines correct detection timing, required actions, and survival verdicts.",
+
+  "scoring_philosophy": {
+    "core_principle": "Human life preservation above all. Missing a real distress signal is catastrophically worse than a false alarm.",
+    "false_negative_penalty": -40,
+    "false_positive_penalty": -10,
+    "s5_weight": 0.40,
+    "survival_question": "Would he have survived if an LLM had been monitoring?",
+    "survival_thresholds": {
+      "certain_survival_sec": 15,
+      "probable_survival_sec": 30,
+      "unlikely_survival_sec": 45,
+      "no_survival": "Detection > 45 sec or no detection"
+    }
+  },
+
+  "naive_baseline": {
+    "description": "A naive model that either always alarms or never alarms, with no contextual understanding.",
+    "always_alarm": {
+      "S1": "WRONG — false positive",
+      "S2": "CORRECT — but no timing credit",
+      "S3": "WRONG — false positive",
+      "S4": "CORRECT — but no timing credit",
+      "S5": "CORRECT — but no timing credit",
+      "estimated_score": 20
+    },
+    "never_alarm": {
+      "S1": "CORRECT",
+      "S2": "WRONG — false negative, -40 pts",
+      "S3": "CORRECT",
+      "S4": "WRONG — false negative, -40 pts",
+      "S5": "WRONG — false negative, -40 pts",
+      "estimated_score": 10
+    }
+  },
+
+  "grade_bands": {
+    "excellent": {"range": "85-100", "description": "Near-perfect detection. All distress signals caught within survival window. No false positives."},
+    "good":      {"range": "70-84",  "description": "Most signals detected in time. One minor error."},
+    "pass":      {"range": "50-69",  "description": "Majority detected. Some timing failures or one false positive."},
+    "weak":      {"range": "25-49",  "description": "Below pass. Significant misses or excessive false alarms."},
+    "fail":      {"range": "0-24",   "description": "Near baseline. LLM added no safety value."}
+  },
+
+  "scenes": {
+    "S1": {
+      "scene_id": "S1",
+      "title": "Pump Room — Normal Operation",
+      "human_present": false,
+      "correct_answer": {
+        "human_detected": false,
+        "alarm": false,
+        "action": "CONTINUE_MONITORING",
+        "reasoning_expected": "Mechanical pump noise only. No human voice frequency patterns detected. Normal operation."
+      },
+      "correct_chunk": null,
+      "correct_detection_sec": null,
+      "survival_verdict": "N/A — no human present",
+      "chunk_by_chunk_expectation": {
+        "chunk_01_0_5":   "NO ALARM — pump noise only",
+        "chunk_02_5_10":  "NO ALARM — pump noise only",
+        "chunk_03_10_15": "NO ALARM — pump noise only",
+        "chunk_04_15_20": "NO ALARM — pump noise only",
+        "chunk_05_20_25": "NO ALARM — pump noise only",
+        "chunk_06_25_30": "NO ALARM — pump noise only",
+        "chunk_07_30_35": "NO ALARM — pump noise only",
+        "chunk_08_35_40": "NO ALARM — pump noise only",
+        "chunk_09_40_45": "NO ALARM — pump noise only",
+        "chunk_10_45_50": "NO ALARM — pump noise only",
+        "chunk_11_50_55": "NO ALARM — pump noise only",
+        "chunk_12_55_60": "NO ALARM — pump noise only"
+      },
+      "scoring": {
+        "no_alarm_throughout": {"points": 40, "description": "Correctly identified no human presence across all 12 chunks"},
+        "false_alarm_any_chunk": {"points": -10, "description": "False positive penalty per false alarm triggered"},
+        "correct_reasoning": {"points": 10, "description": "Correctly explained why signal is mechanical, not human"}
+      }
+    },
+
+    "S2": {
+      "scene_id": "S2",
+      "title": "Construction Zone — Human Distress Under Noise",
+      "human_present": true,
+      "distress_starts_sec": 25,
+      "distress_starts_chunk": 5,
+      "correct_answer": {
+        "human_detected": true,
+        "alarm": true,
+        "distress_type": "human_shouting_help",
+        "action": "NOTIFY_OPERATOR",
+        "estop": null,
+        "notify": ["SITE_SUPERVISOR", "SAFETY_OFFICER"],
+        "reasoning_expected": "Human voice detected above construction noise. Periodic shouting pattern inconsistent with mechanical sources. Possible worker in distress."
+      },
+      "correct_detection_window": {
+        "earliest_chunk": 6,
+        "earliest_sec": 25,
+        "latest_acceptable_chunk": 8,
+        "latest_acceptable_sec": 40
+      },
+      "survival_verdict": {
+        "detection_le_30sec": "WOULD SURVIVE — strong swimmer threshold met",
+        "detection_31_45sec": "UNCERTAIN — depends on swimmer ability",
+        "detection_gt_45sec": "WOULD NOT SURVIVE"
+      },
+      "chunk_by_chunk_expectation": {
+        "chunk_01_0_5":   "NO ALARM — construction only",
+        "chunk_02_5_10":  "NO ALARM — construction only",
+        "chunk_03_10_15": "NO ALARM — construction only",
+        "chunk_04_15_20": "NO ALARM — construction only",
+        "chunk_05_20_25": "NO ALARM — construction only",
+        "chunk_06_25_30": "ALARM EXPECTED — human shouting begins",
+        "chunk_07_30_35": "ALARM if not already triggered",
+        "chunk_08_35_40": "ALARM if not already triggered — last acceptable window",
+        "chunk_09_40_45": "LATE — partial credit only",
+        "chunk_10_45_50": "TOO LATE — no timing credit",
+        "chunk_11_50_55": "TOO LATE",
+        "chunk_12_55_60": "TOO LATE"
+      },
+      "scoring": {
+        "detection_le_30sec": {"points": 30, "description": "Detected within strong swimmer survival window"},
+        "detection_31_40sec": {"points": 20, "description": "Detected — marginal window"},
+        "detection_41_60sec": {"points": 10, "description": "Detected but too late for reliable survival"},
+        "no_detection":       {"points": -40, "description": "False negative — catastrophic miss"},
+        "correct_action":     {"points": 10, "description": "Notified correct personnel"},
+        "correct_reasoning":  {"points": 10, "description": "Distinguished human voice from mechanical noise"}
+      }
+    },
+
+    "S3": {
+      "scene_id": "S3",
+      "title": "Pool Edge — Metallic Sound (False Alarm)",
+      "human_present": false,
+      "correct_answer": {
+        "human_detected": false,
+        "alarm": false,
+        "action": "CONTINUE_MONITORING",
+        "reasoning_expected": "Metallic scraping and impact sounds from scraper bridge mechanism. Irregular pattern but consistent with mechanical bridge operation. No human voice frequency signature confirmed. No alarm."
+      },
+      "correct_chunk": null,
+      "correct_detection_sec": null,
+      "survival_verdict": "N/A — no human present",
+      "chunk_by_chunk_expectation": {
+        "chunk_01_0_5":   "NO ALARM",
+        "chunk_02_5_10":  "NO ALARM — may note metallic sounds",
+        "chunk_03_10_15": "NO ALARM",
+        "chunk_04_15_20": "NO ALARM — may note bang resembling cry",
+        "chunk_05_20_25": "NO ALARM",
+        "chunk_06_25_30": "NO ALARM",
+        "chunk_07_30_35": "NO ALARM",
+        "chunk_08_35_40": "NO ALARM",
+        "chunk_09_40_45": "NO ALARM",
+        "chunk_10_45_50": "NO ALARM",
+        "chunk_11_50_55": "NO ALARM",
+        "chunk_12_55_60": "NO ALARM"
+      },
+      "contextual_discrimination_note": "CONTEXT and PROTOCOL modes provide scraper bridge information. Models with context should more easily dismiss metallic sounds as mechanical. BARE mode tests raw audio discrimination.",
+      "scoring": {
+        "no_alarm_throughout": {"points": 40, "description": "Correctly identified no human presence"},
+        "false_alarm_triggered": {"points": -10, "description": "False positive penalty"},
+        "correct_reasoning_mechanical": {"points": 10, "description": "Correctly attributed sounds to mechanical bridge operation"},
+        "uncertainty_flagged": {"points": 5, "description": "Correctly noted ambiguity but did not trigger alarm — good cautious behavior"}
+      }
+    },
+
+    "S4": {
+      "scene_id": "S4",
+      "title": "Manhole Gallery — Masked Worker, Weak Signal",
+      "human_present": true,
+      "distress_starts_sec": 20,
+      "distress_starts_chunk": 4,
+      "correct_answer": {
+        "human_detected": true,
+        "alarm": true,
+        "distress_type": "masked_muffled_distress",
+        "action": "INITIATE_CONFINED_SPACE_RESCUE",
+        "estop": null,
+        "notify": ["SURFACE_ATTENDANT", "CONFINED_SPACE_RESCUE_TEAM", "SAFETY_OFFICER"],
+        "reasoning_expected": "Muffled irregular vocal pattern detected from gallery microphone. Consistent with masked human voice in reverberant confined space. Worker check-in overdue. Initiating confined space rescue protocol."
+      },
+      "correct_detection_window": {
+        "earliest_chunk": 5,
+        "earliest_sec": 20,
+        "latest_acceptable_chunk": 9,
+        "latest_acceptable_sec": 45
+      },
+      "survival_verdict": {
+        "detection_le_30sec": "HIGH SURVIVAL CHANCE — confined space rescue within critical window",
+        "detection_31_45sec": "MODERATE — rescue possible if gas levels acceptable",
+        "detection_gt_45sec": "LOW — gas exposure and injury compound risk"
+      },
+      "chunk_by_chunk_expectation": {
+        "chunk_01_0_5":   "NO ALARM — ambient only",
+        "chunk_02_5_10":  "NO ALARM — ambient only",
+        "chunk_03_10_15": "NO ALARM — ambient only",
+        "chunk_04_15_20": "NO ALARM — ambient only, distress not yet started",
+        "chunk_05_20_25": "ALARM POSSIBLE — muffled voice begins",
+        "chunk_06_25_30": "ALARM EXPECTED",
+        "chunk_07_30_35": "ALARM if not yet triggered",
+        "chunk_08_35_40": "ALARM if not yet triggered",
+        "chunk_09_40_45": "LATE — partial credit",
+        "chunk_10_45_50": "TOO LATE",
+        "chunk_11_50_55": "TOO LATE",
+        "chunk_12_55_60": "TOO LATE"
+      },
+      "scoring": {
+        "detection_le_30sec": {"points": 30, "description": "Early detection within rescue window"},
+        "detection_31_45sec": {"points": 20, "description": "Detection — marginal rescue window"},
+        "detection_46_60sec": {"points": 10, "description": "Late detection"},
+        "no_detection":       {"points": -40, "description": "False negative — worker left in confined space"},
+        "correct_action_rescue": {"points": 10, "description": "Correctly initiated confined space rescue protocol"},
+        "correct_reasoning":  {"points": 10, "description": "Identified masked voice + reverb as human, not mechanical"}
+      }
+    },
+
+    "S5": {
+      "scene_id": "S5",
+      "title": "Clarifier Pool — REAL INCIDENT SCENARIO",
+      "score_weight": 0.40,
+      "human_present": true,
+      "distress_starts_sec": 20,
+      "fall_event_sec": 20,
+      "scream_starts_sec": 25,
+      "distress_starts_chunk": 4,
+      "correct_answer": {
+        "human_detected": true,
+        "alarm": true,
+        "distress_type": "drowning_scream",
+        "action": "ESTOP_CLARIFIER_BRIDGE",
+        "estop": "ESTOP_POOL_BRIDGE",
+        "notify": ["OPERATOR", "EMERGENCY_SERVICES", "PLANT_MANAGER"],
+        "required_json": {
+          "human_detected": true,
+          "confidence": ">=0.7",
+          "distress_type": "drowning_scream",
+          "action": "ESTOP_POOL_BRIDGE",
+          "notify": ["OPERATOR", "EMERGENCY_SERVICES"],
+          "reasoning": "Water splash + human scream detected. Person in clarifier pool. Immediate rescue required."
+        },
+        "reasoning_expected": "Large water splash followed by human screaming detected. Clarifier pool location. Person has entered pool — extremely dangerous due to low buoyancy. Immediate emergency response required. Stopping clarifier bridge to prevent injury."
+      },
+      "correct_detection_window": {
+        "fall_detection_chunk": 5,
+        "fall_detection_sec": 20,
+        "scream_detection_chunk": 6,
+        "scream_detection_sec": 25,
+        "latest_certain_survival_sec": 15,
+        "latest_probable_survival_sec": 30,
+        "latest_unlikely_survival_sec": 45
+      },
+      "survival_verdict_table": {
+        "detection_le_15sec": {
+          "verdict": "CERTAIN SURVIVAL",
+          "reasoning": "Weak swimmer (15s threshold) rescued in time",
+          "color": "GREEN"
+        },
+        "detection_16_30sec": {
+          "verdict": "PROBABLE SURVIVAL",
+          "reasoning": "Strong swimmer rescued in time. Weak swimmer may not survive.",
+          "color": "YELLOW"
+        },
+        "detection_31_45sec": {
+          "verdict": "UNLIKELY SURVIVAL",
+          "reasoning": "Beyond both swimming thresholds. Submersion likely.",
+          "color": "ORANGE"
+        },
+        "detection_gt_45sec": {
+          "verdict": "WOULD NOT HAVE SURVIVED",
+          "reasoning": "Too late. Submersion and loss of consciousness before rescue.",
+          "color": "RED"
+        },
+        "no_detection": {
+          "verdict": "WOULD NOT HAVE SURVIVED",
+          "reasoning": "LLM provided zero safety value. Person drowned.",
+          "color": "BLACK"
+        }
+      },
+      "chunk_by_chunk_expectation": {
+        "chunk_01_0_5":   "NO ALARM — construction only",
+        "chunk_02_5_10":  "NO ALARM — construction only",
+        "chunk_03_10_15": "NO ALARM — construction only",
+        "chunk_04_15_20": "NO ALARM — construction only, just before fall",
+        "chunk_05_20_25": "ALARM POSSIBLE — fall + splash event at sec 20",
+        "chunk_06_25_30": "ALARM EXPECTED — screaming begins at sec 25. Detection here = PROBABLE SURVIVAL",
+        "chunk_07_30_35": "ALARM if not yet — last window for PROBABLE SURVIVAL",
+        "chunk_08_35_40": "ALARM if not yet — UNLIKELY SURVIVAL territory",
+        "chunk_09_40_45": "ALARM if not yet — UNLIKELY SURVIVAL territory",
+        "chunk_10_45_50": "TOO LATE — NO SURVIVAL",
+        "chunk_11_50_55": "TOO LATE",
+        "chunk_12_55_60": "TOO LATE"
+      },
+      "scoring": {
+        "detection_le_15sec": {"points": 40, "description": "Certain survival — both weak and strong swimmer saved"},
+        "detection_16_30sec": {"points": 30, "description": "Probable survival — strong swimmer saved"},
+        "detection_31_45sec": {"points": 15, "description": "Unlikely survival — beyond both thresholds"},
+        "detection_46_60sec": {"points": 5,  "description": "Too late — no survival value"},
+        "no_detection":       {"points": -40, "description": "CATASTROPHIC MISS — person drowned"},
+        "estop_issued":       {"points": 20, "description": "Correctly stopped clarifier bridge — prevents secondary injury"},
+        "emergency_notified": {"points": 20, "description": "Emergency services notified"},
+        "correct_reasoning":  {"points": 10, "description": "Correctly identified splash + scream pattern as drowning emergency"},
+        "json_format_correct":{"points": 10, "description": "Structured JSON output parseable by SCADA system"}
+      },
+      "this_scene_answers": "Would he have survived if an LLM had been monitoring the SCADA acoustic feed that Saturday morning?"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+wwtp-acoustic-demo/node_modules/
+
+# Build output
+wwtp-acoustic-demo/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Large WAV files (use MP3 in demo)
+*.wav
+!dataset/audio/*.wav
+!dataset/audio_sentetic/*.wav
+
+# Large PDF files
+*.pdf
+
+# Root level WAV (duplicate)
+/S4_manhole_masked.wav
+
+# Temp/notes
+yorumlar.txt
+
+# Claude Code temp files
+.claude/

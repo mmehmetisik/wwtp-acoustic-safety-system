@@ -1,0 +1,318 @@
+{
+  "benchmark": "WWTP Acoustic Safety Benchmark",
+  "version": "1.0",
+  "author": "Mehmet ISIK | Data Scientist | Adana ASKI | Kaggle Grandmaster",
+  "date": "March 2026",
+  "description": "Asymmetric scoring rubric for all 5 scenes. Human life preservation is the primary metric. Missing a real distress signal (false negative) is penalized 4x more than a false alarm (false positive).",
+
+  "scoring_principles": {
+    "1_asymmetry": "False Negative (missing real distress) = -40 pts. False Positive (wrong alarm) = -10 pts. Ratio: 4:1.",
+    "2_timing": "Detection speed determines survival verdict. Earlier detection = higher score.",
+    "3_s5_weight": "S5 (real incident scene) carries 40% of total benchmark score.",
+    "4_action_quality": "Correct SCADA action (E-STOP, notify) scores separately from detection.",
+    "5_reasoning": "Model must explain WHY it detected or did not detect. Blind guessing penalized."
+  },
+
+  "total_score_structure": {
+    "max_raw_score": 100,
+    "scene_weights": {
+      "S1": 0.10,
+      "S2": 0.20,
+      "S3": 0.10,
+      "S4": 0.20,
+      "S5": 0.40
+    },
+    "weighted_total_formula": "total = S1*0.10 + S2*0.20 + S3*0.10 + S4*0.20 + S5*0.40"
+  },
+
+  "categories": {
+    "detection_accuracy": {
+      "max_points": 40,
+      "description": "Did the model correctly detect (or correctly reject) human distress?",
+      "applies_to": "All scenes"
+    },
+    "time_to_detection": {
+      "max_points": 30,
+      "description": "How quickly did the model detect distress? Measured in seconds from distress onset.",
+      "applies_to": "S2, S4, S5 only"
+    },
+    "false_alarm_control": {
+      "max_points": 20,
+      "description": "Did the model avoid unnecessary alarms on non-distress scenes?",
+      "applies_to": "S1, S3 (primary), all scenes (secondary)"
+    },
+    "action_quality": {
+      "max_points": 10,
+      "description": "Did the model recommend the correct SCADA action in structured JSON format?",
+      "applies_to": "S2, S4, S5"
+    }
+  },
+
+  "scene_rubrics": {
+    "S1": {
+      "title": "Pump Room — Normal Operation",
+      "max_score": 100,
+      "primary_test": "false_positive_resistance",
+      "rubric": [
+        {
+          "condition": "No alarm triggered across all 12 chunks",
+          "points": 60,
+          "label": "CORRECT — no false positive"
+        },
+        {
+          "condition": "Correct reasoning: mechanical noise identified",
+          "points": 25,
+          "label": "REASONING CREDIT"
+        },
+        {
+          "condition": "Confidence score provided and justified",
+          "points": 15,
+          "label": "CONFIDENCE CREDIT"
+        },
+        {
+          "condition": "Any false alarm triggered",
+          "points": -10,
+          "label": "FALSE POSITIVE PENALTY — per alarm"
+        }
+      ],
+      "pass_threshold": 50
+    },
+
+    "S2": {
+      "title": "Construction Zone — Human Distress Under Noise",
+      "max_score": 100,
+      "primary_test": "signal_detection_under_noise",
+      "distress_onset_sec": 25,
+      "rubric": [
+        {
+          "condition": "Detection at chunk 6-7 (sec 25-35) — within strong swimmer window",
+          "points": 40,
+          "label": "TIMELY DETECTION — WOULD SURVIVE (strong swimmer)"
+        },
+        {
+          "condition": "Detection at chunk 8 (sec 35-40) — marginal window",
+          "points": 28,
+          "label": "LATE DETECTION — UNCERTAIN SURVIVAL"
+        },
+        {
+          "condition": "Detection at chunk 9-10 (sec 40-50) — beyond survival window",
+          "points": 15,
+          "label": "TOO LATE — would not survive"
+        },
+        {
+          "condition": "Detection at chunk 11-12 (sec 50-60)",
+          "points": 8,
+          "label": "VERY LATE — minimal credit"
+        },
+        {
+          "condition": "No detection across all 12 chunks",
+          "points": -40,
+          "label": "FALSE NEGATIVE — CATASTROPHIC MISS"
+        },
+        {
+          "condition": "Correct notify action (SITE_SUPERVISOR or SAFETY_OFFICER)",
+          "points": 20,
+          "label": "ACTION CREDIT"
+        },
+        {
+          "condition": "Correct reasoning: human voice distinguished from construction noise",
+          "points": 20,
+          "label": "REASONING CREDIT"
+        },
+        {
+          "condition": "False alarm before distress onset (chunks 1-5)",
+          "points": -10,
+          "label": "FALSE POSITIVE PENALTY"
+        }
+      ],
+      "pass_threshold": 50
+    },
+
+    "S3": {
+      "title": "Pool Edge — Metallic Sound (False Alarm)",
+      "max_score": 100,
+      "primary_test": "contextual_discrimination",
+      "rubric": [
+        {
+          "condition": "No alarm triggered across all 12 chunks",
+          "points": 50,
+          "label": "CORRECT — contextual discrimination successful"
+        },
+        {
+          "condition": "Noted ambiguous sounds but correctly withheld alarm",
+          "points": 20,
+          "label": "UNCERTAINTY BONUS — cautious and correct"
+        },
+        {
+          "condition": "Correctly attributed sounds to scraper bridge mechanism",
+          "points": 20,
+          "label": "CONTEXT REASONING CREDIT"
+        },
+        {
+          "condition": "Confidence below 0.5 on human presence — correctly uncertain",
+          "points": 10,
+          "label": "CALIBRATION CREDIT"
+        },
+        {
+          "condition": "False alarm triggered (any chunk)",
+          "points": -10,
+          "label": "FALSE POSITIVE PENALTY — per alarm"
+        },
+        {
+          "condition": "Multiple false alarms triggered",
+          "points": -20,
+          "label": "REPEATED FALSE POSITIVE — model unreliable"
+        }
+      ],
+      "mode_note": "CONTEXT and PROTOCOL modes provide scraper bridge information. Correct discrimination easier with context. BARE mode tests raw audio reasoning.",
+      "pass_threshold": 50
+    },
+
+    "S4": {
+      "title": "Manhole Gallery — Masked Worker, Weak Signal",
+      "max_score": 100,
+      "primary_test": "attenuated_signal_detection",
+      "distress_onset_sec": 20,
+      "rubric": [
+        {
+          "condition": "Detection at chunk 5-6 (sec 20-30) — early window",
+          "points": 40,
+          "label": "EARLY DETECTION — HIGH SURVIVAL CHANCE"
+        },
+        {
+          "condition": "Detection at chunk 7-9 (sec 30-45) — moderate window",
+          "points": 28,
+          "label": "MODERATE DETECTION — rescue possible"
+        },
+        {
+          "condition": "Detection at chunk 10-12 (sec 45-60) — late",
+          "points": 12,
+          "label": "LATE DETECTION — gas exposure risk increasing"
+        },
+        {
+          "condition": "No detection across all 12 chunks",
+          "points": -40,
+          "label": "FALSE NEGATIVE — worker abandoned in confined space"
+        },
+        {
+          "condition": "Correct action: confined space rescue protocol initiated",
+          "points": 20,
+          "label": "ACTION CREDIT — rescue protocol"
+        },
+        {
+          "condition": "Correct reasoning: identified reverb + mask attenuation as human voice",
+          "points": 20,
+          "label": "REASONING CREDIT — difficult signal correctly interpreted"
+        },
+        {
+          "condition": "False alarm before distress onset (chunks 1-4)",
+          "points": -10,
+          "label": "FALSE POSITIVE PENALTY"
+        }
+      ],
+      "special_note": "This scene rewards models that understand acoustic physics — reverb + mask = human, not mechanical. BARE mode is most challenging here.",
+      "pass_threshold": 50
+    },
+
+    "S5": {
+      "title": "Clarifier Pool — REAL INCIDENT SCENARIO",
+      "max_score": 100,
+      "score_weight_in_benchmark": 0.40,
+      "primary_test": "critical_drowning_detection",
+      "fall_event_sec": 20,
+      "scream_onset_sec": 25,
+      "rubric": [
+        {
+          "condition": "Detection at chunk 5 (sec 20-25) — fall event detected",
+          "points": 40,
+          "survival_verdict": "CERTAIN SURVIVAL",
+          "label": "FALL DETECTED IMMEDIATELY — both swimmers saved"
+        },
+        {
+          "condition": "Detection at chunk 6-7 (sec 25-35) — scream detected in time",
+          "points": 35,
+          "survival_verdict": "PROBABLE SURVIVAL",
+          "label": "SCREAM DETECTED — strong swimmer saved"
+        },
+        {
+          "condition": "Detection at chunk 8-9 (sec 35-45)",
+          "points": 20,
+          "survival_verdict": "UNLIKELY SURVIVAL",
+          "label": "LATE — beyond survival window for most"
+        },
+        {
+          "condition": "Detection at chunk 10-12 (sec 45-60)",
+          "points": 8,
+          "survival_verdict": "WOULD NOT HAVE SURVIVED",
+          "label": "TOO LATE — no life-saving value"
+        },
+        {
+          "condition": "No detection across all 12 chunks",
+          "points": -40,
+          "survival_verdict": "WOULD NOT HAVE SURVIVED",
+          "label": "CATASTROPHIC MISS — person drowned"
+        },
+        {
+          "condition": "E-STOP command issued for clarifier bridge",
+          "points": 20,
+          "label": "E-STOP CREDIT — prevents secondary injury from rotating bridge"
+        },
+        {
+          "condition": "Emergency services notified in JSON output",
+          "points": 20,
+          "label": "EMERGENCY NOTIFICATION CREDIT"
+        },
+        {
+          "condition": "Correct reasoning: splash + scream = drowning emergency",
+          "points": 10,
+          "label": "REASONING CREDIT"
+        },
+        {
+          "condition": "JSON output correctly formatted for SCADA parsing",
+          "points": 10,
+          "label": "SCADA INTEGRATION CREDIT"
+        },
+        {
+          "condition": "False alarm before fall event (chunks 1-4)",
+          "points": -10,
+          "label": "FALSE POSITIVE PENALTY"
+        }
+      ],
+      "survival_table": {
+        "certain_survival":   {"detection_sec": "<=15", "color": "GREEN",  "label": "CERTAIN SURVIVAL"},
+        "probable_survival":  {"detection_sec": "16-30","color": "YELLOW", "label": "PROBABLE SURVIVAL"},
+        "unlikely_survival":  {"detection_sec": "31-45","color": "ORANGE", "label": "UNLIKELY SURVIVAL"},
+        "no_survival":        {"detection_sec": ">45",  "color": "RED",    "label": "WOULD NOT HAVE SURVIVED"},
+        "catastrophic_miss":  {"detection_sec": "none", "color": "BLACK",  "label": "LLM FAILED — PERSON DROWNED"}
+      },
+      "this_scene_is_the_answer": "The S5 score directly answers: Would he have survived if an LLM had been monitoring that Saturday morning?",
+      "pass_threshold": 50
+    }
+  },
+
+  "mode_adjustments": {
+    "BARE": {
+      "description": "No context. Raw audio only.",
+      "difficulty_multiplier": 1.0,
+      "scoring_note": "Scores taken as-is. Hardest mode."
+    },
+    "CONTEXT": {
+      "description": "Audio + location and operational context.",
+      "difficulty_multiplier": 0.85,
+      "scoring_note": "S3 discrimination easier with scraper bridge context. S4 easier with confined space protocol hint."
+    },
+    "PROTOCOL": {
+      "description": "Audio + context + full safety protocol document.",
+      "difficulty_multiplier": 0.70,
+      "scoring_note": "Protocol explicitly states what to do in each scenario. Tests compliance with safety documentation."
+    }
+  },
+
+  "final_benchmark_score": {
+    "formula": "weighted_avg = (S1*0.10 + S2*0.20 + S3*0.10 + S4*0.20 + S5*0.40)",
+    "reported_per": ["model", "mode", "scene"],
+    "primary_output": "S5 survival verdict per model",
+    "secondary_output": "Grand average across all scenes and modes",
+    "headline_metric": "Would he have survived? YES / PROBABLE / UNLIKELY / NO"
+  }
+}

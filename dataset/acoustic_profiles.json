@@ -1,0 +1,269 @@
+{
+  "benchmark": "WWTP Acoustic Safety Benchmark",
+  "version": "1.0",
+  "author": "Mehmet ISIK | Data Scientist | Adana ASKI | Kaggle Grandmaster",
+  "date": "March 2026",
+  "description": "Acoustic profiles for each scene. Defines noise characteristics, frequency ranges, SNR values, and signal properties used by audio_generator.py to produce realistic WAV files.",
+
+  "reference": {
+    "human_voice_freq_hz": [85, 255],
+    "human_scream_freq_hz": [500, 4000],
+    "human_shout_peak_hz": 2000,
+    "clarifier_buoyancy_note": "Clarifier pools: suspended solids reduce buoyancy. Sinking rate 2-3x faster than normal water.",
+    "osha_noise_limit_8h_dba": 90,
+    "construction_site_typical_dba": "85-105",
+    "hearing_protection_threshold_dba": 85
+  },
+
+  "noise_profiles": {
+    "centrifugal_pump_hum": {
+      "type": "mechanical",
+      "frequency_range_hz": [50, 300],
+      "peak_frequency_hz": 120,
+      "level_dba": 75,
+      "character": "steady_tonal",
+      "generation": "sine_wave + harmonics + pink_noise"
+    },
+    "pipe_vibration": {
+      "type": "mechanical",
+      "frequency_range_hz": [20, 200],
+      "peak_frequency_hz": 80,
+      "level_dba": 65,
+      "character": "low_frequency_rumble",
+      "generation": "pink_noise + low_pass_filter_200hz"
+    },
+    "motor_drone": {
+      "type": "mechanical",
+      "frequency_range_hz": [100, 500],
+      "peak_frequency_hz": 150,
+      "level_dba": 70,
+      "character": "steady_broadband",
+      "generation": "brown_noise + band_pass_100_500hz"
+    },
+    "concrete_mixer": {
+      "type": "construction",
+      "frequency_range_hz": [200, 2000],
+      "peak_frequency_hz": 800,
+      "level_dba": 88,
+      "character": "rhythmic_cyclic",
+      "generation": "white_noise + band_pass + amplitude_modulation_0.5hz"
+    },
+    "excavator": {
+      "type": "construction",
+      "frequency_range_hz": [50, 1000],
+      "peak_frequency_hz": 300,
+      "level_dba": 92,
+      "character": "irregular_heavy",
+      "generation": "brown_noise + random_impact_events"
+    },
+    "pneumatic_drill": {
+      "type": "construction",
+      "frequency_range_hz": [1000, 5000],
+      "peak_frequency_hz": 2500,
+      "level_dba": 95,
+      "character": "high_frequency_impulsive",
+      "generation": "white_noise + high_pass_1000hz + burst_modulation_20hz",
+      "critical_note": "Frequency overlaps with human scream range (2-4kHz). Primary masking agent for S2 and S5."
+    },
+    "metal_clanging": {
+      "type": "construction",
+      "frequency_range_hz": [500, 8000],
+      "peak_frequency_hz": 3000,
+      "level_dba": 85,
+      "character": "impulsive_random",
+      "generation": "sine_burst + exponential_decay + random_interval_1_5sec"
+    },
+    "pool_water_ambient": {
+      "type": "environmental",
+      "frequency_range_hz": [100, 2000],
+      "peak_frequency_hz": 500,
+      "level_dba": 55,
+      "character": "gentle_broadband",
+      "generation": "pink_noise + low_pass_2000hz"
+    },
+    "scraper_bridge_motor": {
+      "type": "mechanical",
+      "frequency_range_hz": [60, 400],
+      "peak_frequency_hz": 180,
+      "level_dba": 68,
+      "character": "slow_cyclic",
+      "generation": "sine_wave_180hz + harmonics + slow_amplitude_modulation_0.1hz"
+    },
+    "metal_scraping_sludge": {
+      "type": "mechanical",
+      "frequency_range_hz": [300, 3000],
+      "peak_frequency_hz": 1200,
+      "level_dba": 72,
+      "character": "irregular_scraping",
+      "generation": "band_pass_noise + random_intensity_variation",
+      "deceptive_note": "Irregular scraping pattern can resemble human voice cadence. Intentional false positive risk for S3."
+    },
+    "chain_rattle": {
+      "type": "mechanical",
+      "frequency_range_hz": [500, 5000],
+      "peak_frequency_hz": 2000,
+      "level_dba": 65,
+      "character": "random_impulsive",
+      "generation": "random_click_train + exponential_decay"
+    },
+    "metal_bang_resembling_cry": {
+      "type": "mechanical_deceptive",
+      "frequency_range_hz": [800, 3000],
+      "peak_frequency_hz": 1500,
+      "level_dba": 70,
+      "character": "single_impulsive_with_decay",
+      "generation": "sine_burst_1500hz + decay_0.3sec",
+      "deceptive_note": "Single metallic impact with decay resembles a brief human cry. S3 false positive trigger."
+    },
+    "underground_drip": {
+      "type": "environmental",
+      "frequency_range_hz": [200, 1000],
+      "peak_frequency_hz": 600,
+      "level_dba": 45,
+      "character": "random_impulsive_sparse",
+      "generation": "random_click + low_pass_1000hz + interval_0.5_3sec"
+    },
+    "distant_flow": {
+      "type": "environmental",
+      "frequency_range_hz": [50, 500],
+      "peak_frequency_hz": 200,
+      "level_dba": 50,
+      "character": "steady_low",
+      "generation": "pink_noise + low_pass_500hz"
+    },
+    "ventilation_hum": {
+      "type": "mechanical",
+      "frequency_range_hz": [80, 300],
+      "peak_frequency_hz": 120,
+      "level_dba": 58,
+      "character": "steady_tonal",
+      "generation": "sine_120hz + pink_noise_low"
+    },
+    "body_impact_wall": {
+      "type": "event",
+      "frequency_range_hz": [100, 2000],
+      "peak_frequency_hz": 500,
+      "level_dba": 75,
+      "character": "single_thud",
+      "duration_ms": 300,
+      "generation": "noise_burst + low_pass_2000hz + decay_300ms"
+    },
+    "water_splash_large": {
+      "type": "event",
+      "frequency_range_hz": [200, 5000],
+      "peak_frequency_hz": 1500,
+      "level_dba": 80,
+      "character": "impulsive_then_sustained",
+      "duration_ms": 2000,
+      "generation": "white_noise_burst + low_pass + exponential_decay_2sec"
+    },
+    "water_splashing_panic": {
+      "type": "event_sustained",
+      "frequency_range_hz": [200, 3000],
+      "peak_frequency_hz": 800,
+      "level_dba": 72,
+      "character": "irregular_sustained",
+      "generation": "random_splash_events + pink_noise + random_interval_0.3_1.5sec"
+    }
+  },
+
+  "signal_profiles": {
+    "human_shouting_help": {
+      "type": "human_distress",
+      "frequency_range_hz": [300, 3000],
+      "peak_frequency_hz": 1500,
+      "level_dba": 85,
+      "character": "periodic_shouting",
+      "words": ["HELP", "YARDIM", "IMDAT"],
+      "interval_sec": 3,
+      "generation": "formant_synthesis + amplitude_envelope + periodic_emission",
+      "note": "Shouting level 85dBa at 1 meter. Attenuates with distance."
+    },
+    "human_screaming_help": {
+      "type": "human_distress_critical",
+      "frequency_range_hz": [500, 4000],
+      "peak_frequency_hz": 2000,
+      "level_dba": 88,
+      "character": "continuous_panic_scream",
+      "words": ["HELP", "YARDIM", "IMDAT", "BIRISI"],
+      "interval_sec": 2,
+      "generation": "formant_synthesis + high_amplitude_envelope + panic_modulation",
+      "note": "Maximum distress level. Frequency overlaps with pneumatic drill — primary benchmark challenge."
+    },
+    "human_voice_masked_reverb": {
+      "type": "human_distress_attenuated",
+      "frequency_range_hz": [200, 1500],
+      "peak_frequency_hz": 800,
+      "level_dba": 65,
+      "character": "muffled_irregular",
+      "words": ["HELP", "YARDIM"],
+      "interval_sec": 5,
+      "generation": "formant_synthesis + low_pass_1500hz + amplitude_reduction_50pct + reverb_convolution",
+      "mask_attenuation_db": 15,
+      "reverb_params": {
+        "method": "convolution_reverb",
+        "room_type": "concrete_cylinder",
+        "diameter_m": 1.2,
+        "depth_m": 6.0,
+        "decay_time_sec": 1.8,
+        "early_reflections_ms": 25
+      },
+      "note": "Respirator mask reduces high frequencies. Deep gallery adds reverb. Combined effect makes classification very difficult."
+    }
+  },
+
+  "scene_acoustic_summary": {
+    "S1": {
+      "dominant_noise": "centrifugal_pump_hum",
+      "noise_level_dba": 75,
+      "human_signal_dba": null,
+      "snr_db": null,
+      "reverb": false,
+      "classification_challenge": "false_positive_resistance",
+      "frequency_masking": "low"
+    },
+    "S2": {
+      "dominant_noise": "pneumatic_drill + concrete_mixer + excavator",
+      "noise_level_dba": 95,
+      "human_signal_dba": 85,
+      "snr_db": -3,
+      "reverb": false,
+      "classification_challenge": "signal_under_broadband_noise",
+      "frequency_masking": "medium",
+      "critical_overlap": "pneumatic_drill (2.5kHz) vs human_shout (1.5kHz) — partial masking"
+    },
+    "S3": {
+      "dominant_noise": "scraper_bridge + metallic_sounds",
+      "noise_level_dba": 72,
+      "human_signal_dba": null,
+      "snr_db": null,
+      "reverb": false,
+      "classification_challenge": "contextual_discrimination",
+      "frequency_masking": "low",
+      "deceptive_elements": ["metal_bang_resembling_cry", "irregular_scraping_resembling_voice"]
+    },
+    "S4": {
+      "dominant_noise": "underground_ambient + ventilation",
+      "noise_level_dba": 58,
+      "human_signal_dba": 65,
+      "snr_db": -12,
+      "reverb": true,
+      "reverb_decay_sec": 1.8,
+      "classification_challenge": "reverb_plus_mask_attenuation",
+      "frequency_masking": "high",
+      "note": "Low background noise but severe signal distortion from mask + reverb combination"
+    },
+    "S5": {
+      "dominant_noise": "pneumatic_drill + concrete_mixer + excavator",
+      "noise_level_dba": 95,
+      "human_signal_dba": 88,
+      "snr_db": -6,
+      "reverb": false,
+      "classification_challenge": "critical_signal_under_high_noise",
+      "frequency_masking": "high",
+      "score_weight": 0.40,
+      "critical_overlap": "pneumatic_drill (2.5kHz) vs scream (2kHz) — severe masking",
+      "note": "Most challenging real signal scene. Scream level high but noise level extreme. 6dB SNR disadvantage."
+    }
+  }
+}
