@@ -129,11 +129,16 @@ wwtp-acoustic-safety-system/
 │   ├── scene_config.json       # Scene definitions
 │   ├── scoring_rubric.json     # Asymmetric scoring system
 │   └── wwtp_site_map.json      # Facility layout
+├── findings/                   # 14 experiment documents + roadmap
+│   ├── 01_test_results.md
+│   ├── ...
+│   └── 14_temperature_zero.md
+├── experiments/                # Early-stage test scripts
+├── scripts/                    # Utility scripts
 ├── spectrogram_test/           # Spectrogram PNG visualizations
-├── wwtp-acoustic-demo/         # React web demo (Vite + Tailwind)
 ├── tests/                      # BARE / CONTEXT / PROTOCOL test suites
-├── wwtp-aerial.png             # Ceyhan WWTP aerial photograph
-└── *.md                        # 14 experiment findings documents
+├── wwtp-acoustic-demo/         # React web demo (Vite + Tailwind)
+└── wwtp-aerial.png             # Ceyhan WWTP aerial photograph
 ```
 
 ---
