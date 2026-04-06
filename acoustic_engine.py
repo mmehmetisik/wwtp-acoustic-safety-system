@@ -1976,15 +1976,22 @@ if __name__ == "__main__":
     import sys
 
     print("\n  WWTP Acoustic Safety System — Engine Test")
-    print(f"  Model: {OLLAMA_MODEL}")
-    print(f"  Running full evaluation...\n")
 
     # Parse command line arguments
-    # Usage: python acoustic_engine.py PROTOCOL
-    #        python acoustic_engine.py PROTOCOL --spectrogram
-    #        python acoustic_engine.py BARE CONTEXT
+    # Usage: python acoustic_engine.py PROTOCOL --spectrogram
+    #        python acoustic_engine.py PROTOCOL --spectrogram --model gemma4:e2b
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = [a.lower() for a in sys.argv[1:] if a.startswith("--")]
+
+    # Parse --model flag
+    for i, f in enumerate(sys.argv[1:], 1):
+        if f.startswith("--model="):
+            OLLAMA_MODEL = f.split("=", 1)[1]
+        elif f == "--model" and i + 1 < len(sys.argv):
+            OLLAMA_MODEL = sys.argv[i + 1]
+
+    print(f"  Model: {OLLAMA_MODEL}")
+    print(f"  Running full evaluation...\n")
 
     # Parse modes
     modes = None

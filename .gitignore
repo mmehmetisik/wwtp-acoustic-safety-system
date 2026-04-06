@@ -33,6 +33,12 @@ __pycache__/
 # Root level WAV (duplicate)
 /S4_manhole_masked.wav
 
+# Large video files
+videos/
+
+# Personal working files
+altyaz*/
+
 # Temp/notes
 yorumlar.txt
 
