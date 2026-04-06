@@ -1,0 +1,338 @@
+(spaceship) PS C:\Users\ASUS\Desktop\wwtp-acoustic-safety-system> python acoustic_engine.py PROTOCOL --spectrogram --model gemma4:e2b
+
+  WWTP Acoustic Safety System — Engine Test
+  Model: gemma4:e2b
+  Running full evaluation...
+
+  Running modes: ['PROTOCOL']
+  Mode: SPECTROGRAM (few-shot vision)
+  Method: Audio → Mel Spectrogram → Image → Vision API
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean 1: S1 pump room (15-20s)
+    ✓ Clean 2: S2 construction noise only (0-5s)
+    ✓ Clean 3: S3 metallic sounds (0-5s)
+    ✓ Human 1: S4 masked voice (25-30s)
+
+═════════════════════════════════════════════════════════════════
+  WWTP ACOUSTIC SAFETY SYSTEM
+  Can AI Hear What Human Ears Miss?
+═════════════════════════════════════════════════════════════════
+  Plant   : Ceyhan WWTP, Adana, Turkey
+  Model   : gemma4:e2b
+  Runtime : Ollama (local, offline)
+  Method  : Spectrogram + Few-Shot Vision
+  Scenes  : 5 | Modes: 1 | Chunks: 12 × 5s
+  Scoring : Asymmetric — FN: -40pts | FP: -10pts
+  S5 Weight: 40% (real incident scene)
+═════════════════════════════════════════════════════════════════
+
+█████████████████████████████████████████████████████████████████
+  MODE: PROTOCOL
+  Audio + context + full safety protocol.
+  Safety-biased: prefer false alarm over missed detection.
+█████████████████████████████████████████████████████████████████
+
+═════════════════════════════════════════════════════════════════
+  RUN 1/5: PROTOCOL | S1 | Pump Room — Normal Operation
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S1 | PROTOCOL+ SPECTROGRAM | S1_pump_room_normal.wav
+  Human: False | Distress onset: N/A
+  Model: gemma4:e2b
+  ─────────────────────────────────────────────────────────────────
+  [S1|PROTOCOL|c01|00-05s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 26.4s | parse:ok
+  [S1|PROTOCOL|c02|05-10s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s | parse:ok
+  [S1|PROTOCOL|c03|10-15s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c04|15-20s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c05|20-25s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c07|30-35s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s | parse:ok
+  [S1|PROTOCOL|c08|35-40s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s | parse:ok
+  [S1|PROTOCOL|c09|40-45s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s | parse:ok
+  [S1|PROTOCOL|c10|45-50s] 🚨 ALARM     | conf:0.95 | muffled_call     | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c11|50-55s] 🚨 ALARM     | conf:0.95 | muffled_call     | INITIATE_CONFINED_SPACE_RESCUE | 6.3s | parse:ok
+  [S1|PROTOCOL|c12|55-60s] 🚨 ALARM     | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.2s | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S1|PROTOCOL|c01|00-05s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 26.4s | parse:ok
+  [S1|PROTOCOL|c02|05-10s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s | parse:ok
+  [S1|PROTOCOL|c03|10-15s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c04|15-20s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c05|20-25s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c07|30-35s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s | parse:ok
+  [S1|PROTOCOL|c08|35-40s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s | parse:ok
+  [S1|PROTOCOL|c09|40-45s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s | parse:ok
+  [S1|PROTOCOL|c10|45-50s] 🚨 CONFIRMED | conf:0.95 | muffled_call     | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S1|PROTOCOL|c11|50-55s] 🚨 CONFIRMED | conf:0.95 | muffled_call     | INITIATE_CONFINED_SPACE_RESCUE | 6.3s | parse:ok
+  [S1|PROTOCOL|c12|55-60s] 🚨 CONFIRMED | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.2s | parse:ok
+
+  Summary: 12 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S1 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  -40/40
+  Time to Detection  :    0/30
+  False Alarm Control:    0/20
+  Action Quality     :    0/10
+  ──────────────────────────────
+  TOTAL              :    0/100
+  First alarm at     : 0s (chunk 1)
+
+  Run time: 93.8s (1.6 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 2/5: PROTOCOL | S2 | Construction Zone — Human Distress Under Noise
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S2 | PROTOCOL+ SPECTROGRAM | S2_construction_human.wav
+  Human: True | Distress onset: 25s
+  Model: gemma4:e2b
+  ─────────────────────────────────────────────────────────────────
+  [S2|PROTOCOL|c01|00-05s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c02|05-10s] 🚨 ALARM     | conf:0.90 | none             | CONTINUE_MONITORING            | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c03|10-15s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c04|15-20s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c05|20-25s] 🚨 ALARM     | conf:0.90 | none             | CONTINUE_MONITORING            | 6.0s [FP] | parse:ok
+  [S2|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+0s] | parse:ok
+  [S2|PROTOCOL|c07|30-35s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+5s] | parse:ok
+  [S2|PROTOCOL|c08|35-40s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s [+10s] | parse:ok
+  [S2|PROTOCOL|c09|40-45s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+15s] | parse:ok
+  [S2|PROTOCOL|c10|45-50s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+20s] | parse:ok
+  [S2|PROTOCOL|c11|50-55s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+25s] | parse:ok
+  [S2|PROTOCOL|c12|55-60s] 🚨 ALARM     | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+30s] | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S2|PROTOCOL|c01|00-05s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c02|05-10s] 🚨 CONFIRMED | conf:0.90 | none             | CONTINUE_MONITORING            | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c03|10-15s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c04|15-20s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [FP] | parse:ok
+  [S2|PROTOCOL|c05|20-25s] 🚨 CONFIRMED | conf:0.90 | none             | CONTINUE_MONITORING            | 6.0s [FP] | parse:ok
+  [S2|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+0s] | parse:ok
+  [S2|PROTOCOL|c07|30-35s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+5s] | parse:ok
+  [S2|PROTOCOL|c08|35-40s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.0s [+10s] | parse:ok
+  [S2|PROTOCOL|c09|40-45s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+15s] | parse:ok
+  [S2|PROTOCOL|c10|45-50s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+20s] | parse:ok
+  [S2|PROTOCOL|c11|50-55s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s [+25s] | parse:ok
+  [S2|PROTOCOL|c12|55-60s] 🚨 CONFIRMED | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+30s] | parse:ok
+
+  Summary: 12 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S2 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  -40/40
+  Time to Detection  :   30/30
+  False Alarm Control:    0/20
+  Action Quality     :    5/10
+  ──────────────────────────────
+  TOTAL              :    0/100
+  First alarm at     : 0s (chunk 1)
+
+  Run time: 74.2s (1.2 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 3/5: PROTOCOL | S3 | Pool Edge — Metallic Sound (False Alarm)
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S3 | PROTOCOL+ SPECTROGRAM | S3_pool_false_alarm.wav
+  Human: False | Distress onset: N/A
+  Model: gemma4:e2b
+  ─────────────────────────────────────────────────────────────────
+  [S3|PROTOCOL|c01|00-05s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s | parse:ok
+  [S3|PROTOCOL|c02|05-10s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c03|10-15s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S3|PROTOCOL|c04|15-20s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c05|20-25s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s | parse:ok
+  [S3|PROTOCOL|c07|30-35s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.6s | parse:ok
+  [S3|PROTOCOL|c08|35-40s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c09|40-45s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.6s | parse:ok
+  [S3|PROTOCOL|c10|45-50s] 🚨 ALARM     | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.5s | parse:ok
+  [S3|PROTOCOL|c11|50-55s] 🚨 ALARM     | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c12|55-60s] 🚨 ALARM     | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.5s | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S3|PROTOCOL|c01|00-05s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.2s | parse:ok
+  [S3|PROTOCOL|c02|05-10s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c03|10-15s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s | parse:ok
+  [S3|PROTOCOL|c04|15-20s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c05|20-25s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s | parse:ok
+  [S3|PROTOCOL|c07|30-35s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.6s | parse:ok
+  [S3|PROTOCOL|c08|35-40s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c09|40-45s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.6s | parse:ok
+  [S3|PROTOCOL|c10|45-50s] 🚨 CONFIRMED | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.5s | parse:ok
+  [S3|PROTOCOL|c11|50-55s] 🚨 CONFIRMED | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.4s | parse:ok
+  [S3|PROTOCOL|c12|55-60s] 🚨 CONFIRMED | conf:0.95 | none             | INITIATE_CONFINED_SPACE_RESCUE | 6.5s | parse:ok
+
+  Summary: 12 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S3 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  -40/40
+  Time to Detection  :    0/30
+  False Alarm Control:    0/20
+  Action Quality     :    0/10
+  ──────────────────────────────
+  TOTAL              :    0/100
+  First alarm at     : 0s (chunk 1)
+
+  Run time: 77.0s (1.3 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 4/5: PROTOCOL | S4 | Manhole Gallery — Masked Worker, Weak Signal
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S4 | PROTOCOL+ SPECTROGRAM | S4_manhole_masked.wav
+  Human: True | Distress onset: 20s
+  Model: gemma4:e2b
+  ─────────────────────────────────────────────────────────────────
+  [S4|PROTOCOL|c01|00-05s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [FP] | parse:ok
+  [S4|PROTOCOL|c02|05-10s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [FP] | parse:ok
+  [S4|PROTOCOL|c03|10-15s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.5s [FP] | parse:ok
+  [S4|PROTOCOL|c04|15-20s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.7s [FP] | parse:ok
+  [S4|PROTOCOL|c05|20-25s] 🚨 ALARM     | conf:0.90 | none             | CONTINUE_MONITORING            | 6.2s [+0s] | parse:ok
+  [S4|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s [+5s] | parse:ok
+  [S4|PROTOCOL|c07|30-35s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+10s] | parse:ok
+  [S4|PROTOCOL|c08|35-40s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+15s] | parse:ok
+  [S4|PROTOCOL|c09|40-45s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+20s] | parse:ok
+  [S4|PROTOCOL|c10|45-50s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.5s [+25s] | parse:ok
+  [S4|PROTOCOL|c11|50-55s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+30s] | parse:ok
+  [S4|PROTOCOL|c12|55-60s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+35s] | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S4|PROTOCOL|c01|00-05s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [FP] | parse:ok
+  [S4|PROTOCOL|c02|05-10s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [FP] | parse:ok
+  [S4|PROTOCOL|c03|10-15s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.5s [FP] | parse:ok
+  [S4|PROTOCOL|c04|15-20s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.7s [FP] | parse:ok
+  [S4|PROTOCOL|c05|20-25s] 🚨 CONFIRMED | conf:0.90 | none             | CONTINUE_MONITORING            | 6.2s [+0s] | parse:ok
+  [S4|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.1s [+5s] | parse:ok
+  [S4|PROTOCOL|c07|30-35s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+10s] | parse:ok
+  [S4|PROTOCOL|c08|35-40s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+15s] | parse:ok
+  [S4|PROTOCOL|c09|40-45s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+20s] | parse:ok
+  [S4|PROTOCOL|c10|45-50s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.5s [+25s] | parse:ok
+  [S4|PROTOCOL|c11|50-55s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+30s] | parse:ok
+  [S4|PROTOCOL|c12|55-60s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+35s] | parse:ok
+
+  Summary: 12 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S4 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  -40/40
+  Time to Detection  :   30/30
+  False Alarm Control:    0/20
+  Action Quality     :   10/10
+  ──────────────────────────────
+  TOTAL              :    0/100
+  First alarm at     : 0s (chunk 1)
+
+  Run time: 76.3s (1.3 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 5/5: PROTOCOL | S5 | Clarifier Pool — REAL INCIDENT SCENARIO
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S5 | PROTOCOL+ SPECTROGRAM | S5_pool_critical.wav
+  Human: True | Distress onset: 20s
+  Model: gemma4:e2b
+  ─────────────────────────────────────────────────────────────────
+  [S5|PROTOCOL|c01|00-05s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [FP] | parse:ok
+  [S5|PROTOCOL|c02|05-10s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [FP] | parse:ok
+  [S5|PROTOCOL|c03|10-15s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [FP] | parse:ok
+  [S5|PROTOCOL|c04|15-20s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.5s [FP] | parse:ok
+  [S5|PROTOCOL|c05|20-25s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+0s] | parse:ok
+  [S5|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+5s] | parse:ok
+  [S5|PROTOCOL|c07|30-35s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+10s] | parse:ok
+  [S5|PROTOCOL|c08|35-40s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+15s] | parse:ok
+  [S5|PROTOCOL|c09|40-45s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+20s] | parse:ok
+  [S5|PROTOCOL|c10|45-50s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+25s] | parse:ok
+  [S5|PROTOCOL|c11|50-55s] 🚨 ALARM     | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+30s] | parse:ok
+  [S5|PROTOCOL|c12|55-60s] 🚨 ALARM     | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+35s] | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S5|PROTOCOL|c01|00-05s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [FP] | parse:ok
+  [S5|PROTOCOL|c02|05-10s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [FP] | parse:ok
+  [S5|PROTOCOL|c03|10-15s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [FP] | parse:ok
+  [S5|PROTOCOL|c04|15-20s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.5s [FP] | parse:ok
+  [S5|PROTOCOL|c05|20-25s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+0s] | parse:ok
+  [S5|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+5s] | parse:ok
+  [S5|PROTOCOL|c07|30-35s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+10s] | parse:ok
+  [S5|PROTOCOL|c08|35-40s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+15s] | parse:ok
+  [S5|PROTOCOL|c09|40-45s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+20s] | parse:ok
+  [S5|PROTOCOL|c10|45-50s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+25s] | parse:ok
+  [S5|PROTOCOL|c11|50-55s] 🚨 CONFIRMED | conf:0.90 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.3s [+30s] | parse:ok
+  [S5|PROTOCOL|c12|55-60s] 🚨 CONFIRMED | conf:0.95 | speech           | INITIATE_CONFINED_SPACE_RESCUE | 6.4s [+35s] | parse:ok
+
+  Summary: 12 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S5 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  -40/40
+  Time to Detection  :   40/30
+  False Alarm Control:    0/20
+  Action Quality     :    5/10
+  ──────────────────────────────
+  TOTAL              :    5/100
+  First alarm at     : 0s (chunk 1)
+
+  ★ SURVIVAL VERDICT : CERTAIN SURVIVAL
+    Detection at 0s ≤ 15s — both weak and strong swimmers saved
+
+  Run time: 76.3s (1.3 min)
+
+═════════════════════════════════════════════════════════════════
+  WWTP ACOUSTIC SAFETY SYSTEM — FINAL RESULTS
+  Model: gemma4:e2b | Local inference via Ollama
+═════════════════════════════════════════════════════════════════
+
+  MODE AVERAGES:
+  Mode             S1     S2     S3     S4     S5   WGT AVG
+  ──────────────────────────────────────────────────────────
+  BARE            ---    ---    ---    ---    ---       0.0
+  CONTEXT         ---    ---    ---    ---    ---       0.0
+  PROTOCOL          0      0      0      0      5       2.0
+
+  S5 SURVIVAL VERDICTS — The Answer:
+  Mode            Detection Verdict
+  ──────────────────────────────────────────────────
+  PROTOCOL               0s   CERTAIN SURVIVAL
+
+  GRAND WEIGHTED AVERAGE: 0.7/100
+  GRADE: FAIL
+
+  System: Gemma 4 E4B running locally via Ollama
+  No cloud dependency. No internet required.
+  Edge-deployable on Raspberry Pi / Jetson Nano.
+═════════════════════════════════════════════════════════════════
+
+  Total runs  : 5/5
+  Total time  : 398s (6.6 min)
+
+  "What happens when you teach AI what to listen for?"
+  "Maybe we can save a life."
+
+═════════════════════════════════════════════════════════════════
+
+
+  Final score: 0.7/100
+(spaceship) PS C:\Users\ASUS\Desktop\wwtp-acoustic-safety-system> 

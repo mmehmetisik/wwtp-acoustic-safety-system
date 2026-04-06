@@ -52,6 +52,22 @@ The system converts audio into spectrogram images and uses Gemma 4 E4B's vision 
 
 ---
 
+## Model Comparison: E4B vs E2B
+
+Both Gemma 4 audio-capable models were tested with identical pipeline configuration — same spectrograms, same few-shot examples, same CoT prompt, same temperature=0.
+
+| Metric | E2B (2B params) | E4B (4B params) |
+|--------|-----------------|-----------------|
+| Weighted Average | 2.0/100 | 91.0/100 |
+| False Positives | 37/60 chunks | 0/60 chunks |
+| CoT Reasoning | Not functional | Fully functional |
+| Speed per chunk | ~6.2s | ~7.0s |
+| Verdict | **Unusable** | **CERTAIN SURVIVAL** |
+
+> *"E2B alarmed on everything — pump rooms, metallic sounds, silence. E4B distinguished human voice from noise with zero false positives. The extra 2B parameters enable Chain-of-Thought reasoning, which is the critical capability for safety systems."*
+
+---
+
 ## The Journey — 3.0 → 91.0
 
 8 iterations. 2 failed experiments. 30x improvement.
