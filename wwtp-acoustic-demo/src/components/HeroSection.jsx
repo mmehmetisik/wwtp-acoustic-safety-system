@@ -20,6 +20,38 @@ function useCountUp(target, duration = 1500, startTrigger = false) {
   return value;
 }
 
+function HeroStats({ statsVisible }) {
+  const detDelay = useCountUp(5, 1200, statsVisible);
+  const score = useCountUp(91, 1800, statsVisible);
+  const fp = useCountUp(0, 800, statsVisible);
+  const runs = useCountUp(5, 1000, statsVisible);
+
+  return (
+    <div
+      className={`flex flex-wrap justify-center gap-8 md:gap-14 mb-16 transition-all duration-1000 ${
+        statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      }`}
+    >
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold mono text-accent-green">{detDelay}s</div>
+        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">Detection Delay</div>
+      </div>
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold mono text-accent-gold">{score}/100</div>
+        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">Weighted Score</div>
+      </div>
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold mono text-white">{fp}</div>
+        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">False Positives</div>
+      </div>
+      <div className="text-center">
+        <div className="text-3xl md:text-4xl font-bold mono text-accent-blue">{runs}/5</div>
+        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">Identical Runs</div>
+      </div>
+    </div>
+  );
+}
+
 export default function HeroSection() {
   const [visible, setVisible] = useState(false);
   const [storyVisible, setStoryVisible] = useState(false);
@@ -120,37 +152,5 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-function HeroStats({ statsVisible }) {
-  const detDelay = useCountUp(5, 1200, statsVisible);
-  const score = useCountUp(91, 1800, statsVisible);
-  const fp = useCountUp(0, 800, statsVisible);
-  const runs = useCountUp(5, 1000, statsVisible);
-
-  return (
-    <div
-      className={`flex flex-wrap justify-center gap-8 md:gap-14 mb-16 transition-all duration-1000 ${
-        statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-      }`}
-    >
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold mono text-accent-green">{detDelay}s</div>
-        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">Detection Delay</div>
-      </div>
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold mono text-accent-gold">{score}/100</div>
-        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">Weighted Score</div>
-      </div>
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold mono text-white">{fp}</div>
-        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">False Positives</div>
-      </div>
-      <div className="text-center">
-        <div className="text-3xl md:text-4xl font-bold mono text-accent-blue">{runs}/5</div>
-        <div className="text-text-muted text-xs mt-1 uppercase tracking-wider">Identical Runs</div>
-      </div>
-    </div>
   );
 }
