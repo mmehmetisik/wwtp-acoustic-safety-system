@@ -278,6 +278,32 @@ def broadcast(msg):
         state["clients"].remove(ws)
 
 
+def terminal_log(chunk_num, is_alarm, result, elapsed, now):
+    """Print colored terminal log (same style as live_detector.py)."""
+    conf = result.get("confidence", 0) if result else 0
+    reasoning = result.get("reasoning", "") if result else ""
+    dtype = result.get("distress_type", "none") if result else "none"
+    action = result.get("action", "") if result else ""
+
+    try:
+        from colorama import Fore, Back, Style
+        if is_alarm:
+            print(f"\n{Back.RED}{Fore.WHITE}{Style.BRIGHT}" + " " * 70)
+            print(f"  CHUNK {chunk_num:03d} | ALARM — HUMAN DISTRESS DETECTED")
+            print(f"  Confidence: {conf:.0%} | Type: {dtype} | Action: {action}")
+            print(f"  Reasoning: {reasoning}")
+            print(f"  Time: {elapsed:.1f}s | {now}")
+            print(" " * 70 + f"{Style.RESET_ALL}")
+        else:
+            print(f"\n{Fore.GREEN}{Style.BRIGHT}  Chunk {chunk_num:03d} | SAFE — CONTINUE MONITORING{Style.RESET_ALL}")
+            print(f"  Confidence: {conf:.0%} | Time: {elapsed:.1f}s | {reasoning[:100]}")
+    except ImportError:
+        if is_alarm:
+            print(f"\n  !!! CHUNK {chunk_num:03d} | ALARM — {dtype} | {conf:.0%} | {elapsed:.1f}s !!!")
+        else:
+            print(f"  Chunk {chunk_num:03d} | SAFE | {conf:.0%} | {elapsed:.1f}s")
+
+
 def detection_loop():
     """Background thread: record → spectrogram → analyze → broadcast."""
     chunk_num = 0
@@ -285,6 +311,9 @@ def detection_loop():
     stats = {"total": 0, "alarms": 0, "total_conf": 0.0}
 
     broadcast({"type": "status", "message": "Starting detection loop..."})
+    print("\n  " + "=" * 55)
+    print("  LISTENING... (Ctrl+C to stop)")
+    print("  " + "=" * 55 + "\n")
 
     while state["running"]:
         chunk_num += 1
@@ -292,6 +321,7 @@ def detection_loop():
 
         # Phase 1: Recording
         broadcast({"type": "phase", "phase": "recording", "chunk": chunk_num, "time": now})
+        print(f"  [{now}] Recording chunk {chunk_num} ({state['chunk_size']}s)...", end="", flush=True)
         try:
             audio = sd.rec(
                 int(state["chunk_size"] * SAMPLE_RATE),
@@ -302,7 +332,9 @@ def detection_loop():
             audio = audio.flatten()
         except Exception as e:
             broadcast({"type": "error", "message": f"Microphone error: {e}"})
+            print(f" ERROR: {e}")
             break
+        print(" done.", flush=True)
 
         # Audio level for VU meter
         rms = float(np.sqrt(np.mean(audio ** 2)))
@@ -311,17 +343,22 @@ def detection_loop():
 
         # Phase 2: Spectrogram
         broadcast({"type": "phase", "phase": "spectrogram", "chunk": chunk_num, "time": now})
+        print(f"  Generating spectrogram...", end="", flush=True)
         spec_b64 = audio_to_spectrogram_b64(audio, sr=SAMPLE_RATE, chunk_label=f"LIVE #{chunk_num} {now}")
         if spec_b64 is None:
             broadcast({"type": "error", "message": "Spectrogram generation failed"})
+            print(" failed.")
             continue
+        print(" done.", flush=True)
 
         # Phase 3: Analysis
         broadcast({"type": "phase", "phase": "analyzing", "chunk": chunk_num, "time": now})
+        print(f"  Analyzing with {state['model']}...", end="", flush=True)
         t0 = time.time()
         raw = analyze_spectrogram(spec_b64, state["fewshot"], chunk_num, model=state["model"])
         elapsed = time.time() - t0
         result = parse_response(raw)
+        print(f" {elapsed:.1f}s", flush=True)
 
         # Build result message
         is_alarm = False
@@ -333,6 +370,9 @@ def detection_loop():
             stats["total_conf"] += conf
             if is_alarm:
                 stats["alarms"] += 1
+
+        # Terminal log
+        terminal_log(chunk_num, is_alarm, result, elapsed, now)
 
         broadcast({
             "type": "result",
@@ -355,6 +395,16 @@ def detection_loop():
 
     state["running"] = False
     broadcast({"type": "stopped"})
+
+    # Terminal summary
+    duration = time.time() - session_start
+    print(f"\n  {'=' * 55}")
+    print(f"  SESSION SUMMARY")
+    print(f"  {'=' * 55}")
+    print(f"  Chunks: {stats['total']} | Alarms: {stats['alarms']} | Duration: {duration:.0f}s")
+    if stats['total'] > 0:
+        print(f"  Avg Confidence: {stats['total_conf']/stats['total']:.0%}")
+    print(f"  {'=' * 55}\n")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -585,9 +635,11 @@ SCADA_HTML = """<!DOCTYPE html>
 // ── State ──
 let ws = null;
 let running = false;
-let chunks = [];
+let chunks = [];          // {alarm, spec_b64, reasoning, confidence, chunk_num}
 let spectrogramHistory = [];
 const MAX_TIMELINE = 30;
+const MAX_HISTORY = 20;   // keep last 20 chunks with spectrograms
+let selectedChunk = null; // for click-to-view
 
 // ── Clock ──
 setInterval(() => {
@@ -729,17 +781,38 @@ function handleMessage(msg) {
       waveAlarm = false;
     }
 
-    // Spectrogram
+    // Store chunk data (keep last MAX_HISTORY with spectrograms)
+    chunks.push({
+      alarm: msg.is_alarm,
+      spec_b64: msg.spectrogram_b64,
+      reasoning: msg.reasoning || '',
+      confidence: msg.confidence,
+      chunk_num: msg.chunk,
+      distress_type: msg.distress_type,
+    });
+    // Trim old spectrogram data to save memory
+    if (chunks.length > MAX_HISTORY) {
+      const old = chunks[chunks.length - MAX_HISTORY - 1];
+      if (old) old.spec_b64 = null;
+    }
+    selectedChunk = null; // auto-show latest
+
+    // Spectrogram — show latest
     if (msg.spectrogram_b64) {
       specMain.innerHTML = `<img src="data:image/png;base64,${msg.spectrogram_b64}" alt="spectrogram">`;
-      // History thumbnails
-      spectrogramHistory.unshift({ b64: msg.spectrogram_b64, alarm: msg.is_alarm });
-      if (spectrogramHistory.length > 3) spectrogramHistory.pop();
+      // Thumbnails — last 3 with data
+      const recent = chunks.filter(c => c.spec_b64).slice(-3).reverse();
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById(`thumb${i+1}`);
-        if (spectrogramHistory[i]) {
-          el.innerHTML = `<img src="data:image/png;base64,${spectrogramHistory[i].b64}" alt="thumb">`;
-          el.className = spectrogramHistory[i].alarm ? 'thumb alarm-thumb' : 'thumb';
+        if (recent[i]) {
+          const ci = chunks.indexOf(recent[i]);
+          el.innerHTML = `<img src="data:image/png;base64,${recent[i].spec_b64}" alt="thumb">`;
+          el.className = recent[i].alarm ? 'thumb alarm-thumb' : 'thumb';
+          el.style.cursor = 'pointer';
+          el.onclick = () => showChunk(ci);
+        } else {
+          el.innerHTML = '';
+          el.className = 'thumb';
         }
       }
     }
@@ -748,7 +821,6 @@ function handleMessage(msg) {
     cotText.textContent = msg.reasoning || 'Analyzing...';
 
     // Timeline
-    chunks.push({ alarm: msg.is_alarm });
     renderTimeline(msg.chunk);
 
     // Stats
@@ -782,10 +854,28 @@ function renderTimeline(currentChunk) {
   const visible = chunks.slice(-MAX_TIMELINE);
   const startIdx = Math.max(0, chunks.length - MAX_TIMELINE);
   el.innerHTML = visible.map((c, i) => {
-    const isCurrent = (startIdx + i + 1) === currentChunk;
+    const globalIdx = startIdx + i;
+    const isCurrent = (globalIdx + 1) === currentChunk && selectedChunk === null;
+    const isSelected = selectedChunk === globalIdx;
     const cls = c.alarm ? 'chunk-box alarm' : 'chunk-box safe';
-    return `<div class="${cls}${isCurrent ? ' current' : ''}" title="Chunk ${startIdx+i+1}"></div>`;
+    const sel = (isCurrent || isSelected) ? ' current' : '';
+    const clickable = c.spec_b64 ? 'cursor:pointer' : 'cursor:default;opacity:0.5';
+    return `<div class="${cls}${sel}" title="Chunk ${globalIdx+1}${c.alarm?' ALARM':''}" style="${clickable}" onclick="showChunk(${globalIdx})"></div>`;
   }).join('');
+}
+
+function showChunk(idx) {
+  const c = chunks[idx];
+  if (!c || !c.spec_b64) return;
+  selectedChunk = idx;
+  const specMain = document.getElementById('specMain');
+  const cotText = document.getElementById('cotText');
+  specMain.innerHTML = `<img src="data:image/png;base64,${c.spec_b64}" alt="spectrogram">`;
+  specMain.className = c.alarm ? 'spec-main alarm-ring' : 'spec-main';
+  cotText.textContent = `[Chunk ${c.chunk_num}] ${c.reasoning}`;
+  cotText.className = c.alarm ? 'cot-text alarm-text' : 'cot-text';
+  // Update timeline highlight
+  renderTimeline(null);
 }
 
 // ── Controls ──
