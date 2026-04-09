@@ -853,16 +853,17 @@ connect();
 # ═══════════════════════════════════════════════════════════════
 
 def main():
+    default_model = OLLAMA_MODEL  # capture module-level default
     parser = argparse.ArgumentParser(description="WWTP Acoustic Safety System — Live Detector Web UI")
     parser.add_argument("--device", type=int, default=None, help="Microphone device index")
-    parser.add_argument("--model", type=str, default=OLLAMA_MODEL, help=f"Ollama model (default: {OLLAMA_MODEL})")
+    parser.add_argument("--model", type=str, default=default_model, help=f"Ollama model (default: {default_model})")
     parser.add_argument("--port", type=int, default=8080, help="Web server port (default: 8080)")
     parser.add_argument("--chunk-size", type=int, default=CHUNK_SIZE_SEC, help=f"Chunk duration seconds (default: {CHUNK_SIZE_SEC})")
     parser.add_argument("--threshold", type=float, default=0.50, help="Alarm threshold (default: 0.50)")
     args = parser.parse_args()
 
-    OLLAMA_MODEL = args.model
-    state["model"] = args.model
+    model = args.model
+    state["model"] = model
     state["device"] = args.device
     state["chunk_size"] = args.chunk_size
     state["threshold"] = args.threshold
