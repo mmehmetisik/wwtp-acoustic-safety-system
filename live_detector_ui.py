@@ -557,6 +557,31 @@ SCADA_HTML = """<!DOCTYPE html>
     display: flex; gap: 12px;
   }
   .session-stats span b { color: #94a3b8; }
+
+  /* Edge badge */
+  .edge-badge {
+    position: fixed; bottom: 8px; right: 12px;
+    background: #0f1520; border: 1px solid #1e293b; border-radius: 6px;
+    padding: 6px 10px; font-size: 8px; color: #64748b;
+    display: flex; align-items: center; gap: 8px; z-index: 50;
+  }
+  .edge-badge b { color: #94a3b8; }
+  .edge-badge .g { color: #22c55e; }
+
+  /* Confidence bar */
+  .conf-bar { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .conf-bar .track { flex:1; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
+  .conf-bar .fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+  .conf-bar .val { font-size: 11px; font-weight: 700; min-width: 36px; text-align: right; }
+
+  /* Spec legend */
+  .spec-legend {
+    display: flex; gap: 10px; font-size: 8px; color: #475569;
+    padding: 3px 0; flex-shrink: 0;
+  }
+  .spec-legend span::before { content: ''; display: inline-block; width: 8px; height: 3px; margin-right: 4px; border-radius: 1px; vertical-align: middle; }
+  .spec-legend .mech::before { background: #f59e0b; }
+  .spec-legend .human::before { background: #ef4444; }
 </style>
 </head>
 <body>
@@ -592,9 +617,9 @@ SCADA_HTML = """<!DOCTYPE html>
       <div class="indicator" id="audioIndicator"></div>
       LIVE AUDIO — MICROPHONE
     </div>
-    <div class="waveform-area">
+    <div class="waveform-area" id="waveArea">
       <canvas id="waveCanvas"></canvas>
-      <div class="inaudible-overlay"><div class="big">LISTENING</div></div>
+      <div class="inaudible-overlay"><div class="big" id="waveOverlay">NO SIGNAL</div></div>
     </div>
     <div class="vu-meter"><div class="fill" id="vuFill" style="width:0%"></div></div>
     <div class="chunk-info" id="chunkInfo">Waiting...</div>
@@ -614,9 +639,25 @@ SCADA_HTML = """<!DOCTYPE html>
         <div class="thumb" id="thumb2"></div>
         <div class="thumb" id="thumb3"></div>
       </div>
+      <div class="conf-bar" id="confBar" style="display:none">
+        <div class="track"><div class="fill" id="confFill"></div></div>
+        <div class="val" id="confVal">0%</div>
+      </div>
       <div class="cot-text" id="cotText">CoT reasoning...</div>
+      <div class="spec-legend">
+        <span class="mech">Vertical spikes = Mechanical</span>
+        <span class="human">Curved bands = Human speech</span>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- EDGE BADGE -->
+<div class="edge-badge">
+  <span class="g">EDGE AI</span>
+  <span>Latency: <b id="badgeLatency">—</b></span>
+  <span>FP: <b class="g">0</b></span>
+  <span>Model: <b>Gemma 4 E4B</b></span>
 </div>
 
 <!-- BOTTOM -->
@@ -725,6 +766,7 @@ function handleMessage(msg) {
     const info = document.getElementById('chunkInfo');
     const aiInd = document.getElementById('aiIndicator');
     const audioInd = document.getElementById('audioIndicator');
+    document.getElementById('waveOverlay').textContent = 'LISTENING';
     if (msg.phase === 'recording') {
       info.textContent = `Chunk ${msg.chunk} | Recording...`;
       waveActive = true;
@@ -758,6 +800,20 @@ function handleMessage(msg) {
 
     info.textContent = `Chunk ${msg.chunk} | ${msg.analysis_time}s`;
     waveAlarm = msg.is_alarm;
+
+    // Confidence bar
+    const confPct = Math.round(msg.confidence * 100);
+    const confBar = document.getElementById('confBar');
+    const confFill = document.getElementById('confFill');
+    const confVal = document.getElementById('confVal');
+    confBar.style.display = 'flex';
+    confFill.style.width = confPct + '%';
+    confFill.style.background = msg.is_alarm ? '#ef4444' : '#22c55e';
+    confVal.textContent = confPct + '%';
+    confVal.style.color = msg.is_alarm ? '#ef4444' : '#22c55e';
+
+    // Edge badge latency
+    document.getElementById('badgeLatency').textContent = msg.analysis_time + 's';
 
     if (msg.is_alarm) {
       panel.className = 'main-status alarm';
@@ -846,6 +902,7 @@ function handleMessage(msg) {
     document.getElementById('btnStart').disabled = false;
     document.getElementById('btnStop').disabled = true;
     document.getElementById('systemStatus').textContent = 'SYSTEM READY';
+    document.getElementById('waveOverlay').textContent = 'NO SIGNAL';
   }
 }
 
