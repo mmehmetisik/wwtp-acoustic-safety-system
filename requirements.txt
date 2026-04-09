@@ -1,0 +1,17 @@
+# WWTP Acoustic Safety System — Dependencies
+# Install: pip install -r requirements.txt
+
+# Audio processing
+librosa>=0.10.0
+soundfile>=0.12.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Live microphone detection
+sounddevice>=0.4.6
+
+# Visualization
+matplotlib>=3.7.0
+
+# Terminal colors (optional but recommended)
+colorama>=0.4.6
