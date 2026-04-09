@@ -418,93 +418,105 @@ SCADA_HTML = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WWTP.AI — Acoustic Safety System</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { height:100vh; overflow:hidden; }
   body {
     font-family: 'JetBrains Mono', monospace;
-    background: #0a0e17;
+    background: #080c12;
     color: #e2e8f0;
     display: flex; flex-direction: column;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  /* Alarm screen pulse */
+  .alarm-pulse { animation: screen-pulse 1.2s infinite; }
+  @keyframes screen-pulse {
+    0%,100% { box-shadow: inset 0 0 0 0 transparent; }
+    50% { box-shadow: inset 0 0 60px rgba(255,51,85,0.06); }
   }
 
-  /* Top bar — includes controls */
+  /* Top bar */
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 6px 16px;
-    background: #0f1520;
-    border-bottom: 1px solid #1e293b;
-    height: 40px; flex-shrink: 0;
+    padding: 0 16px; background: rgba(8,12,18,0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    height: 44px; flex-shrink: 0; backdrop-filter: blur(8px);
   }
-  .topbar .logo { font-size: 12px; font-weight: 700; letter-spacing: 2px; }
-  .topbar .logo span { color: #3b82f6; }
-  .topbar .clock { font-size: 16px; font-weight: 600; color: #94a3b8; }
-  .topbar .right { display: flex; align-items: center; gap: 8px; }
-  .topbar .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse-dot 2s infinite; }
-  .topbar .dot.inactive { background: #64748b; animation: none; }
-  .topbar .meta { font-size: 9px; color: #64748b; display: flex; align-items: center; gap: 6px; }
-  .topbar .meta .sep { color: #1e293b; }
+  .topbar .left { display: flex; align-items: center; gap: 10px; }
+  .topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: #00e6b4; animation: pulse-dot 2s infinite; }
+  .topbar .dot.inactive { background: #475569; animation: none; }
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .topbar .logo { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: #fff; }
+  .topbar .logo-sub { font-size: 9px; font-weight: 400; color: rgba(255,255,255,0.25); letter-spacing: 1px; margin-left: 6px; }
+  .topbar .clock { font-size: 18px; font-weight: 300; color: rgba(255,255,255,0.5); letter-spacing: 4px; }
+  .topbar .right { display: flex; align-items: center; gap: 8px; }
+  .topbar .meta { font-size: 8px; color: rgba(255,255,255,0.2); display: flex; align-items: center; gap: 6px; }
+  .topbar .meta .sep { color: rgba(255,255,255,0.06); }
+  .topbar .offline-badge {
+    font-size: 8px; color: #00e6b4; border: 1px solid rgba(0,230,180,0.2);
+    border-radius: 3px; padding: 2px 6px; letter-spacing: 1px;
+  }
+  .topbar .latency { font-size: 8px; color: rgba(255,255,255,0.15); }
   .btn {
-    padding: 5px 16px; border: none; border-radius: 5px;
-    font-family: inherit; font-size: 10px; font-weight: 600;
+    padding: 5px 14px; border: none; border-radius: 4px;
+    font-family: inherit; font-size: 9px; font-weight: 600;
     cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
   }
-  .btn-start { background: #22c55e; color: #0a0e17; }
-  .btn-start:hover { background: #16a34a; }
-  .btn-stop { background: #ef4444; color: white; }
-  .btn-stop:hover { background: #dc2626; }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-start { background: transparent; color: #00e6b4; border: 1px solid rgba(0,230,180,0.3); }
+  .btn-start:hover { background: rgba(0,230,180,0.1); }
+  .btn-stop { background: transparent; color: #ff3355; border: 1px solid rgba(255,51,85,0.3); }
+  .btn-stop:hover { background: rgba(255,51,85,0.1); }
+  .btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
-  /* Main status */
-  .main-status {
-    margin: 8px 12px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    border: 2px solid #22c55e;
-    background: rgba(34,197,94,0.05);
-    text-align: center;
-    transition: all 0.3s;
-    flex-shrink: 0;
+  /* Alarm banner */
+  .alarm-banner {
+    margin: 6px 10px; padding: 10px 16px;
+    border-radius: 6px; text-align: center;
+    transition: all 0.4s; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(0,230,180,0.03);
   }
-  .main-status.alarm {
-    border-color: #ef4444;
-    background: rgba(239,68,68,0.1);
-    animation: alarm-flash 0.8s infinite;
+  .alarm-banner.active {
+    background: linear-gradient(135deg, rgba(255,51,85,0.08), rgba(255,51,85,0.15));
+    border-color: rgba(255,51,85,0.3);
+    padding: 14px 16px;
   }
-  .main-status.standby { border-color: #64748b; background: rgba(100,116,139,0.05); }
-  @keyframes alarm-flash { 0%,100%{background:rgba(239,68,68,0.1)} 50%{background:rgba(239,68,68,0.25)} }
-  .main-status .big { font-size: 22px; font-weight: 700; letter-spacing: 3px; }
-  .main-status .sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-  .main-status .detail { font-size: 10px; color: #ef4444; margin-top: 3px; }
+  .alarm-banner.standby { border-color: rgba(255,255,255,0.04); background: rgba(255,255,255,0.01); }
+  .alarm-banner .big { font-size: 18px; font-weight: 700; letter-spacing: 4px; }
+  .alarm-banner .sub { font-size: 9px; color: rgba(255,255,255,0.3); margin-top: 3px; letter-spacing: 1px; }
+  .alarm-banner .detail { font-size: 9px; color: #ff3355; margin-top: 3px; }
 
   /* Panels */
   .panels {
     display: grid; grid-template-columns: 1fr 1.5fr;
-    gap: 10px; padding: 8px 12px;
+    gap: 8px; padding: 6px 10px;
     flex: 1; min-height: 0;
   }
   .panel {
-    background: #0f1520; border: 1px solid #1e293b;
+    background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.04);
     border-radius: 8px; padding: 8px 10px;
     display: flex; flex-direction: column; min-height: 0;
   }
   .panel-title {
-    font-size: 9px; font-weight: 600; letter-spacing: 2px;
-    color: #64748b; text-transform: uppercase;
+    font-size: 8px; font-weight: 500; letter-spacing: 2px;
+    color: rgba(255,255,255,0.25); text-transform: uppercase;
     margin-bottom: 6px;
     display: flex; align-items: center; gap: 6px;
     flex-shrink: 0;
   }
-  .panel-title .indicator { width: 5px; height: 5px; border-radius: 50%; background: #64748b; }
-  .panel-title .indicator.active { background: #22c55e; animation: pulse-dot 2s infinite; }
-  .panel-title .indicator.alarm { background: #ef4444; animation: pulse-dot 0.5s infinite; }
+  .panel-title .indicator { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .panel-title .indicator.active { background: #00e6b4; animation: pulse-dot 2s infinite; }
+  .panel-title .indicator.alarm { background: #ff3355; animation: pulse-dot 0.5s infinite; }
 
   /* Waveform */
   .waveform-area {
-    flex: 1; background: #080c14; border-radius: 6px;
+    flex: 1; background: rgba(0,0,0,0.3); border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
     position: relative; overflow: hidden; min-height: 0;
+    border: 1px solid rgba(255,255,255,0.03);
   }
   .waveform-area canvas { width: 100%; height: 100%; }
   .inaudible-overlay {
@@ -512,106 +524,108 @@ SCADA_HTML = """<!DOCTYPE html>
     display: flex; align-items: center; justify-content: center;
     pointer-events: none;
   }
-  .inaudible-overlay .big { font-size: 24px; font-weight: 700; color: rgba(255,255,255,0.05); letter-spacing: 6px; }
-  .vu-meter { margin-top: 6px; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; flex-shrink:0; }
-  .vu-meter .fill { height: 100%; background: #22c55e; transition: width 0.2s; border-radius: 2px; }
-  .chunk-info { font-size: 9px; color: #64748b; margin-top: 4px; text-align: center; flex-shrink:0; }
+  .inaudible-overlay .big { font-size: 20px; font-weight: 300; color: rgba(255,255,255,0.04); letter-spacing: 8px; }
+  .vu-meter { margin-top: 6px; height: 3px; background: rgba(255,255,255,0.04); border-radius: 2px; overflow: hidden; flex-shrink:0; }
+  .vu-meter .fill { height: 100%; background: #00e6b4; transition: width 0.15s; border-radius: 2px; }
+  .chunk-info { font-size: 8px; color: rgba(255,255,255,0.2); margin-top: 4px; text-align: center; flex-shrink:0; letter-spacing: 1px; }
 
   /* Spectrogram */
-  .spec-area { flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+  .spec-area { flex: 1; display: flex; flex-direction: column; gap: 5px; min-height: 0; }
   .spec-main {
-    flex: 1; background: #080c14; border-radius: 6px;
+    flex: 1; background: rgba(0,0,0,0.3); border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
-    overflow: hidden; border: 1px solid #1e293b; min-height: 0;
+    overflow: hidden; border: 1px solid rgba(255,255,255,0.04); min-height: 0;
+    transition: all 0.3s;
   }
-  .spec-main.alarm-ring { border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.2); }
+  .spec-main.alarm-ring { border-color: rgba(255,51,85,0.5); box-shadow: 0 0 20px rgba(255,51,85,0.15); }
   .spec-main img { width: 100%; height: 100%; object-fit: contain; }
-  .spec-thumbs { display: flex; gap: 4px; height: 40px; flex-shrink: 0; }
+  .spec-thumbs { display: flex; gap: 3px; height: 36px; flex-shrink: 0; }
   .spec-thumbs .thumb {
-    flex: 1; background: #080c14; border-radius: 4px; overflow: hidden;
-    border: 1px solid #1e293b;
+    flex: 1; background: rgba(0,0,0,0.2); border-radius: 3px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: border 0.2s;
   }
-  .spec-thumbs .thumb.alarm-thumb { border-color: #ef4444; }
+  .spec-thumbs .thumb:hover { border-color: rgba(255,255,255,0.15); }
+  .spec-thumbs .thumb.alarm-thumb { border-color: rgba(255,51,85,0.5); }
   .spec-thumbs .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .conf-bar { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .conf-bar .track { flex:1; height: 3px; background: rgba(255,255,255,0.04); border-radius: 2px; overflow: hidden; }
+  .conf-bar .fill { height: 100%; border-radius: 2px; transition: width 0.5s ease-out; }
+  .conf-bar .val { font-size: 10px; font-weight: 600; min-width: 32px; text-align: right; letter-spacing: 1px; }
   .cot-text {
-    font-size: 9px; color: #22c55e; line-height: 1.5;
-    max-height: 36px; overflow-y: auto;
-    padding: 5px 8px; background: rgba(0,0,0,0.3); border-radius: 4px;
-    flex-shrink: 0;
+    font-size: 8px; line-height: 1.5; letter-spacing: 0.5px;
+    max-height: 32px; overflow-y: auto;
+    padding: 5px 8px; background: rgba(0,0,0,0.2); border-radius: 4px;
+    flex-shrink: 0; color: rgba(0,230,180,0.7);
   }
-  .cot-text.alarm-text { color: #ef4444; }
-
-  /* Bottom */
-  .bottom { padding: 6px 12px 8px; flex-shrink: 0; }
-  .timeline-label { font-size: 8px; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-  .timeline { display: flex; gap: 2px; height: 18px; }
-  .timeline .chunk-box {
-    flex: 1; max-width: 20px; border-radius: 2px;
-    background: #1e293b; transition: background 0.3s;
-  }
-  .timeline .chunk-box.safe { background: #22c55e; }
-  .timeline .chunk-box.alarm { background: #ef4444; }
-  .timeline .chunk-box.current { outline: 2px solid #3b82f6; outline-offset: 1px; }
-  .session-stats {
-    margin-top: 4px; font-size: 9px; color: #475569;
-    display: flex; gap: 12px;
-  }
-  .session-stats span b { color: #94a3b8; }
-
-  /* Edge badge */
-  .edge-badge {
-    position: fixed; bottom: 8px; right: 12px;
-    background: #0f1520; border: 1px solid #1e293b; border-radius: 6px;
-    padding: 6px 10px; font-size: 8px; color: #64748b;
-    display: flex; align-items: center; gap: 8px; z-index: 50;
-  }
-  .edge-badge b { color: #94a3b8; }
-  .edge-badge .g { color: #22c55e; }
-
-  /* Confidence bar */
-  .conf-bar { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-  .conf-bar .track { flex:1; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
-  .conf-bar .fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
-  .conf-bar .val { font-size: 11px; font-weight: 700; min-width: 36px; text-align: right; }
-
-  /* Spec legend */
+  .cot-text.alarm-text { color: rgba(255,51,85,0.8); }
   .spec-legend {
-    display: flex; gap: 10px; font-size: 8px; color: #475569;
-    padding: 3px 0; flex-shrink: 0;
+    display: flex; gap: 10px; font-size: 7px; color: rgba(255,255,255,0.15);
+    padding: 2px 0; flex-shrink: 0; letter-spacing: 0.5px;
   }
-  .spec-legend span::before { content: ''; display: inline-block; width: 8px; height: 3px; margin-right: 4px; border-radius: 1px; vertical-align: middle; }
-  .spec-legend .mech::before { background: #f59e0b; }
-  .spec-legend .human::before { background: #ef4444; }
+  .spec-legend span::before { content: ''; display: inline-block; width: 8px; height: 2px; margin-right: 4px; border-radius: 1px; vertical-align: middle; }
+  .spec-legend .mech::before { background: #f0c040; }
+  .spec-legend .human::before { background: #ff3355; }
+
+  /* Bottom — timeline with confidence heights */
+  .bottom { padding: 6px 10px 4px; flex-shrink: 0; }
+  .timeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .timeline-header .label { font-size: 7px; color: rgba(255,255,255,0.15); letter-spacing: 1px; text-transform: uppercase; }
+  .timeline-header .info { font-size: 8px; color: rgba(255,255,255,0.25); }
+  .timeline { display: flex; gap: 2px; height: 28px; align-items: flex-end; }
+  .timeline .chunk-bar {
+    flex: 1; max-width: 18px; border-radius: 2px 2px 0 0;
+    background: rgba(255,255,255,0.04); transition: all 0.3s; cursor: pointer;
+    min-height: 3px;
+  }
+  .timeline .chunk-bar.safe { background: rgba(0,230,180,0.35); }
+  .timeline .chunk-bar.alarm { background: #ff3355; box-shadow: 0 0 6px rgba(255,51,85,0.3); }
+  .timeline .chunk-bar.current { outline: 1px solid rgba(255,255,255,0.5); outline-offset: 1px; }
+  .timeline .chunk-bar:hover { opacity: 0.8; }
+  .session-stats {
+    margin-top: 4px; font-size: 8px; color: rgba(255,255,255,0.15);
+    display: flex; gap: 12px; letter-spacing: 0.5px;
+  }
+  .session-stats span b { color: rgba(255,255,255,0.35); }
+
+  /* Footer */
+  .footer {
+    padding: 4px 10px; flex-shrink: 0; text-align: center;
+    font-size: 7px; color: rgba(255,255,255,0.08); letter-spacing: 1px;
+  }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR with controls -->
+<!-- TOP BAR -->
 <div class="topbar">
-  <div class="logo">WWTP<span>.</span>AI — ACOUSTIC SAFETY SYSTEM</div>
+  <div class="left">
+    <div class="dot" id="systemDot"></div>
+    <span class="logo">WWTP.AI</span>
+    <span class="logo-sub">ACOUSTIC SAFETY SYSTEM</span>
+  </div>
   <div class="clock" id="clock">--:--:--</div>
   <div class="right">
     <button class="btn btn-start" id="btnStart" onclick="startDetection()">&#9654; START</button>
     <button class="btn btn-stop" id="btnStop" onclick="stopDetection()" disabled>&#9632; STOP</button>
     <div class="meta">
-      <div class="dot" id="systemDot"></div>
       <span id="systemStatus">INIT</span>
       <span class="sep">|</span><span>Gemma 4 E4B</span>
       <span class="sep">|</span><span>Ollama</span>
-      <span class="sep">|</span><span style="color:#22c55e">OFFLINE</span>
+      <span class="sep">|</span><span class="offline-badge">OFFLINE</span>
     </div>
+    <div class="latency">Latency: <span id="badgeLatency">—</span> | FP: 0</div>
   </div>
 </div>
 
-<!-- MAIN STATUS -->
-<div class="main-status standby" id="mainStatus">
-  <div class="big" id="statusText">STANDBY</div>
+<!-- ALARM BANNER -->
+<div class="alarm-banner standby" id="mainStatus">
+  <div class="big" id="statusText" style="color:rgba(255,255,255,0.2)">STANDBY</div>
   <div class="sub" id="statusSub">Press START to begin monitoring</div>
   <div class="detail" id="statusDetail"></div>
 </div>
 
 <!-- PANELS -->
-<div class="panels">
+<div class="panels" id="mainBody">
   <div class="panel">
     <div class="panel-title">
       <div class="indicator" id="audioIndicator"></div>
@@ -628,11 +642,11 @@ SCADA_HTML = """<!DOCTYPE html>
   <div class="panel">
     <div class="panel-title">
       <div class="indicator" id="aiIndicator"></div>
-      AI ANALYSIS — SPECTROGRAM [300-3000Hz]
+      AI ANALYSIS — VOICE-RANGE SPECTROGRAM [300-3000Hz]
     </div>
     <div class="spec-area">
       <div class="spec-main" id="specMain">
-        <span style="color:#475569;font-size:11px">Spectrogram will appear here</span>
+        <span style="color:rgba(255,255,255,0.1);font-size:10px;letter-spacing:2px">AWAITING INPUT</span>
       </div>
       <div class="spec-thumbs" id="specThumbs">
         <div class="thumb" id="thumb1"></div>
@@ -643,26 +657,21 @@ SCADA_HTML = """<!DOCTYPE html>
         <div class="track"><div class="fill" id="confFill"></div></div>
         <div class="val" id="confVal">0%</div>
       </div>
-      <div class="cot-text" id="cotText">CoT reasoning...</div>
+      <div class="cot-text" id="cotText">Chain-of-Thought reasoning will appear here...</div>
       <div class="spec-legend">
-        <span class="mech">Vertical spikes = Mechanical</span>
+        <span class="mech">Vertical spikes = Mechanical noise</span>
         <span class="human">Curved bands = Human speech</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- EDGE BADGE -->
-<div class="edge-badge">
-  <span class="g">EDGE AI</span>
-  <span>Latency: <b id="badgeLatency">—</b></span>
-  <span>FP: <b class="g">0</b></span>
-  <span>Model: <b>Gemma 4 E4B</b></span>
-</div>
-
 <!-- BOTTOM -->
 <div class="bottom">
-  <div class="timeline-label">CHUNK TIMELINE — LAST 30</div>
+  <div class="timeline-header">
+    <span class="label">CHUNK TIMELINE — LAST 30</span>
+    <span class="info" id="timelineInfo"></span>
+  </div>
   <div class="timeline" id="timeline"></div>
   <div class="session-stats" id="sessionStats">
     <span>Chunks: <b>0</b></span>
@@ -671,6 +680,9 @@ SCADA_HTML = """<!DOCTYPE html>
     <span>Session: <b>00:00</b></span>
   </div>
 </div>
+
+<!-- FOOTER -->
+<div class="footer">WWTP.AI v1.0 &middot; Gemma 4 E4B &middot; Ollama &middot; Apache 2.0 &middot; Mehmet ISIK — Adana ASKI</div>
 
 <script>
 // ── State ──
@@ -714,9 +726,9 @@ function drawWave() {
       amp = (Math.sin(i*0.3)*0.05 + 0.03) * mid;
     }
     const h = Math.max(1, Math.abs(amp));
-    ctx.fillStyle = waveAlarm ? `rgba(239,68,68,${0.5+Math.sin(wavePhase+i)*0.3})` :
-                    waveActive ? `rgba(59,130,246,${0.4+Math.sin(wavePhase+i)*0.2})` :
-                    'rgba(100,116,139,0.15)';
+    ctx.fillStyle = waveAlarm ? `rgba(255,51,85,${0.5+Math.sin(wavePhase+i)*0.3})` :
+                    waveActive ? `rgba(0,230,180,${0.3+Math.sin(wavePhase+i)*0.2})` :
+                    'rgba(255,255,255,0.06)';
     ctx.beginPath();
     ctx.roundRect(x, mid-h, bw, h*2, 2);
     ctx.fill();
@@ -785,7 +797,7 @@ function handleMessage(msg) {
     const pct = Math.min(100, msg.rms * 3000);
     const fill = document.getElementById('vuFill');
     fill.style.width = pct + '%';
-    fill.style.background = pct > 70 ? '#ef4444' : pct > 40 ? '#f59e0b' : '#22c55e';
+    fill.style.background = pct > 70 ? '#ff3355' : pct > 40 ? '#f0c040' : '#00e6b4';
   }
 
   else if (msg.type === 'result') {
@@ -808,32 +820,34 @@ function handleMessage(msg) {
     const confVal = document.getElementById('confVal');
     confBar.style.display = 'flex';
     confFill.style.width = confPct + '%';
-    confFill.style.background = msg.is_alarm ? '#ef4444' : '#22c55e';
+    confFill.style.background = msg.is_alarm ? '#ff3355' : '#00e6b4';
     confVal.textContent = confPct + '%';
-    confVal.style.color = msg.is_alarm ? '#ef4444' : '#22c55e';
+    confVal.style.color = msg.is_alarm ? '#ff3355' : '#00e6b4';
 
     // Edge badge latency
     document.getElementById('badgeLatency').textContent = msg.analysis_time + 's';
 
     if (msg.is_alarm) {
-      panel.className = 'main-status alarm';
-      text.textContent = 'ALARM — HUMAN DISTRESS DETECTED';
-      text.style.color = '#ef4444';
+      panel.className = 'alarm-banner active';
+      text.textContent = '\u26A0 ALARM — HUMAN DISTRESS DETECTED';
+      text.style.color = '#ff3355';
       sub.textContent = `Action: ${msg.action.replace(/_/g,' ')}`;
-      detail.textContent = `Type: ${msg.distress_type} | Confidence: ${Math.round(msg.confidence*100)}% | Chunk ${msg.chunk}`;
+      detail.textContent = `Type: ${msg.distress_type} \u00B7 Confidence: ${Math.round(msg.confidence*100)}% \u00B7 Chunk ${msg.chunk}`;
       aiInd.className = 'indicator alarm';
       cotText.className = 'cot-text alarm-text';
       specMain.className = 'spec-main alarm-ring';
+      document.getElementById('mainBody').classList.add('alarm-pulse');
       playAlarm();
     } else {
-      panel.className = 'main-status';
+      panel.className = 'alarm-banner';
       text.textContent = 'MONITORING — ALL CLEAR';
-      text.style.color = '#22c55e';
+      text.style.color = '#00e6b4';
       sub.textContent = `Confidence: ${Math.round(msg.confidence*100)}%`;
       detail.textContent = '';
       aiInd.className = 'indicator active';
       cotText.className = 'cot-text';
       specMain.className = 'spec-main';
+      document.getElementById('mainBody').classList.remove('alarm-pulse');
       waveAlarm = false;
     }
 
@@ -895,14 +909,15 @@ function handleMessage(msg) {
     running = false;
     waveActive = false;
     waveAlarm = false;
-    document.getElementById('mainStatus').className = 'main-status standby';
+    document.getElementById('mainStatus').className = 'alarm-banner standby';
     document.getElementById('statusText').textContent = 'STOPPED';
-    document.getElementById('statusText').style.color = '#94a3b8';
+    document.getElementById('statusText').style.color = 'rgba(255,255,255,0.2)';
     document.getElementById('statusSub').textContent = 'Press START to resume';
     document.getElementById('btnStart').disabled = false;
     document.getElementById('btnStop').disabled = true;
-    document.getElementById('systemStatus').textContent = 'SYSTEM READY';
+    document.getElementById('systemStatus').textContent = 'READY';
     document.getElementById('waveOverlay').textContent = 'NO SIGNAL';
+    document.getElementById('mainBody').classList.remove('alarm-pulse');
   }
 }
 
@@ -914,11 +929,18 @@ function renderTimeline(currentChunk) {
     const globalIdx = startIdx + i;
     const isCurrent = (globalIdx + 1) === currentChunk && selectedChunk === null;
     const isSelected = selectedChunk === globalIdx;
-    const cls = c.alarm ? 'chunk-box alarm' : 'chunk-box safe';
+    const cls = c.alarm ? 'chunk-bar alarm' : 'chunk-bar safe';
     const sel = (isCurrent || isSelected) ? ' current' : '';
-    const clickable = c.spec_b64 ? 'cursor:pointer' : 'cursor:default;opacity:0.5';
-    return `<div class="${cls}${sel}" title="Chunk ${globalIdx+1}${c.alarm?' ALARM':''}" style="${clickable}" onclick="showChunk(${globalIdx})"></div>`;
+    const conf = c.confidence || 0.1;
+    const h = Math.max(12, Math.round(conf * 100 * 0.28));
+    const clickable = c.spec_b64 ? '' : 'opacity:0.3;cursor:default';
+    return `<div class="${cls}${sel}" title="Chunk ${globalIdx+1} · ${Math.round(conf*100)}%${c.alarm?' · ALARM':''}" style="height:${h}px;${clickable}" onclick="showChunk(${globalIdx})"></div>`;
   }).join('');
+  // Update timeline info
+  const last = visible[visible.length - 1];
+  if (last) {
+    document.getElementById('timelineInfo').textContent = `Chunk ${chunks.length} \u00B7 Conf: ${Math.round((last.confidence||0)*100)}%`;
+  }
 }
 
 function showChunk(idx) {
@@ -947,8 +969,10 @@ function startDetection() {
   document.getElementById('systemStatus').textContent = 'ACTIVE';
   const panel = document.getElementById('mainStatus');
   panel.className = 'main-status';
-  document.getElementById('statusText').textContent = 'MONITORING — ALL CLEAR';
-  document.getElementById('statusText').style.color = '#22c55e';
+  const panel = document.getElementById('mainStatus');
+  panel.className = 'alarm-banner';
+  document.getElementById('statusText').textContent = 'MONITORING — ANALYZING';
+  document.getElementById('statusText').style.color = '#00e6b4';
   document.getElementById('statusSub').textContent = 'Listening for human distress signals...';
   document.getElementById('statusDetail').textContent = '';
   ws.send(JSON.stringify({ action: 'start' }));
