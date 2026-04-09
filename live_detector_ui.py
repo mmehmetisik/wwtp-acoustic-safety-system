@@ -967,10 +967,7 @@ function startDetection() {
   document.getElementById('btnStart').disabled = true;
   document.getElementById('btnStop').disabled = false;
   document.getElementById('systemStatus').textContent = 'ACTIVE';
-  const panel = document.getElementById('mainStatus');
-  panel.className = 'main-status';
-  const panel = document.getElementById('mainStatus');
-  panel.className = 'alarm-banner';
+  document.getElementById('mainStatus').className = 'alarm-banner';
   document.getElementById('statusText').textContent = 'MONITORING — ANALYZING';
   document.getElementById('statusText').style.color = '#00e6b4';
   document.getElementById('statusSub').textContent = 'Listening for human distress signals...';
