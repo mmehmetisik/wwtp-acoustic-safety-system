@@ -861,7 +861,6 @@ def main():
     parser.add_argument("--threshold", type=float, default=0.50, help="Alarm threshold (default: 0.50)")
     args = parser.parse_args()
 
-    global OLLAMA_MODEL
     OLLAMA_MODEL = args.model
     state["model"] = args.model
     state["device"] = args.device
