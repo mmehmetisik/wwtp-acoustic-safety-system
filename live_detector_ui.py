@@ -370,155 +370,34 @@ SCADA_HTML = """<!DOCTYPE html>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100vh; overflow:hidden; }
   body {
     font-family: 'JetBrains Mono', monospace;
     background: #0a0e17;
     color: #e2e8f0;
-    overflow: hidden;
-    height: 100vh;
-  }
-
-  /* Top bar */
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 24px;
-    background: #0f1520;
-    border-bottom: 1px solid #1e293b;
-    height: 52px;
-  }
-  .topbar .logo { font-size: 14px; font-weight: 700; letter-spacing: 2px; }
-  .topbar .logo span { color: #3b82f6; }
-  .topbar .clock { font-size: 20px; font-weight: 600; color: #94a3b8; }
-  .topbar .status-bar { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #64748b; }
-  .topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse-dot 2s infinite; }
-  .topbar .dot.inactive { background: #64748b; animation: none; }
-  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* Main status panel */
-  .main-status {
-    margin: 16px 24px;
-    padding: 32px;
-    border-radius: 12px;
-    border: 2px solid #22c55e;
-    background: rgba(34,197,94,0.05);
-    text-align: center;
-    transition: all 0.3s;
-    min-height: 140px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-  }
-  .main-status.alarm {
-    border-color: #ef4444;
-    background: rgba(239,68,68,0.1);
-    animation: alarm-flash 0.8s infinite;
-  }
-  .main-status.standby {
-    border-color: #64748b;
-    background: rgba(100,116,139,0.05);
-  }
-  @keyframes alarm-flash { 0%,100%{background:rgba(239,68,68,0.1)} 50%{background:rgba(239,68,68,0.25)} }
-  .main-status .big { font-size: 28px; font-weight: 700; letter-spacing: 3px; }
-  .main-status .sub { font-size: 13px; color: #94a3b8; margin-top: 8px; }
-  .main-status .detail { font-size: 12px; color: #ef4444; margin-top: 6px; }
-
-  /* Middle panels */
-  .panels {
-    display: grid; grid-template-columns: 1fr 1.5fr;
-    gap: 16px;
-    padding: 0 24px;
-    height: calc(100vh - 52px - 172px - 130px - 16px);
-    min-height: 280px;
-  }
-  .panel {
-    background: #0f1520;
-    border: 1px solid #1e293b;
-    border-radius: 10px;
-    padding: 16px;
     display: flex; flex-direction: column;
   }
-  .panel-title {
-    font-size: 10px; font-weight: 600; letter-spacing: 2px;
-    color: #64748b; text-transform: uppercase;
-    margin-bottom: 12px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .panel-title .indicator { width: 6px; height: 6px; border-radius: 50%; background: #64748b; }
-  .panel-title .indicator.active { background: #22c55e; animation: pulse-dot 2s infinite; }
-  .panel-title .indicator.alarm { background: #ef4444; animation: pulse-dot 0.5s infinite; }
 
-  /* Waveform */
-  .waveform-area {
-    flex: 1; background: #080c14; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    position: relative; overflow: hidden;
+  /* Top bar — includes controls */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 16px;
+    background: #0f1520;
+    border-bottom: 1px solid #1e293b;
+    height: 40px; flex-shrink: 0;
   }
-  .waveform-area canvas { width: 100%; height: 100%; }
-  .inaudible-overlay {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    pointer-events: none;
-  }
-  .inaudible-overlay .big { font-size: 32px; font-weight: 700; color: rgba(255,255,255,0.06); letter-spacing: 6px; }
-  .vu-meter {
-    margin-top: 10px; height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden;
-  }
-  .vu-meter .fill { height: 100%; background: #22c55e; transition: width 0.2s; border-radius: 3px; }
-  .chunk-info { font-size: 11px; color: #64748b; margin-top: 8px; text-align: center; }
-
-  /* Spectrogram */
-  .spec-area {
-    flex: 1; display: flex; flex-direction: column; gap: 10px;
-  }
-  .spec-main {
-    flex: 1; background: #080c14; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; position: relative;
-    border: 1px solid #1e293b;
-  }
-  .spec-main.alarm-ring { border-color: #ef4444; box-shadow: 0 0 20px rgba(239,68,68,0.2); }
-  .spec-main img { width: 100%; height: 100%; object-fit: contain; }
-  .spec-thumbs { display: flex; gap: 6px; height: 60px; }
-  .spec-thumbs .thumb {
-    flex: 1; background: #080c14; border-radius: 6px; overflow: hidden;
-    border: 1px solid #1e293b;
-  }
-  .spec-thumbs .thumb.alarm-thumb { border-color: #ef4444; }
-  .spec-thumbs .thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .cot-text {
-    font-size: 10px; color: #22c55e; line-height: 1.6;
-    max-height: 60px; overflow-y: auto;
-    padding: 8px; background: rgba(0,0,0,0.3); border-radius: 6px;
-  }
-  .cot-text.alarm-text { color: #ef4444; }
-
-  /* Bottom */
-  .bottom {
-    padding: 12px 24px;
-  }
-  .timeline-label { font-size: 9px; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .timeline {
-    display: flex; gap: 3px; height: 24px;
-  }
-  .timeline .chunk-box {
-    flex: 1; max-width: 24px; border-radius: 3px;
-    background: #1e293b; transition: background 0.3s;
-  }
-  .timeline .chunk-box.safe { background: #22c55e; }
-  .timeline .chunk-box.alarm { background: #ef4444; }
-  .timeline .chunk-box.current { outline: 2px solid #3b82f6; outline-offset: 1px; }
-  .session-stats {
-    margin-top: 8px; font-size: 10px; color: #475569;
-    display: flex; gap: 16px;
-  }
-  .session-stats span b { color: #94a3b8; }
-
-  /* Controls */
-  .controls {
-    display: flex; justify-content: center; gap: 12px;
-    padding: 10px 24px 0;
-  }
+  .topbar .logo { font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+  .topbar .logo span { color: #3b82f6; }
+  .topbar .clock { font-size: 16px; font-weight: 600; color: #94a3b8; }
+  .topbar .right { display: flex; align-items: center; gap: 8px; }
+  .topbar .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse-dot 2s infinite; }
+  .topbar .dot.inactive { background: #64748b; animation: none; }
+  .topbar .meta { font-size: 9px; color: #64748b; display: flex; align-items: center; gap: 6px; }
+  .topbar .meta .sep { color: #1e293b; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .btn {
-    padding: 10px 32px; border: none; border-radius: 8px;
-    font-family: inherit; font-size: 13px; font-weight: 600;
+    padding: 5px 16px; border: none; border-radius: 5px;
+    font-family: inherit; font-size: 10px; font-weight: 600;
     cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
   }
   .btn-start { background: #22c55e; color: #0a0e17; }
@@ -526,23 +405,126 @@ SCADA_HTML = """<!DOCTYPE html>
   .btn-stop { background: #ef4444; color: white; }
   .btn-stop:hover { background: #dc2626; }
   .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Main status */
+  .main-status {
+    margin: 8px 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #22c55e;
+    background: rgba(34,197,94,0.05);
+    text-align: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .main-status.alarm {
+    border-color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    animation: alarm-flash 0.8s infinite;
+  }
+  .main-status.standby { border-color: #64748b; background: rgba(100,116,139,0.05); }
+  @keyframes alarm-flash { 0%,100%{background:rgba(239,68,68,0.1)} 50%{background:rgba(239,68,68,0.25)} }
+  .main-status .big { font-size: 22px; font-weight: 700; letter-spacing: 3px; }
+  .main-status .sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+  .main-status .detail { font-size: 10px; color: #ef4444; margin-top: 3px; }
+
+  /* Panels */
+  .panels {
+    display: grid; grid-template-columns: 1fr 1.5fr;
+    gap: 10px; padding: 8px 12px;
+    flex: 1; min-height: 0;
+  }
+  .panel {
+    background: #0f1520; border: 1px solid #1e293b;
+    border-radius: 8px; padding: 8px 10px;
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .panel-title {
+    font-size: 9px; font-weight: 600; letter-spacing: 2px;
+    color: #64748b; text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .panel-title .indicator { width: 5px; height: 5px; border-radius: 50%; background: #64748b; }
+  .panel-title .indicator.active { background: #22c55e; animation: pulse-dot 2s infinite; }
+  .panel-title .indicator.alarm { background: #ef4444; animation: pulse-dot 0.5s infinite; }
+
+  /* Waveform */
+  .waveform-area {
+    flex: 1; background: #080c14; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; min-height: 0;
+  }
+  .waveform-area canvas { width: 100%; height: 100%; }
+  .inaudible-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .inaudible-overlay .big { font-size: 24px; font-weight: 700; color: rgba(255,255,255,0.05); letter-spacing: 6px; }
+  .vu-meter { margin-top: 6px; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; flex-shrink:0; }
+  .vu-meter .fill { height: 100%; background: #22c55e; transition: width 0.2s; border-radius: 2px; }
+  .chunk-info { font-size: 9px; color: #64748b; margin-top: 4px; text-align: center; flex-shrink:0; }
+
+  /* Spectrogram */
+  .spec-area { flex: 1; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+  .spec-main {
+    flex: 1; background: #080c14; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; border: 1px solid #1e293b; min-height: 0;
+  }
+  .spec-main.alarm-ring { border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.2); }
+  .spec-main img { width: 100%; height: 100%; object-fit: contain; }
+  .spec-thumbs { display: flex; gap: 4px; height: 40px; flex-shrink: 0; }
+  .spec-thumbs .thumb {
+    flex: 1; background: #080c14; border-radius: 4px; overflow: hidden;
+    border: 1px solid #1e293b;
+  }
+  .spec-thumbs .thumb.alarm-thumb { border-color: #ef4444; }
+  .spec-thumbs .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .cot-text {
+    font-size: 9px; color: #22c55e; line-height: 1.5;
+    max-height: 36px; overflow-y: auto;
+    padding: 5px 8px; background: rgba(0,0,0,0.3); border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .cot-text.alarm-text { color: #ef4444; }
+
+  /* Bottom */
+  .bottom { padding: 6px 12px 8px; flex-shrink: 0; }
+  .timeline-label { font-size: 8px; color: #475569; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .timeline { display: flex; gap: 2px; height: 18px; }
+  .timeline .chunk-box {
+    flex: 1; max-width: 20px; border-radius: 2px;
+    background: #1e293b; transition: background 0.3s;
+  }
+  .timeline .chunk-box.safe { background: #22c55e; }
+  .timeline .chunk-box.alarm { background: #ef4444; }
+  .timeline .chunk-box.current { outline: 2px solid #3b82f6; outline-offset: 1px; }
+  .session-stats {
+    margin-top: 4px; font-size: 9px; color: #475569;
+    display: flex; gap: 12px;
+  }
+  .session-stats span b { color: #94a3b8; }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOP BAR with controls -->
 <div class="topbar">
   <div class="logo">WWTP<span>.</span>AI — ACOUSTIC SAFETY SYSTEM</div>
   <div class="clock" id="clock">--:--:--</div>
-  <div class="status-bar">
-    <div class="dot" id="systemDot"></div>
-    <span id="systemStatus">INITIALIZING</span>
-    <span style="color:#1e293b">|</span>
-    <span>Gemma 4 E4B</span>
-    <span style="color:#1e293b">|</span>
-    <span>Ollama</span>
-    <span style="color:#1e293b">|</span>
-    <span style="color:#22c55e">OFFLINE</span>
+  <div class="right">
+    <button class="btn btn-start" id="btnStart" onclick="startDetection()">&#9654; START</button>
+    <button class="btn btn-stop" id="btnStop" onclick="stopDetection()" disabled>&#9632; STOP</button>
+    <div class="meta">
+      <div class="dot" id="systemDot"></div>
+      <span id="systemStatus">INIT</span>
+      <span class="sep">|</span><span>Gemma 4 E4B</span>
+      <span class="sep">|</span><span>Ollama</span>
+      <span class="sep">|</span><span style="color:#22c55e">OFFLINE</span>
+    </div>
   </div>
 </div>
 
@@ -553,58 +535,48 @@ SCADA_HTML = """<!DOCTYPE html>
   <div class="detail" id="statusDetail"></div>
 </div>
 
-<!-- CONTROLS -->
-<div class="controls">
-  <button class="btn btn-start" id="btnStart" onclick="startDetection()">&#9654; START MONITORING</button>
-  <button class="btn btn-stop" id="btnStop" onclick="stopDetection()" disabled>&#9632; STOP</button>
-</div>
-
 <!-- PANELS -->
 <div class="panels">
-  <!-- Left: Live Audio -->
   <div class="panel">
     <div class="panel-title">
       <div class="indicator" id="audioIndicator"></div>
-      LIVE AUDIO — MICROPHONE INPUT
+      LIVE AUDIO — MICROPHONE
     </div>
     <div class="waveform-area">
       <canvas id="waveCanvas"></canvas>
-      <div class="inaudible-overlay">
-        <div class="big">LISTENING</div>
-      </div>
+      <div class="inaudible-overlay"><div class="big">LISTENING</div></div>
     </div>
     <div class="vu-meter"><div class="fill" id="vuFill" style="width:0%"></div></div>
     <div class="chunk-info" id="chunkInfo">Waiting...</div>
   </div>
 
-  <!-- Right: AI Analysis -->
   <div class="panel">
     <div class="panel-title">
       <div class="indicator" id="aiIndicator"></div>
-      AI ANALYSIS — VOICE-RANGE SPECTROGRAM [300-3000Hz]
+      AI ANALYSIS — SPECTROGRAM [300-3000Hz]
     </div>
     <div class="spec-area">
       <div class="spec-main" id="specMain">
-        <span style="color:#475569;font-size:12px">Spectrogram will appear here</span>
+        <span style="color:#475569;font-size:11px">Spectrogram will appear here</span>
       </div>
       <div class="spec-thumbs" id="specThumbs">
-        <div class="thumb" id="thumb1"><span style="color:#333;font-size:9px;padding:4px">—</span></div>
-        <div class="thumb" id="thumb2"><span style="color:#333;font-size:9px;padding:4px">—</span></div>
-        <div class="thumb" id="thumb3"><span style="color:#333;font-size:9px;padding:4px">—</span></div>
+        <div class="thumb" id="thumb1"></div>
+        <div class="thumb" id="thumb2"></div>
+        <div class="thumb" id="thumb3"></div>
       </div>
-      <div class="cot-text" id="cotText">Chain-of-Thought reasoning will appear here...</div>
+      <div class="cot-text" id="cotText">CoT reasoning...</div>
     </div>
   </div>
 </div>
 
 <!-- BOTTOM -->
 <div class="bottom">
-  <div class="timeline-label">CHUNK TIMELINE — LAST 30 CHUNKS</div>
+  <div class="timeline-label">CHUNK TIMELINE — LAST 30</div>
   <div class="timeline" id="timeline"></div>
   <div class="session-stats" id="sessionStats">
     <span>Chunks: <b>0</b></span>
     <span>Alarms: <b>0</b></span>
-    <span>Avg Confidence: <b>0%</b></span>
+    <span>Avg Conf: <b>0%</b></span>
     <span>Session: <b>00:00</b></span>
   </div>
 </div>
