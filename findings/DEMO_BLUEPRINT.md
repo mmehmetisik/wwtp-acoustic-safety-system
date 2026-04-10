@@ -1,5 +1,5 @@
 # WWTP Acoustic Safety System — Web Demo Blueprint
-## Claude Code İçin Proje Oluşturma Planı
+## Web Demo Development Plan
 
 > **Amaç:** Gemma 4 Good Hackathon için interaktif web demo. Jüri linke tıklar, tesis haritasını görür, sahne seçer, split-screen'de waveform vs spektrogram karşılaştırması izler, alarm tetiklenir, survival verdict görünür.
 > **Deploy:** Vercel (GitHub repo'dan otomatik deploy)
@@ -363,9 +363,9 @@ GitHub repo oluştur: `wwtp-acoustic-demo`. Kodu push et. Vercel'e bağla (GitHu
 
 ---
 
-## 8. CLAUDE CODE İÇİN TALİMATLAR
+## 8. IMPLEMENTATION STEPS
 
-Bu blueprint'i okuyan Claude Code şunları yapmalı:
+Development steps for the web demo:
 
 1. `npm create vite@latest wwtp-acoustic-demo -- --template react` ile proje oluştur.
 2. `npm install -D tailwindcss @tailwindcss/vite` ile Tailwind kur.
@@ -395,4 +395,4 @@ Havadan tesis çekimi gerçek Ceyhan WWTP fotoğrafı. Bu jüriye "gerçek bir t
 ---
 
 *Bu blueprint WWTP Acoustic Safety System web demo projesini oluşturmak için gerekli tüm bilgileri içerir.*
-*Hazırlayan: Mehmet ISIK & Claude | Tarih: 5 Nisan 2026*
+*Author: Mehmet ISIK | Date: April 5, 2026*

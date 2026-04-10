@@ -216,7 +216,7 @@
       "Gemini 2.0 Flash Lite"
     ],
     "excluded_families": {
-      "Claude": "No native audio file API support",
+      "Anthropic": "No native audio file API support",
       "Qwen": "No native audio file API support",
       "DeepSeek": "No native audio file API support",
       "Gemma": "No native audio file API support"
