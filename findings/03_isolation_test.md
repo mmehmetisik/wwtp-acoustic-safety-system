@@ -1,147 +1,147 @@
-# WWTP Acoustic Safety — İzolasyon Testi Bulguları
-## BARE Modu 12-Chunk Tam Çalıştırma
-> **Test Tarihi:** 3 Nisan 2026
-> **Amaç:** Sorunun prompt'ta mı yoksa ses kalitesinde mi olduğunu izole etmek
+# WWTP Acoustic Safety — Isolation Test Findings
+## BARE Mode 12-Chunk Full Run
+> **Test Date:** April 3, 2026
+> **Purpose:** Isolate whether the problem is in the prompt or in the audio quality
 > **Model:** Gemma 4 E4B (Ollama v0.20.0, RTX 3060 6GB)
 
 ---
 
-## 1. TEST SONUÇLARI
+## 1. TEST RESULTS
 
-### BARE Modu — 12 Chunk Tam Çalıştırma
+### BARE Mode — 12-Chunk Full Run
 
-| Sahne | Skor | İnsan | Alarm | FP | Detay |
-|-------|------|-------|-------|----|-------|
-| S1 — Pompa | **60/100** | YOK | Yok | 0 | Mükemmel — sıfır yanlış alarm |
-| S2 — İnşaat | 0/100 | VAR | Yok* | 0 | Kaçırdı — gürültü altında duyamadı |
-| S3 — Havuz | **60/100** | YOK | Yok | 0 | Mükemmel — sıfır yanlış alarm |
-| S4 — Menhol | 0/100 | VAR | 2 (filtered) | 0 | Duydu (0.70) ama eşik altı kaldı |
-| S5 — Kritik | 0/100 | VAR | Yok | 0 | Tamamen sessiz — hiçbir şey duymadı |
+| Scene | Score | Human | Alarm | FP | Detail |
+|-------|-------|-------|-------|----|--------|
+| S1 — Pump | **60/100** | NO | None | 0 | Perfect — zero false alarms |
+| S2 — Construction | 0/100 | YES | None* | 0 | Missed — could not hear under noise |
+| S3 — Pool | **60/100** | NO | None | 0 | Perfect — zero false alarms |
+| S4 — Manhole | 0/100 | YES | 2 (filtered) | 0 | Heard (0.70) but below threshold |
+| S5 — Critical | 0/100 | YES | None | 0 | Completely silent — heard nothing |
 
-*S2: Chunk 6'da 0.60 alarm verdi ama debouncing filtreledi.
+*S2: Chunk 6 produced 0.60 alarm but debouncing filtered it.
 
-### PROTOCOL Modu Karşılaştırması (Önceki Test)
+### PROTOCOL Mode Comparison (Previous Test)
 
-| Sahne | BARE | PROTOCOL | Fark |
-|-------|------|----------|------|
-| S1 | 60 (0 FP) | 0 (5 FP) | PROTOCOL halüsinasyon yarattı |
-| S2 | 0 (kaçırdı) | 5 (FP sorunlu) | Her ikisinde de sorunlu |
-| S3 | 60 (0 FP) | 60 (0 confirmed)* | BARE zaten temiz, debouncing PROTOCOL'ü kurtardı |
-| S4 | 0 (0.70 duydu) | 5 (FP sorunlu) | PROTOCOL FP ekledi, gerçek tespiti bozmadı |
-| S5 | 0 (sessiz) | 0 (sessiz) | İkisinde de duyamadı |
-
----
-
-## 2. KESİNLEŞEN İKİ AYRI SORUN
-
-### Sorun 1: PROTOCOL Prompt Halüsinasyon Yaratıyor ✅ KESİNLEŞTİ
-
-Kanıt:
-- S1 BARE: 0 FP → S1 PROTOCOL: 5 FP (aynı ses, farklı prompt)
-- S3 BARE: 0 FP → S3 PROTOCOL: 4+ FP (aynı ses, farklı prompt)
-- "Şüphede alarm ver" talimatı modeli aşırı hassaslaştırıyor
-- Mekanik seslerde "muffled_call" halüsinasyonu yapıyor
-
-Çözüm: Prompt kısaltma ve dengeleme. "Tatlı nokta" bulma — güveni artır ama halüsinasyon yaratma.
-
-### Sorun 2: Model Sentetik Çığlığı Gerçekten Duyamıyor ✅ KESİNLEŞTİ
-
-Kanıt:
-- S5 BARE: 12 chunk boyunca sıfır alarm, sıfır tespit, tamamen sessiz
-- S2 BARE: 12 chunk'tan sadece 1'inde çok zayıf alarm (0.60)
-- S5 ve S2'de ortak özellik: yoğun inşaat gürültüsü (95dB, -6 ile -3dB SNR)
-
-Karşı kanıt (model DUYABİLİYOR bazı durumlarda):
-- S4 BARE: Maskeli sesi chunk 5 ve 7'de doğru zamanda tespit etti (0.70 confidence)
-- S4 farkı: gürültü seviyesi çok daha düşük (underground ambient, 52dB)
-
-Sonuç: Model insan sesini duyabiliyor AMA sadece gürültü düşükse. 95dB inşaat gürültüsü altındaki sentetik formant sesini ayırt edemiyor.
+| Scene | BARE | PROTOCOL | Difference |
+|-------|------|----------|------------|
+| S1 | 60 (0 FP) | 0 (5 FP) | PROTOCOL caused hallucinations |
+| S2 | 0 (missed) | 5 (FP issues) | Both problematic |
+| S3 | 60 (0 FP) | 60 (0 confirmed)* | BARE already clean, debouncing saved PROTOCOL |
+| S4 | 0 (heard 0.70) | 5 (FP issues) | PROTOCOL added FP, didn't improve real detection |
+| S5 | 0 (silent) | 0 (silent) | Neither could hear |
 
 ---
 
-## 3. TEK CHUNK TESTİ YENİDEN DEĞERLENDİRME
+## 2. TWO SEPARATE PROBLEMS CONFIRMED
 
-Tek chunk PROTOCOL testinde S5 "confidence 0.98" ile tespit edilmişti. Bu sonuç şimdi şüpheli:
+### Problem 1: PROTOCOL Prompt Causes Hallucinations — CONFIRMED
 
-- BARE modda model S5'i hiç duyamıyor (12 chunk'ta sıfır sinyal)
-- BARE tek chunk'ta da duyamamıştı
-- CONTEXT tek chunk'ta "sesi duymadı ama bağlamdan alarm verdi" (human_detected=false, alarm=true)
-- PROTOCOL tek chunk'ta 0.98 — büyük ihtimalle model sesi değil, prompt metnindeki "worker climbing pool wall, splash + voice" bilgisinden çıkarım yaptı
+Evidence:
+- S1 BARE: 0 FP → S1 PROTOCOL: 5 FP (same audio, different prompt)
+- S3 BARE: 0 FP → S3 PROTOCOL: 4+ FP (same audio, different prompt)
+- "When in doubt, alarm" instruction makes the model overly sensitive
+- Hallucinating "muffled_call" on mechanical sounds
 
-Bu demek ki: Tek chunk PROTOCOL "başarısı" gerçek bir ses tespiti değildi, metin tabanlı çıkarımdı. Gerçek dünyada böyle bir metin bilgisi olmayacağı için bu güvenilir değil.
+Solution: Prompt shortening and balancing. Find the "sweet spot" — increase sensitivity without causing hallucinations.
 
----
+### Problem 2: Model Cannot Hear Synthetic Screams — CONFIRMED
 
-## 4. SORUNUN KÖK NEDENİ
+Evidence:
+- S5 BARE: 12 chunks, zero alarm, zero detection, completely silent
+- S2 BARE: Only 1 out of 12 chunks produced a very weak alarm (0.60)
+- S5 and S2 share: heavy construction noise (95dB, -6 to -3dB SNR)
 
-### Neden S4 duyuluyor ama S5 duyulmuyor?
+Counter-evidence (model CAN hear in some conditions):
+- S4 BARE: Detected masked voice at chunks 5 and 7 at correct timing (0.70 confidence)
+- S4 difference: noise level much lower (underground ambient, 52dB)
 
-S4 (maskeli ses, underground): Arka plan gürültüsü 52dB. İnsan sesi 65dB. SNR = -12dB ama düşük mutlak gürültü seviyesinde model frekans paternlerini ayırt edebiliyor.
-
-S5 (çığlık, inşaat): Arka plan gürültüsü 95dB. İnsan sesi 88dB. SNR = -6dB ve yüksek mutlak gürültü seviyesinde tüm frekans bantları doymuş, model hiçbir şeyi ayırt edemiyor.
-
-### Neden formant sentezi yetersiz?
-
-Formant sentezi matematiksel sinüs dalgaları + harmonikler üretiyor. Bu akustik olarak insan sesine benzer ama modelin ASR eğitimindeki gerçek insan sesi paternleri ile eşleşmiyor. Model gerçek konuşma ritimleri, tonlama değişimleri, nefes alış verişleri, kelime yapıları arıyor — formant sentezinde bunlar yok.
-
----
-
-## 5. ÇÖZÜM YOLU (GÜNCELLENMİŞ)
-
-### Adım 1: Ses Üreticiyi TTS Tabanlıya Çevir (EN KRİTİK)
-- gTTS veya pyttsx3 ile "HELP!", "YARDIM!", "İMDAT!" sesleri üret
-- Endüstriyel bozulma ekle (mesafe, reverb, maske)
-- Model gerçek konuşma paternini tanıyacak
-
-### Adım 2: S5 SNR Dengesini İyileştir
-- Gerçek hayatta insan panik halinde 100+ dB'de bağırır
-- SNR'ı -6dB'den -3dB veya 0dB'ye çek
-- İnşaat gürültüsünü biraz azalt veya çığlığı biraz yükselt
-
-### Adım 3: PROTOCOL Prompt'u Kısalt ve Dengele
-- S4 BARE 0.70 → PROTOCOL ile 0.90+ yapılabilir
-- Ama S1/S3 FP yaratmadan
-- "Tatlı nokta" prompt: kısa, odaklı, güvenlik kuralları minimal
-
-### Adım 4: Tam Test ve Doğrulama
-- TTS seslerle tüm sahneleri yeniden üret
-- BARE → CONTEXT → PROTOCOL sırayla test et
-- Başarılıysa roadmap güncelle ve demo arayüzüne geç
+Conclusion: The model can hear human voice BUT only when noise is low. It cannot distinguish synthetic formant sounds under 95dB construction noise.
 
 ---
 
-## 6. ALTIN BULGULAR (PROJE İÇİN ÇOK DEĞERLİ)
+## 3. SINGLE-CHUNK TEST RE-EVALUATION
 
-### Bulgu 1: Prompt Tasarımı Halüsinasyon Yaratabilir
-Aynı model, aynı ses — kısa prompt ile temiz karar, uzun güvenlik prompt'u ile halüsinasyon patlaması. Bu LLM güvenlik sistemleri için kritik bir uyarı.
+The single-chunk PROTOCOL test reported S5 detection at "confidence 0.98". This result is now suspicious:
 
-### Bulgu 2: "AI'ya NE söylediğin, NE KADAR söylediğinden daha önemli"
-PROTOCOL'ün her kuralı model performansını olumsuz etkileyebiliyor. Daha fazla kural ≠ daha iyi sonuç. Doğru kural = doğru sonuç.
+- BARE mode: model heard nothing in S5 across 12 chunks (zero signal)
+- BARE single-chunk: also heard nothing
+- CONTEXT single-chunk: "did not hear the voice but alarmed from context" (human_detected=false, alarm=true)
+- PROTOCOL single-chunk: 0.98 — most likely the model inferred from prompt text ("worker climbing pool wall, splash + voice") rather than from actual audio
 
-### Bulgu 3: LLM'ler Ses Analizinde Gürültü Seviyesine Çok Duyarlı
-52dB ortamda 0.70 tespit, 95dB ortamda 0.00 tespit. Mutlak gürültü seviyesi, SNR'dan bile daha belirleyici.
-
-### Bulgu 4: Tek Chunk Test Başarısı Yanıltıcı Olabilir
-PROTOCOL tek chunk'ta S5 "0.98 confidence" — ama bu ses tespiti değil, metin çıkarımıydı. Gerçek performansı ölçmek için çok-chunk testi şart.
-
-### Bulgu 5: Debouncing Katmanı Çalışıyor
-S3 PROTOCOL'de 4 ham alarm → debouncing sonrası 0 onaylanmış alarm (60 puan). S4 BARE'de 2 zayıf alarm (0.70) → doğru şekilde filtrelendi. Endüstriyel standart alarm yönetimi etkin.
+This means: the single-chunk PROTOCOL "success" was not real audio detection but text-based inference. Since such text information would not exist in a real deployment, this is not reliable.
 
 ---
 
-## 7. PROJE DURUMU
+## 4. ROOT CAUSE
 
-Proje iptal DEĞİL. Temel altyapı sağlam:
-- Motor çalışıyor, hata vermiyor ✅
-- Debouncing katmanı kanıtlanmış ✅
-- Timing hesaplamaları doğru ✅
-- JSON parse güvenilir ✅
-- Model sessiz ortamda insan sesini duyabiliyor ✅ (S4 kanıtı)
+### Why is S4 heard but S5 is not?
 
-Eksik olan: modelin tanıyabileceği kalitede ses üretimi.
-Bu düzeldiğinde sonuçlar dramatik şekilde değişecek.
+S4 (masked voice, underground): Background noise 52dB. Human voice 65dB. SNR = -12dB but at low absolute noise level, the model can distinguish frequency patterns.
+
+S5 (scream, construction): Background noise 95dB. Human voice 88dB. SNR = -6dB and at high absolute noise level, all frequency bands are saturated — the model cannot distinguish anything.
+
+### Why is formant synthesis insufficient?
+
+Formant synthesis produces mathematical sine waves + harmonics. This is acoustically similar to human voice but does not match the real human speech patterns in the model's ASR training data. The model looks for real speech rhythms, intonation changes, breathing patterns, word structures — formant synthesis has none of these.
 
 ---
 
-*Bu doküman BARE vs PROTOCOL izolasyon testi bulgularını içerir.*
-*Son güncelleme: 3 Nisan 2026*
+## 5. SOLUTION PATH (UPDATED)
+
+### Step 1: Switch Audio Generator to TTS (MOST CRITICAL)
+- Use gTTS or pyttsx3 to generate "HELP!", "YARDIM!", "IMDAT!" voices
+- Add industrial degradation (distance, reverb, mask)
+- Model should recognize real speech patterns
+
+### Step 2: Improve S5 SNR Balance
+- In real life, a panicked person screams at 100+ dB
+- Adjust SNR from -6dB to -3dB or 0dB
+- Slightly reduce construction noise or increase scream volume
+
+### Step 3: Shorten and Balance PROTOCOL Prompt
+- S4 BARE 0.70 → with PROTOCOL could reach 0.90+
+- But without creating S1/S3 false positives
+- "Sweet spot" prompt: short, focused, minimal safety rules
+
+### Step 4: Full Test and Validation
+- Regenerate all scenes with TTS voices
+- Test BARE → CONTEXT → PROTOCOL sequentially
+- If successful, update roadmap and proceed to demo interface
+
+---
+
+## 6. KEY FINDINGS (HIGHLY VALUABLE FOR THE PROJECT)
+
+### Finding 1: Prompt Design Can Cause Hallucinations
+Same model, same audio — short prompt produces clean decisions, long safety prompt produces hallucination explosion. This is a critical warning for LLM-based safety systems.
+
+### Finding 2: "What you tell AI matters more than how much you tell it"
+Every PROTOCOL rule can negatively affect model performance. More rules ≠ better results. The right rules = the right results.
+
+### Finding 3: LLMs Are Highly Sensitive to Absolute Noise Level
+0.70 detection at 52dB, 0.00 detection at 95dB. Absolute noise level is even more deterministic than SNR.
+
+### Finding 4: Single-Chunk Test Success Can Be Misleading
+PROTOCOL single-chunk S5 "0.98 confidence" — but this was text inference, not audio detection. Multi-chunk testing is essential to measure real performance.
+
+### Finding 5: Debouncing Layer Works
+S3 PROTOCOL: 4 raw alarms → 0 confirmed after debouncing (60 points). S4 BARE: 2 weak alarms (0.70) → correctly filtered. Industrial-standard alarm management is effective.
+
+---
+
+## 7. PROJECT STATUS
+
+Project NOT cancelled. Core infrastructure is solid:
+- Engine runs without errors ✅
+- Debouncing layer proven ✅
+- Timing calculations correct ✅
+- JSON parsing reliable ✅
+- Model can hear human voice in quiet environments ✅ (S4 evidence)
+
+What's missing: audio quality that the model can recognize.
+When this is fixed, results will change dramatically.
+
+---
+
+*This document contains BARE vs PROTOCOL isolation test findings.*
+*Last updated: April 3, 2026*
