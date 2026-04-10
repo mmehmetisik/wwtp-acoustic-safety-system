@@ -1,109 +1,109 @@
-# WWTP Acoustic Safety — Frekans Filtrelemeli Spektrogram Bulguları
-## 300-3000Hz Bandpass + 3 Temiz Örnek Few-Shot Sonuçları
-> **Test Tarihi:** 4 Nisan 2026
+# WWTP Acoustic Safety — Frequency-Filtered Spectrogram Findings
+## 300-3000Hz Bandpass + 4 Few-Shot Examples Results
+> **Test Date:** April 4, 2026
 > **Model:** Gemma 4 E4B (Ollama v0.20.0, RTX 3060 6GB)
-> **Yöntem:** Mel Spektrogram (300-3000Hz) + Few-Shot Vision (3 temiz + 1 insan)
+> **Method:** Mel Spectrogram (300-3000Hz) + Few-Shot Vision (3 clean + 1 human)
 
 ---
 
-## 1. NE DEĞİŞTİ?
+## 1. WHAT CHANGED?
 
-Önceki spektrogram testinden iki değişiklik yapıldı:
+Two changes from the previous spectrogram test:
 
-**Frekans filtreleme:** Spektrogram artık 0-8000Hz yerine sadece 300-3000Hz aralığını gösteriyor. İnsan sesi bu aralıkta — düşük frekanslı makine gürültüsü (pompa 120Hz, motor 150Hz) ve yüksek frekanslı metalik çınlama (4000Hz+) filtreleniyor. Modelin sadece insan ses aralığına odaklanması sağlanıyor.
+**Frequency filtering:** Spectrogram now shows only 300-3000Hz instead of 0-8000Hz. Human voice lives in this range — low-frequency machine noise (pump 120Hz, motor 150Hz) and high-frequency metallic ringing (4000Hz+) are filtered out. The model can focus exclusively on the human voice range.
 
-**3 temiz + 1 insan few-shot:** Önceki testte sadece 2 örnek vardı (S1 temiz, S4 insan). Model "S1'e benzemiyorsa insan" diye binary sınıflandırma yapıyordu. Şimdi 4 örnek var:
-- Temiz 1: S1 pompa dairesi (15-20s) — düşük enerjili, sessiz
-- Temiz 2: S2 inşaat gürültüsü (0-5s, distress öncesi) — geniş bantlı ama insan yok
-- Temiz 3: S3 metalik sesler (0-5s) — darbeli ama insan yok
-- İnsan: S4 maskeli ses (25-30s) — formant bantları görünür
+**3 clean + 1 human few-shot:** Previous test had only 2 examples (S1 clean, S4 human). The model performed binary classification: "doesn't look like S1 = human." Now 4 examples:
+- Clean 1: S1 pump room (15-20s) — low energy, quiet
+- Clean 2: S2 construction noise (0-5s, before distress) — broadband but no human
+- Clean 3: S3 metallic sounds (0-5s) — impulsive but no human
+- Human: S4 masked voice (25-30s) — formant bands visible
 
-Model artık "inşaat gürültüsü de temiz olabilir" biliyor.
-
----
-
-## 2. TEST SONUÇLARI
-
-| Sahne | İnsan | Distress | Skor | İlk Alarm | FP | Confirmed | Detay |
-|-------|-------|----------|------|-----------|-----|-----------|-------|
-| S1 | YOK | — | **60/100** | Yok | 0 | 0 | Mükemmel — 12 chunk sıfır alarm |
-| S2 | VAR | 25s | **95/100** | 25s [+0s] | 0 | 6 | **PROJE REKORU** — kusursuz tespit |
-| S3 | YOK | — | 0/100 | 5s | 9 | 9 | FP devam ediyor |
-| S4 | VAR | 20s | 0/100 | 5s | 3 | 11 | Doğru tespit var ama distress öncesi FP |
-| S5 | VAR | 20s | 5/100 | 10s | 2 | 7 | CERTAIN SURVIVAL ama distress öncesi FP |
-
-**Weighted Average: 27.0/100** (önceki en iyi: 12.0)
-**Toplam süre: 7.9 dakika** (ses tabanlı ile 28-37 dakikaydı)
+The model now knows "construction noise can also be clean."
 
 ---
 
-## 3. S2 ANALİZİ — 95/100 (PROJE REKORU)
+## 2. TEST RESULTS
 
-Bu projenin tüm testleri boyunca alınan en yüksek skor.
+| Scene | Human | Distress | Score | First Alarm | FP | Confirmed | Detail |
+|-------|-------|----------|-------|-------------|-----|-----------|--------|
+| S1 | NO | — | **60/100** | None | 0 | 0 | Perfect — 12 chunks zero alarm |
+| S2 | YES | 25s | **95/100** | 25s [+0s] | 0 | 6 | **PROJECT RECORD** — flawless detection |
+| S3 | NO | — | 0/100 | 5s | 9 | 9 | FP continues |
+| S4 | YES | 20s | 0/100 | 5s | 3 | 11 | Correct detection exists but pre-distress FP |
+| S5 | YES | 20s | 5/100 | 10s | 2 | 7 | CERTAIN SURVIVAL but pre-distress FP |
 
-Chunk 1-5 (0-25s, distress öncesi): Hepsi "none", confidence 0.10. Sıfır alarm. Model inşaat gürültüsünü doğru tanıdı — few-shot'taki "S2 inşaat gürültüsü temiz" örneği işe yaradı.
-
-Chunk 6 (25-30s, distress başlangıcı): İlk alarm, confidence 0.80, "shouting", [+0s]. Distress başlangıcıyla aynı anda tespit. Sıfır gecikme.
-
-Chunk 7-12 (30-60s): 5 chunk'ta alarm (0.75-0.90), 1 chunk temiz. Model distress sonrası çoğu chunk'ta insan sesini doğru tespit etti.
-
-Neden 95 ve 100 değil: Action Quality'de 5/10 aldı çünkü "INITIATE_CONFINED_SPACE_RESCUE" verdi, sahne inşaat alanı olduğu için en doğru aksiyon bu olmayabilir. Ama 95/100 olağanüstü bir skor.
-
-**Bu sonuç neyi kanıtlıyor:** Frekans filtreleme + doğru few-shot örnekleri ile model, inşaat gürültüsü altındaki insan sesini güvenilir şekilde ayırt edebiliyor. Sorun modelin kapasitesinde değil, modele verilen girdinin kalitesinde.
-
----
-
-## 4. S3 ANALİZİ — DEVAM EDEN SORUN
-
-S3'te 9 onaylanmış FP — metalik ses hâlâ insan sesi olarak yorumlanıyor. S3'ün 0-5s chunk'ı few-shot "temiz" örneği olarak verildi ama model S3'ün diğer chunk'larını yine "insan" olarak sınıflandırıyor.
-
-Olası neden: S3'ün metalik ses paternleri (metal scraping, 300-3000Hz aralığında düzensiz enerji) 300-3000Hz filtrelemesinden sonra da formant benzeri görünüyor olabilir. S1 ve S2'nin temiz chunk'ları bu bantta farklı görünüyor ama S3'ün temiz chunk'ı ile S3'ün diğer chunk'ları çok benzer — few-shot örneği fark yaratmıyor.
+**Weighted Average: 27.0/100** (previous best: 12.0)
+**Total time: 7.9 minutes** (audio-based was 28-37 minutes)
 
 ---
 
-## 5. S4 ve S5 ANALİZİ
+## 3. S2 ANALYSIS — 95/100 (PROJECT RECORD)
 
-**S4:** Model distress sonrası tüm chunk'larda doğru tespit yapıyor (0.90). Ama distress öncesi 3 chunk'ta da FP var. S4'ün insan yok kısmı (0-20s) underground ambient — bu sessiz bir ortam ama 300-3000Hz filtrelemesinden sonra damla sesleri ve havalandırma gürültüsü formant benzeri görünüyor olabilir.
+The highest score achieved across all tests in this project.
 
-**S5:** CERTAIN SURVIVAL — 10 saniyede tespit. Distress sonrası 5 chunk'ta doğru alarm (0.80-0.90). Ama distress öncesi 2 FP (chunk 3-4). S5'in inşaat gürültüsü S2'den farklı seed ile üretilmiş, belki bazı chunk'lar S2'nin "temiz" örneğine yeterince benzemiyor.
+Chunks 1-5 (0-25s, before distress): All "none", confidence 0.10. Zero alarms. Model correctly identified construction noise — the "S2 construction noise is clean" few-shot example worked.
+
+Chunk 6 (25-30s, distress onset): First alarm, confidence 0.80, "shouting", [+0s]. Detection simultaneous with distress onset. Zero delay.
+
+Chunks 7-12 (30-60s): 5 chunks alarmed (0.75-0.90), 1 chunk clean. Model correctly detected human voice in most post-distress chunks.
+
+Why 95 and not 100: Received 5/10 on Action Quality because it gave "INITIATE_CONFINED_SPACE_RESCUE" — since the scene is a construction zone, this may not be the most appropriate action. But 95/100 is an extraordinary score.
+
+**What this proves:** With frequency filtering + correct few-shot examples, the model can reliably distinguish human voice under construction noise. The problem was not in the model's capacity but in the quality of input provided to the model.
 
 ---
 
-## 6. ÖNCEKİ TESTLERLE KARŞILAŞTIRMA
+## 4. S3 ANALYSIS — ONGOING ISSUE
 
-| Test | S1 | S2 | S3 | S4 | S5 | WGT AVG | Süre |
+S3 still has 9 confirmed FPs — metallic sounds still interpreted as human voice. S3's 0-5s chunk was given as a "clean" few-shot example but the model still classifies other S3 chunks as "human."
+
+Likely cause: S3's metallic scraping patterns (irregular energy in the 300-3000Hz range) may still look formant-like after frequency filtering. S1 and S2 clean chunks look different in this band, but S3's clean chunk and other S3 chunks look too similar — the few-shot example doesn't create enough differentiation.
+
+---
+
+## 5. S4 AND S5 ANALYSIS
+
+**S4:** Model correctly detects all post-distress chunks (0.90). But 3 pre-distress chunks have FP. The no-human portion (0-20s) is underground ambient — quiet environment but after 300-3000Hz filtering, drip sounds and ventilation noise may look formant-like.
+
+**S5:** CERTAIN SURVIVAL — detection at 10 seconds. 5 post-distress chunks correctly alarmed (0.80-0.90). But 2 pre-distress FPs (chunks 3-4). S5's construction noise was generated with a different seed from S2 — some chunks may not resemble S2's "clean" example sufficiently.
+
+---
+
+## 6. COMPARISON WITH PREVIOUS TESTS
+
+| Test | S1 | S2 | S3 | S4 | S5 | WGT AVG | Time |
 |------|-----|-----|-----|-----|-----|---------|------|
-| Ses + Agresif prompt | 0 | 0 | 60 | 5 | 5 | 3.0 | 37 dk |
-| Ses + Nötr prompt | 60 | 0 | 60 | 0 | 0 | 12.0 | 25 dk |
-| Spektrogram 2-örnek | 60 | 0 | 0 | 0 | 5 | 8.0 | 7.5 dk |
-| **Spektrogram 4-örnek + filtre** | **60** | **95** | **0** | **0** | **5** | **27.0** | **7.9 dk** |
+| Audio + Aggressive prompt | 0 | 0 | 60 | 5 | 5 | 3.0 | 37 min |
+| Audio + Neutral prompt | 60 | 0 | 60 | 0 | 0 | 12.0 | 25 min |
+| Spectrogram 2-example | 60 | 0 | 0 | 0 | 5 | 8.0 | 7.5 min |
+| **Spectrogram 4-example + filter** | **60** | **95** | **0** | **0** | **5** | **27.0** | **7.9 min** |
 
-Weighted average 12.0 → 27.0: **%125 iyileşme.**
-S2: 0 → 95: önceki hiçbir yöntemde S2'de tespit yapılamamıştı.
-Hız: 37 dakika → 7.9 dakika: **4.7x hızlanma.**
-
----
-
-## 7. KALAN SORUNLAR
-
-**S3 metalik ses FP'si:** 300-3000Hz aralığında metalik ses formant benzeri görünüyor. Çözüm seçenekleri: S3'e özel ek few-shot örneği, farklı frekans bandı, veya S3 ses üretiminde metalik sesin frekans aralığını değiştirme.
-
-**S4 ve S5 distress öncesi FP:** Her iki sahnede de distress başlamadan 10-15 saniye önce yanlış alarm var. Bu puanlamayı düşürüyor. Çözüm: distress öncesi chunk'ların spektrogramının inşaat gürültüsü örneğine daha iyi eşleşmesi lazım.
+Weighted average 12.0 → 27.0: **125% improvement.**
+S2: 0 → 95: no previous method had achieved detection in S2.
+Speed: 37 minutes → 7.9 minutes: **4.7x speedup.**
 
 ---
 
-## 8. ALINAN DERSLER
+## 7. REMAINING ISSUES
 
-**Frekans filtreleme kritik:** 0-8000Hz → 300-3000Hz değişikliği tek başına büyük fark yarattı. İnsan ses aralığına odaklanmak modelin işini kolaylaştırıyor.
+**S3 metallic sound FP:** Metallic sound in the 300-3000Hz range looks formant-like. Solutions: additional S3-specific few-shot example, different frequency band, or changing metallic sound frequency range in audio generation.
 
-**Few-shot çeşitliliği önemli:** 2 örnek → 4 örnek geçişi S2'yi 0'dan 95'e çıkardı. Ama her gürültü tipi için ayrı "temiz" örneği gerekiyor — genellenebilirlik sınırlı.
-
-**Hız avantajı gerçek:** Spektrogram yaklaşımı ses tabanlıdan 4-5x daha hızlı. 5 saniyelik sesi 7 saniyede analiz etmek neredeyse gerçek zamanlı.
-
-**Binary classifier tuzağı kısmen çözüldü:** S2'de model artık "inşaat gürültüsü ≠ insan sesi" biliyor. Ama S3 ve S4'ün distress öncesi chunk'larında hâlâ aşırı tetikleniyor.
+**S4 and S5 pre-distress FP:** Both scenes have false alarms 10-15 seconds before distress onset. This lowers scores. Solution: pre-distress chunk spectrograms need to better match the construction noise example.
 
 ---
 
-*Bu doküman frekans filtrelemeli spektrogram test sonuçlarını içerir.*
-*S2'de 95/100 proje rekoru — frekans filtreleme + few-shot çeşitliliğinin etkisi kanıtlandı.*
-*Son güncelleme: 4 Nisan 2026*
+## 8. LESSONS LEARNED
+
+**Frequency filtering is critical:** 0-8000Hz → 300-3000Hz change alone made a huge difference. Focusing on the human voice range simplifies the model's task.
+
+**Few-shot diversity matters:** 2 examples → 4 examples took S2 from 0 to 95. But each noise type requires a separate "clean" example — generalizability is limited.
+
+**Speed advantage is real:** Spectrogram approach is 4-5x faster than audio-based. Analyzing 5 seconds of audio in 7 seconds is nearly real-time.
+
+**Binary classifier trap partially solved:** In S2, the model now knows "construction noise ≠ human voice." But S3 and S4 pre-distress chunks still trigger too aggressively.
+
+---
+
+*This document records the frequency-filtered spectrogram test results.*
+*S2 achieved 95/100 project record — frequency filtering + few-shot diversity proven effective.*
+*Last updated: April 4, 2026*
