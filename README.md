@@ -176,11 +176,11 @@ wwtp-acoustic-safety-system/
 │   ├── scene_config.json       # Scene definitions
 │   ├── scoring_rubric.json     # Asymmetric scoring system
 │   └── wwtp_site_map.json      # Facility layout
-├── findings/                   # 15 experiment documents + roadmap
+├── findings/                   # 16 experiment documents + roadmap + blueprint
 │   ├── 01_test_results.md
 │   ├── ...
-│   ├── 14_temperature_zero.md
-│   └── 15_e2b_vs_e4b_comparison.md
+│   ├── 15_e2b_vs_e4b_comparison.md
+│   └── 16_field_test_ceyhan_wwtp.md
 ├── results/                    # Model outputs + field test logs
 │   ├── field-test/             # Real-world test terminal logs
 │   ├── gemma4-e4b/             # E4B run outputs
