@@ -1,0 +1,92 @@
+============================================================
+  Model:      gemma4:e4b
+  Port:       8080
+  Threshold:  0.5
+  Warming up gemma4:e4b...
+    [OK] Model ready (3.0s)
+  Generating few-shot reference spectrograms...
+    [OK] All 4 few-shot examples ready
+
+  Opening browser: http://localhost:8080
+  Press Ctrl+C to stop.
+
+
+  =======================================================
+  LISTENING... (Ctrl+C to stop)
+  =======================================================
+
+  [10:33:35] Recording chunk 1 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 9.4s
+
+  Chunk 001 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 9.4s | No clear, sustained curved formant bands indicative of speech. Energy is scattered, suggesting backg
+  [10:33:50] Recording chunk 2 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.7s
+
+                                                                      
+  CHUNK 002 | ALARM — HUMAN DISTRESS DETECTED
+  Confidence: 70% | Type: shouting | Action: INITIATE_CONFINED_SPACE_RESCUE
+  Reasoning: Presence of curved, stacked formant bands characteristic of human speech, despite some background noise.
+  Time: 7.7s | 10:33:50                                                                                                                                                          
+                                                                                                                                                                                 
+  [10:34:03] Recording chunk 3 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 8.0s
+
+  Chunk 003 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 8.0s | Contains some energy patterns, but they are not clearly defined, sustained, or curved formant bands 
+  [10:34:16] Recording chunk 4 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 8.8s
+
+  Chunk 004 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 8.8s | No clear, sustained curved formant bands indicative of speech. Energy is scattered, with some transi
+  [10:34:30] Recording chunk 5 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.9s
+
+  Chunk 005 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.9s | No clear, sustained curved formant bands indicative of speech. Energy is scattered, suggesting gener
+  [10:34:44] Recording chunk 6 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.2s
+
+  Chunk 006 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.2s | No distinct, curved formant bands are visible. The energy is scattered, suggesting general backgroun
+  [10:34:56] Recording chunk 7 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.7s
+
+  Chunk 007 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.7s | No clear, sustained curved formant bands indicative of speech. Energy is scattered, suggesting backg
+  [10:35:09] Recording chunk 8 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.6s
+
+                                                                      
+  CHUNK 008 | ALARM — HUMAN DISTRESS DETECTED                                                                                                                                    
+  Confidence: 70% | Type: shouting | Action: INITIATE_CONFINED_SPACE_RESCUE                                                                                                      
+  Reasoning: Presence of curved, stacked formant bands characteristic of human speech, despite some background noise.                                                            
+  Time: 7.6s | 10:35:09                                                                                                                                                          
+                                                                                                                                                                                 
+  [10:35:22] Recording chunk 9 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.9s
+
+  Chunk 009 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.9s | Contains some energy, but no distinct, sustained, curved formant bands characteristic of human speec
+  [10:35:36] Recording chunk 10 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 8.4s
+
+  Chunk 010 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 8.4s | No clear, sustained curved formant bands indicative of speech. Energy is scattered, with some transi
+
+  =======================================================
+  SESSION SUMMARY
+  =======================================================
+  Chunks: 10 | Alarms: 2 | Duration: 135s
+  Avg Confidence: 28%
+  =======================================================

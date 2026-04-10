@@ -536,6 +536,30 @@ def main():
         print("    Make sure Ollama is running: ollama serve")
         sys.exit(1)
 
+    # Warmup — load model into GPU before listening
+    print(f"\n  Warming up model... (this may take 30-60s on first run)")
+    try:
+        warmup_payload = json.dumps({
+            "model": model,
+            "messages": [{"role": "user", "content": "hello"}],
+            "stream": False,
+            "options": {"num_predict": 1},
+        }).encode('utf-8')
+        warmup_req = urllib.request.Request(
+            OLLAMA_URL,
+            data=warmup_payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        t0 = time.time()
+        with urllib.request.urlopen(warmup_req, timeout=OLLAMA_TIMEOUT) as resp:
+            resp.read()
+        warmup_time = time.time() - t0
+        print(f"    [OK] Model loaded and ready ({warmup_time:.1f}s)")
+    except Exception as e:
+        print(f"    [WARNING] Warmup failed: {e}")
+        print(f"    First chunk may be slower than usual.")
+
     # Generate few-shot examples
     print()
     fewshot = generate_fewshot_examples()

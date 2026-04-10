@@ -1,0 +1,89 @@
+  =======================================================
+  LISTENING... (Ctrl+C to stop)
+  =======================================================
+
+  [10:37:48] Recording chunk 1 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 001 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.5s | No clear, sustained, curved formant bands indicative of speech. The energy is diffuse with some vert
+  [10:38:01] Recording chunk 2 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 002 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.5s | No clear, sustained curved formant bands indicative of speech. Energy is scattered or consists of tr
+  [10:38:13] Recording chunk 3 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.6s
+
+  Chunk 003 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.6s | No clear, sustained curved formant bands indicative of speech. Energy is scattered or contains trans
+  [10:38:26] Recording chunk 4 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 004 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.5s | No distinct curved formant bands are visible. The energy is scattered, suggesting general background
+  [10:38:39] Recording chunk 5 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.9s
+
+  Chunk 005 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.9s | No clear, sustained, curved formant bands indicative of speech. The energy is scattered, with some t
+  [10:38:53] Recording chunk 6 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 006 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.5s | No clear, sustained curved formant bands indicative of speech. Energy is scattered or consists of tr
+  [10:39:05] Recording chunk 7 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.3s
+
+  Chunk 007 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.3s | The spectrogram shows some energy, but it lacks the distinct, curved, and sustained formant structur
+  [10:39:18] Recording chunk 8 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 008 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.5s | No distinct curved formant bands are visible. The energy is scattered, suggesting general background
+  [10:39:31] Recording chunk 9 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.1s
+
+  Chunk 009 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.1s | No distinct curved formant bands (Step 2). The energy is scattered and lacks the characteristic stru
+  [10:39:44] Recording chunk 10 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.4s
+
+  Chunk 010 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.4s | No clear, sustained curved formant bands indicative of speech. Energy is scattered or consists of ve
+  [10:39:56] Recording chunk 11 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.8s
+
+  Chunk 011 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.8s | No distinct curved formant bands are visible. The energy is scattered, suggesting general background
+  [10:40:09] Recording chunk 12 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.4s
+
+  Chunk 012 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.4s | No clear, sustained curved formant bands (speech). The energy is scattered, with some transient vert
+  [10:40:22] Recording chunk 13 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.7s
+
+  Chunk 013 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 7.7s | No clear, sustained curved formant bands indicative of speech. Energy is scattered, suggesting backg
+
+  =======================================================
+  SESSION SUMMARY
+  =======================================================
+  Chunks: 13 | Alarms: 0 | Duration: 167s
+  Avg Confidence: 13%
+  =======================================================

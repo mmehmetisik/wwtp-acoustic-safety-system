@@ -1,0 +1,82 @@
+  =======================================================
+  LISTENING... (Ctrl+C to stop)
+  =======================================================
+
+  [10:43:54] Recording chunk 1 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.7s
+
+  Chunk 001 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.7s | The spectrogram shows strong vertical energy spikes (metallic/mechanical transients) but lacks the c
+  [10:44:07] Recording chunk 2 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 002 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.5s | The spectrogram shows some energy, but it lacks the distinct, curved, and sustained formant structur
+  [10:44:20] Recording chunk 3 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.5s
+
+  Chunk 003 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.5s | The spectrogram shows some transient energy and vertical spikes, but lacks the characteristic curved
+  [10:44:33] Recording chunk 4 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.8s
+
+  Chunk 004 | SAFE — CONTINUE MONITORING
+  Confidence: 20% | Time: 7.8s | Contains some transient energy and scattered noise, but no distinct, sustained, curved formant bands
+  [10:44:46] Recording chunk 5 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 8.9s
+
+  Chunk 005 | SAFE — CONTINUE MONITORING
+  Confidence: 10% | Time: 8.9s | No clear curved formant bands (Step 2). The energy is scattered, consistent with background noise or
+  [10:45:00] Recording chunk 6 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 7.7s
+
+                                                                      
+  CHUNK 006 | ALARM — HUMAN DISTRESS DETECTED                                                                                                                                    
+  Confidence: 90% | Type: shouting | Action: INITIATE_CONFINED_SPACE_RESCUE                                                                                                      
+  Reasoning: Clear, stacked, curved formant bands indicative of human speech, despite some transient energy.                                                                     
+  Time: 7.7s | 10:45:00                                                                                                                                                          
+                                                                                                                                                                                 
+  [10:45:13] Recording chunk 7 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 9.1s
+
+                                                                      
+  CHUNK 007 | ALARM — HUMAN DISTRESS DETECTED                                                                                                                                    
+  Confidence: 95% | Type: shouting | Action: INITIATE_CONFINED_SPACE_RESCUE                                                                                                      
+  Reasoning: Clear, strong, and rhythmic curved formant bands visible between 500-2000Hz, characteristic of human speech.                                                        
+  Time: 9.1s | 10:45:13                                                                                                                                                          
+                                                                                                                                                                                 
+  [10:45:28] Recording chunk 8 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 9.1s
+
+                                                                      
+  CHUNK 008 | ALARM — HUMAN DISTRESS DETECTED                                                                                                                                    
+  Confidence: 90% | Type: shouting | Action: INITIATE_CONFINED_SPACE_RESCUE                                                                                                      
+  Reasoning: Clear, stacked, curved formant bands visible between 500-2000Hz, characteristic of human speech.                                                                    
+  Time: 9.1s | 10:45:28                                                                                                                                                          
+                                                                                                                                                                                 
+  [10:45:42] Recording chunk 9 (5s)... done.
+  Generating spectrogram... done.
+  Analyzing with gemma4:e4b... 9.0s
+
+                                                                      
+  CHUNK 009 | ALARM — HUMAN DISTRESS DETECTED                                                                                                                                    
+  Confidence: 90% | Type: shouting | Action: INITIATE_CONFINED_SPACE_RESCUE                                                                                                      
+  Reasoning: Clear, stacked, and curved formant bands are visible between 500Hz and 2000Hz, characteristic of human speech.                                                      
+  Time: 9.0s | 10:45:42                                                                                                                                                          
+                                                                                                                                                                                 
+
+  =======================================================
+  SESSION SUMMARY
+  =======================================================
+  Chunks: 9 | Alarms: 4 | Duration: 123s
+  Avg Confidence: 51%
+  =======================================================
+

@@ -68,6 +68,29 @@ Both Gemma 4 audio-capable models were tested with identical pipeline configurat
 
 ---
 
+## Field Validation at Ceyhan WWTP
+
+The system was tested at the actual facility with a laptop's built-in microphone — fully offline (WiFi disabled, ethernet unplugged).
+
+| Location | Noise Level | Chunks | Alarms | FP | Max Confidence | Result |
+|----------|-------------|--------|--------|-----|----------------|--------|
+| Underground pump gallery | ~75dB (echo + pumps) | 8 | 2 | 0 | 70% | **DETECTED** |
+| Blower room | >100dB (extreme) | 13 | 0 | 0 | 20% | Microphone limit |
+| **Clarifier pool (incident site)** | **~65dB** | **9** | **4** | **0** | **95%** | **DETECTED** |
+| **Total** | | **30** | **6** | **0** | **95%** | **2/3 locations** |
+
+**Zero false positives across 30 real-world chunks.** CoT reasoning transfers from synthetic training data to real industrial environments.
+
+The blower room (>100dB) exceeded the laptop microphone's physical capacity — the ADC saturates, making all sound indistinguishable. Industrial-grade directional microphones are recommended for >100dB zones.
+
+<p align="center">
+  <img src="screenshots/01_pump_gallery_alarm.png" width="48%" alt="Pump Gallery ALARM">
+  <img src="screenshots/05_clarifier_pool_alarm.png" width="48%" alt="Clarifier Pool ALARM">
+</p>
+<p align="center"><em>Left: Underground pump gallery — ALARM at 70% confidence. Right: Clarifier pool (incident site) — ALARM at 90% confidence.</em></p>
+
+---
+
 ## The Journey — 3.0 → 91.0
 
 8 iterations. 2 failed experiments. 30x improvement.
@@ -87,9 +110,15 @@ Both Gemma 4 audio-capable models were tested with identical pipeline configurat
 
 ## Live Demo
 
-**[https://wwtp-acoustic-safety-system.vercel.app](https://wwtp-acoustic-safety-system.vercel.app)**
+**Web Demo:** [https://wwtp-acoustic-safety-system.vercel.app](https://wwtp-acoustic-safety-system.vercel.app)
+Interactive demo with chunk-by-chunk analysis, spectrograms, audio playback, and survival verdict animation.
 
-Interactive web demo with chunk-by-chunk analysis, real spectrograms, audio playback, and survival verdict animation. Pre-computed results from 5 verified identical runs. Live inference requires local installation.
+**Live Detector (real-time microphone):**
+```bash
+python live_detector.py                    # Terminal UI
+python live_detector_ui.py                 # SCADA-style web UI (localhost:8080)
+```
+Real-time microphone monitoring with spectrogram analysis. Field-validated at Ceyhan WWTP.
 
 ---
 
@@ -138,6 +167,8 @@ Consistency: 5/5 identical runs at temperature=0
 ```
 wwtp-acoustic-safety-system/
 ├── acoustic_engine.py          # Main detection engine
+├── live_detector.py            # Real-time microphone detector (terminal)
+├── live_detector_ui.py         # SCADA-style web UI for live detection
 ├── audio_generator_tts.py      # Synthetic audio generator (TTS)
 ├── audio_generator.py          # Formant-based audio generator
 ├── dataset/
@@ -145,10 +176,16 @@ wwtp-acoustic-safety-system/
 │   ├── scene_config.json       # Scene definitions
 │   ├── scoring_rubric.json     # Asymmetric scoring system
 │   └── wwtp_site_map.json      # Facility layout
-├── findings/                   # 14 experiment documents + roadmap
+├── findings/                   # 15 experiment documents + roadmap
 │   ├── 01_test_results.md
 │   ├── ...
-│   └── 14_temperature_zero.md
+│   ├── 14_temperature_zero.md
+│   └── 15_e2b_vs_e4b_comparison.md
+├── results/                    # Model outputs + field test logs
+│   ├── field-test/             # Real-world test terminal logs
+│   ├── gemma4-e4b/             # E4B run outputs
+│   └── gemma4-e2b/             # E2B run outputs
+├── screenshots/                # Field test & UI screenshots
 ├── experiments/                # Early-stage test scripts
 ├── scripts/                    # Utility scripts
 ├── spectrogram_test/           # Spectrogram PNG visualizations

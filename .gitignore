@@ -35,12 +35,22 @@ __pycache__/
 
 # Large video files
 videos/
+*.mp4
+*.mkv
+*.rar
+saha test videoları/
+The Gemma 4 Good Hackathon*.mp4
+
+# Original screenshots (renamed copies in screenshots/)
+for_github_screen_shoot/
+write up ekran görüntüleri/
 
 # Personal working files
 altyaz*/
 
 # Temp/notes
 yorumlar.txt
+field-test.txt
 
 # Logs
 *.log
