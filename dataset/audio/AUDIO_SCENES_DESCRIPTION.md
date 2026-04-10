@@ -1,89 +1,88 @@
-# WWTP Acoustic Safety System — Ses Dosyaları Açıklaması
-## 5 Sahne × 60 Saniye — TTS Tabanlı Üretim
-> **Üretim Yöntemi:** Endüstriyel gürültü (numpy/scipy) + İnsan sesi (Google TTS)
+# WWTP Acoustic Safety System — Audio Files Description
+## 5 Scenes × 60 Seconds — TTS-Based Generation
+> **Generation Method:** Industrial noise (numpy/scipy) + Human voice (Google TTS)
 > **Format:** 16kHz, Mono, PCM_16, WAV
-> **Üretim Aracı:** audio_generator_tts.py
-> **Seed:** 42 (gürültü bileşenleri tekrarlanabilir, TTS deterministik)
+> **Tool:** audio_generator_tts.py
+> **Seed:** 42 (noise components reproducible, TTS deterministic)
 
 ---
 
-## S1 — Pompa Dairesi, Normal Operasyon
-**Dosya:** `S1_pump_room_normal.wav`
-**İnsan:** YOK
-**Amaç:** Yanlış alarm (false positive) direnci testi. Model bu seste "insan yok" demeli.
+## S1 — Pump Room, Normal Operation
+**File:** `S1_pump_room_normal.wav`
+**Human:** NO
+**Purpose:** False positive resistance test. Model should report "no human."
 
-Bu sahne tamamen mekanik seslerden oluşuyor. 60 saniye boyunca hiçbir değişiklik yok, baştan sona aynı monoton endüstriyel uğultu devam ediyor. Baskın ses 120Hz frekanslı santrifüj pompa hum'ı — derin, kalın, sürekli bir "hmmmmm" tonu. Bunun üzerine 240Hz ve 360Hz harmonikler binmiş, sese hafif bir metalik karakter katıyor. Arka planda 50-300Hz aralığında pink noise var, bu boru titreşimlerini simüle ediyor — düşük frekanslı, sürekli bir rumble. Motor drone 150Hz'de ayrı bir ton ekliyor, 50-250Hz aralığında brown noise ile desteklenmiş. Tüm frekanslar 250Hz'in altında tutulmuş — bu bilinçli bir tasarım kararı çünkü insan sesi 300Hz'den başlar. Böylece model mekanik sesi insan sesiyle karıştırmamalı.
+This scene consists entirely of mechanical sounds. 60 seconds of unchanging monotone industrial hum. Dominant sound is a 120Hz centrifugal pump hum — deep, continuous tone. 240Hz and 360Hz harmonics add metallic character. Background pink noise at 50-300Hz simulates pipe vibrations. Motor drone at 150Hz with brown noise support at 50-250Hz. All frequencies kept below 250Hz — deliberate design because human voice starts at 300Hz. The model should not confuse mechanical noise with human voice.
 
-Dinlediğinde duyacağın şey: sıkıcı, değişmeyen, düşük frekanslı bir fabrika uğultusu. Hiçbir ani ses yok, hiçbir ritim değişikliği yok, hiçbir insan sesi yok. Bu tam olarak bir pompa dairesinin gerçek sesi — 7/24 aynı monoton gürültü.
-
----
-
-## S2 — İnşaat Alanı, İnsan Bağırıyor
-**Dosya:** `S2_construction_human.wav`
-**İnsan:** VAR (25. saniyeden itibaren)
-**Amaç:** Yoğun gürültü altında insan sesini tespit etme testi.
-
-Bu sahne iki bölümden oluşuyor. İlk 25 saniye sadece yoğun inşaat gürültüsü var. Beton mikseri 200-2000Hz aralığında ritmik bir döngüde çalışıyor (0.5Hz modülasyon — yani 2 saniyede bir yükselip alçalıyor). Ekskavatör düşük frekanslı ağır darbe sesleri yapıyor, düzensiz aralıklarla "güm güm" vuruyor. Pnömatik matkap en rahatsız edici ses — 1000Hz üstünde keskin, yüksek frekanslı "tatatata" darbeleri, 20Hz hızında. Metal çarpma sesleri rastgele aralıklarla geliyor, 500-8000Hz aralığında kısa ve sert çınlamalar. Bu dört ses birlikte kaotik, yoğun ve rahatsız edici bir inşaat ortamı oluşturuyor.
-
-25. saniyeden itibaren bu gürültünün altına gerçek insan sesi karışıyor. Google TTS ile üretilmiş "Help! Help me!" (İngilizce) ve "Yardım! Yardım edin!" (Türkçe) sesleri 3 saniye aralıklarla dönüşümlü tekrarlanıyor. Sesler doğal TTS tonu ile üretilmiş, pitch shift uygulanmamış — modelin tanıyabileceği gerçek konuşma paterni korunmuş. Her çığlığın başında hafif bir yükseliş var (bağırmaya başlama), ortasında sabit seviye (bağırma), sonunda düşüş (nefes alma). Mix ağırlığı 0.35 — yani insan sesi inşaat gürültüsünün altında, duyulabilir ama baskın değil. Kulağını zorlarsan kelimeleri seçebilirsin ama rahat bir şekilde duyamazsın. Bu tam olarak gerçek hayattaki durumu simüle ediyor: adam bağırıyor ama inşaat gürültüsü bastırıyor.
+What you hear: boring, unchanging, low-frequency factory hum. No sudden sounds, no rhythm changes, no human voice. Exactly what a real pump room sounds like — 24/7 monotone noise.
 
 ---
 
-## S3 — Havuz Kenarı, Yanlış Alarm Testi
-**Dosya:** `S3_pool_false_alarm.wav`
-**İnsan:** YOK
-**Amaç:** Yanıltıcı mekanik sesleri insan sesinden ayırt etme testi.
+## S2 — Construction Zone, Human Shouting
+**File:** `S2_construction_human.wav`
+**Human:** YES (from second 25 onward)
+**Purpose:** Detection of human voice under heavy noise.
 
-Bu sahne bilerek aldatıcı tasarlanmış. 60 saniye boyunca insan yok ama bazı sesler insan sesine benziyor. Arka planda hafif bir havuz suyu sesi var — düşük seviyeli, sakin bir pink noise (2000Hz altı). Bunun üzerine köprü kazıyıcı motoru 180Hz'de yavaş bir uğultu yapıyor, 0.1Hz modülasyonla (10 saniyede bir hafifçe yükselip alçalıyor).
+Two parts. First 25 seconds: heavy construction noise only. Concrete mixer at 200-2000Hz with rhythmic cycling (0.5Hz modulation). Excavator low-frequency heavy impacts at irregular intervals. Pneumatic drill sharp high-frequency impacts above 1000Hz at 20Hz rate. Random metallic impact sounds at 500-8000Hz. Together these create a chaotic, intense construction environment.
 
-Yanıltıcı sesler şunlar: Metal sürtme sesi 300-3000Hz aralığında düzensiz yoğunluk değişimleri gösteriyor. Bu ses bilerek insan konuşma ritmine benzetilmiş — bazen yüksek bazen düşük, bazen kısa bazen uzun, tıpkı bir insanın konuşurken ses tonunu değiştirmesi gibi. Zincir şıkırtıları 500-5000Hz'de rastgele klik sesleri çıkarıyor. Ve en aldatıcı olan metal çarpma sesi: 800-3000Hz aralığında 0.35 saniye süren tek darbeler, exponansiyel sönümle. Bu ses kısa bir insan çığlığına benziyor — keskin başlangıç, hızlı sönüm. 4 adet rastgele yerleştirilmiş.
-
-Dinlediğinde "bu insan mı makine mi" diye tereddüt edebilirsin ama 60 saniye boyunca hiçbir gerçek insan sesi, kelime veya konuşma paterni yok. Tüm sesler mekanik kaynaklı.
+From second 25: real human voice mixed under the noise. Google TTS "Help! Help me!" (English) and "Yardim! Yardim edin!" (Turkish) alternating every 3 seconds. Natural TTS tone, no pitch shift — real speech patterns preserved for model recognition. Mix weight 0.35 — human voice is below construction noise, audible but not dominant. If you strain your ears you can pick out words but cannot hear them comfortably. This simulates the real situation: the man is shouting but construction noise drowns him out.
 
 ---
 
-## S4 — Menhol Galeri, Maskeli İşçi (Zayıf Sinyal)
-**Dosya:** `S4_manhole_masked.wav`
-**İnsan:** VAR (20. saniyeden itibaren)
-**Amaç:** Çok zor koşullarda zayıf insan sesi tespiti. En zor sahne.
+## S3 — Pool Edge, False Alarm Test
+**File:** `S3_pool_false_alarm.wav`
+**Human:** NO
+**Purpose:** Distinguishing deceptive mechanical sounds from human voice.
 
-Bu sahne yeraltı ortamını simüle ediyor. İlk 20 saniye sessiz ve ürkütücü bir ambiyans var. Uzaktan gelen su akışı sesi — düşük frekanslı, sürekli, 500Hz altında pink noise. Havalandırma uğultusu — 120Hz'de ince bir sinüs tonu. Ve damla sesleri — 600Hz'de rastgele aralıklarla (0.5-3 saniye) gelen kısa, keskin "tık" sesleri, hızla sönümlenen. Bu üç ses birlikte karanlık, nemli, derin bir beton galerinin atmosferini oluşturuyor.
+This scene is intentionally deceptive. 60 seconds with no human but some sounds resemble human voice. Background: gentle pool water sound — low-level pink noise below 2000Hz. Scraper bridge motor at 180Hz with slow 0.1Hz modulation.
 
-20. saniyeden itibaren bu sessiz ortama boğuk bir insan sesi karışıyor. Google TTS ile üretilmiş "Help! Help me!" (İngilizce) ve "Yardım! Yardım edin!" (Türkçe) sesleri 4 saniye aralıklarla tekrarlanıyor. Ama bu sesler iki katmanlı bozulmadan geçmiş: birincisi 2000Hz low-pass filtre — bu respiratör maske etkisini simüle ediyor, yüksek frekansları keserek sesi boğuk ve uzaktan geliyormuş gibi yapıyor. İkincisi 1.2 saniyelik reverb — beton tünel yankısı eklenmiş, ses dalgalanarak, yankılanarak geliyor, kelimelerin sınırları bulanıklaşıyor.
+Deceptive sounds: Metal scraping at 300-3000Hz with irregular intensity changes — intentionally designed to resemble human speech rhythm. Chain rattles at 500-5000Hz with random clicks. Most deceptive: metallic impact sounds at 800-3000Hz, 0.35 seconds with exponential decay. These resemble short human screams — sharp onset, rapid decay. 4 randomly placed throughout.
 
-Dinlediğinde 20. saniyeden sonra "bir şey var ama ne olduğunu anlamıyorum" hissi almalısın. Türkçe "Yardım" kelimesi İngilizce "Help"ten biraz daha anlaşılır çünkü Türkçe TTS artikülasyonu daha belirgin. Ama her iki dilde de kelimeleri net anlamak zor — bu tamamen tasarım gereği. Gerçek hayatta 6 metre derinlikte beton galeride, ağzında maske olan bir insanın sesini böyle duyarsın.
-
----
-
-## S5 — Durultma Havuzu, GERÇEK KAZA SAHNESİ (Kritik)
-**Dosya:** `S5_pool_critical.wav`
-**İnsan:** VAR (20. saniyede düşme, 25. saniyeden itibaren çığlık)
-**Amaç:** Projenin kalbi. "O adam hayatta kalır mıydı?" sorusunun cevabı.
-
-Bu sahne üç bölümden oluşuyor ve gerçek bir olayı yeniden yaratıyor.
-
-**0-20. saniye — Normal inşaat operasyonu.** S2 ile aynı türde inşaat gürültüsü ama farklı rastgele paternlerle (farklı seed kullanılıyor, bu yüzden birebir aynı değil). Beton mikseri, ekskavatör, pnömatik matkap ve metal çarpma sesleri. Ağırlıklar biraz farklı — ekskavatör daha baskın (daha yakında), mikseri biraz daha sessiz. Bu 20 saniye boyunca her şey normal, tehlike yok. Tıpkı o cumartesi sabahı gibi.
-
-**20-25. saniye — Düşme olayı.** 20. saniyede bir gümbürtü ve ardından büyük bir su sıçraması duyulur. Gümbürtü 100-2000Hz aralığında kısa bir gürültü patlaması — havuz duvarına çarpma sesi, 0.3 saniye sürüyor ve hızla sönüyor. Hemen ardından su sıçraması başlıyor — 200-5000Hz aralığında geniş bantlı bir gürültü, önce hızla yükseliyor (suyun patlaması) sonra 2 saniye içinde yavaşça sönüyor (su yüzeyinin sakinleşmesi). 20. saniyeden itibaren ayrıca panik su çırpınması sesleri başlıyor — düzensiz aralıklarla (0.3-1.5 saniye) gelen kısa su sıçramaları, batıp çıkan bir insanın el kol hareketlerini simüle ediyor. Bu sesler 60. saniyeye kadar devam ediyor.
-
-**25-60. saniye — Boğulma çığlığı.** Bu kısım projenin en kritik sesidir. Google TTS ile üretilmiş kısa panik cümleleri var: "Help! Help!", "Yardım!", "Help me!", "İmdat!", "Somebody!", "Yardım edin!" — ama bunlar temiz konuşma olarak değil, boğulma efektleriyle bozulmuş durumda.
-
-Boğulma efektleri şunlar: Birincisi, her cümlenin rastgele %30 ile %100'ü duyuluyor — geri kalanı kesilmiş çünkü kişi su altına batmış. Bazen sadece "Hel-" duyarsın, "Help" tamamlanmadan ses kesilir. İkincisi, ses düzensiz olarak açılıp kapanıyor — hızlı bir yükseliş (su yüzeyine çıkma, nefes kapma), kısa bir düz kısım (yüzeyde bağırma), sonra yavaş düşüş (tekrar batma). Üçüncüsü, cümlelerin yarısında üzerine su gürültüsü biniyor — 200-2000Hz aralığında kısa su patlamaları, ağza su girmiş ve boğuluyor efekti. Dördüncüsü, zamanlama tamamen düzensiz — bazen 1.5 saniye aralıkla hızlı hızlı (yüzeyde panikle nefes alıp bağırıyor), bazen 3-5 saniye tamamen sessizlik (su altında, bağıramıyor).
-
-Tüm bunlar 95dB inşaat gürültüsünün altında. Mix ağırlığı 0.40 — yani inşaat gürültüsü hâlâ baskın ama insan sesi de duyulabilir seviyede. Dinlediğinde inşaat gürültüsü devam ederken arada kesik kesik, boğuk, bazen yarıda kalan "Help!" ve "Yardım!" sesleri duyarsın. Bazıları su sesiyle karışmış, bazıları birden kesilmiş. Bu, havuza düşmüş ve boğulmakta olan bir insanın gerçekçi akustik simülasyonudur.
+When listening you might hesitate "is this human or machine?" but across 60 seconds there is no real human voice, words, or speech patterns. All sounds are mechanical.
 
 ---
 
-## GENEL NOTLAR
+## S4 — Manhole Gallery, Masked Worker (Weak Signal)
+**File:** `S4_manhole_masked.wav`
+**Human:** YES (from second 20 onward)
+**Purpose:** Weak human voice detection under very difficult conditions. Hardest scene.
 
-**Ses Kalitesi Felsefesi:** İnsan sesleri için Google TTS kullanılmıştır (gerçek konuşma paternleri). Gemma 4 E4B'nin ASR motoru gerçek insan konuşmasını tanımak üzere eğitilmiştir — TTS sesleri bu eğitim verisiyle uyumludur. Endüstriyel gürültüler ise numpy/scipy ile matematiksel olarak üretilmiştir (sinüs dalgaları, filtreler, rastgele gürültü). Bu hibrit yaklaşım hem gerçekçi ses üretimi hem de tam kontrol ve tekrarlanabilirlik sağlar.
+Underground environment simulation. First 20 seconds: quiet, eerie ambiance. Distant water flow — low-frequency continuous pink noise below 500Hz. Ventilation hum at 120Hz. Drip sounds at 600Hz at random intervals (0.5-3 seconds), short sharp clicks with rapid decay. Together these create a dark, damp, deep concrete gallery atmosphere.
 
-**Etik Not:** Gerçek bir boğulma sesi kaydı etik olarak mümkün değildir. Bu sesler 10+ yıllık saha deneyiminden alınan akustik parametrelerle (frekans, dB, SNR) üretilmiştir. Tüm değerler gerçek tesis ölçümlerine dayanmaktadır.
+From second 20: muffled human voice enters. Google TTS "Help! Help me!" and "Yardim! Yardim edin!" at 4-second intervals. These voices pass through two degradation layers: first a 2000Hz low-pass filter simulating respirator mask effect — cuts high frequencies making voice sound distant and muffled. Second: 1.2-second reverb simulating concrete tunnel echo — words ripple and blur.
 
-**Tekrarlanabilirlik:** Gürültü bileşenleri Seed=42 ile üretilir — aynı parametrelerle her zaman aynı sonuç. TTS bileşenleri deterministiktir — aynı metin, aynı dil, aynı ses.
+When listening after second 20 you should feel "something is there but I can't tell what." This is by design. In real life, this is how you'd hear a person 6 meters deep in a concrete gallery wearing a mask.
 
 ---
 
-*Bu doküman 5 ses dosyasının içeriğini detaylı olarak açıklar.*
-*Demo arayüzünde, videoda ve writeup'ta bu açıklamalar referans alınacaktır.*
-*Son güncelleme: 3 Nisan 2026*
+## S5 — Clarifier Pool, REAL INCIDENT SCENE (Critical)
+**File:** `S5_pool_critical.wav`
+**Human:** YES (fall at second 20, screaming from second 25)
+**Purpose:** The heart of the project. Answers: "Would he have survived?"
+
+Three parts recreating a real incident.
+
+**0-20 seconds — Normal construction operation.** Same type of construction noise as S2 but with different random patterns (different seed). Concrete mixer, excavator, pneumatic drill, metallic impacts. 20 seconds of normality, no danger. Just like that Saturday morning.
+
+**20-25 seconds — The fall.** At second 20: a thud followed by a large water splash. Thud at 100-2000Hz, 0.3 seconds with rapid decay — hitting the pool wall. Immediately followed by water splash — broadband noise at 200-5000Hz, rising quickly then fading over 2 seconds. From second 20 onward: panic water thrashing at irregular intervals (0.3-1.5 seconds) — simulating a sinking person's arm movements. These continue until second 60.
+
+**25-60 seconds — Drowning screams.** The project's most critical audio. Google TTS panic phrases: "Help! Help!", "Yardim!", "Help me!", "Imdat!", "Somebody!", "Yardim edin!" — but degraded with drowning effects.
+
+Drowning effects: (1) Random 30-100% of each phrase audible — rest cut because person is submerged. Sometimes only "Hel-" before voice cuts. (2) Irregular volume envelope — rapid rise (surfacing, gasping), short plateau (shouting at surface), slow fade (sinking again). (3) Half the phrases have water noise overlay — short water bursts simulating water entering mouth. (4) Completely irregular timing — sometimes 1.5 seconds apart (panicking at surface), sometimes 3-5 seconds of silence (underwater, cannot scream).
+
+All under 95dB construction noise. Mix weight 0.40 — construction noise still dominant but human voice audible. When listening you hear construction noise continuing with intermittent, muffled, sometimes incomplete "Help!" and "Yardim!" sounds. Some mixed with water, some cut short. This is a realistic acoustic simulation of a person who has fallen into a pool and is drowning.
+
+---
+
+## GENERAL NOTES
+
+**Audio Quality Philosophy:** Google TTS used for human voices (real speech patterns). Gemma 4 E4B's ASR engine is trained to recognize real human speech — TTS voices are compatible with this training data. Industrial noise generated mathematically with numpy/scipy (sine waves, filters, random noise). This hybrid approach provides both realistic audio and full control with reproducibility.
+
+**Ethical Note:** Recording real drowning audio is not ethically possible. These sounds were generated using acoustic parameters (frequency, dB, SNR) from 10+ years of field experience. All values are based on real facility measurements.
+
+**Reproducibility:** Noise components generated with Seed=42 — same parameters always produce same result. TTS components are deterministic — same text, same language, same voice.
+
+---
+
+*This document describes the content of all 5 audio files in detail.*
+*Last updated: April 3, 2026*

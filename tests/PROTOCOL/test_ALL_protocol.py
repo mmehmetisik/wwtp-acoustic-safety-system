@@ -1,5 +1,5 @@
 """
-TEST — PROTOCOL MODU (Tüm Sahneler)
+TEST — PROTOCOL MODE (All Scenes)
 =====================================
 En yüksek bağlam seviyesi. Modele verilen:
   - Lokasyon bilgisi
@@ -7,11 +7,11 @@ En yüksek bağlam seviyesi. Modele verilen:
   - TAM GÜVENLİK PROTOKOLÜ
 
 Güvenlik protokolü modele şunu söylüyor:
-  "İnsan sesi olabilecek her şeyde alarm ver.
-   Yanlış alarm vermek, insanı kaçırmaktan İYİDİR."
+  "Alarm on anything that could be human voice.
+   A false alarm is better than missing a human."
 
 BARE modda 3 sahne kaçırıldı. CONTEXT modda ne oldu bilmiyoruz henüz.
-PROTOCOL mod son şansımız — bu da yetmezse, model bu göreve hazır değil.
+PROTOCOL mode is our last chance — if this fails too, the model is not ready for this task.
 
 Kullanım:
   python tests/test_ALL_protocol.py
@@ -40,19 +40,19 @@ SCENES = [
         "chunk_idx": 0,
         "chunk_time": "0-5 sn",
         "human_present": False,
-        "expected": "İnsan YOK → alarm YOK",
+        "expected": "No human → no alarm",
         "location": "Pump station, basement level, Ceyhan WWTP",
         "operation": "Routine wastewater pumping. Duty pump 1 and 2 running at 85% capacity. Saturday morning shift.",
         "protocol": "Normal operation. No restricted access zones active. Standard monitoring.",
     },
     {
         "scene_id": "S2",
-        "title": "İnşaat Alanı — İnsan Bağırıyor",
+        "title": "Construction Zone — Human Shouting",
         "file": "S2_construction_human.wav",
         "chunk_idx": 5,
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → alarm VER",
+        "expected": "Human present → trigger alarm",
         "location": "Construction site adjacent to aeration tanks, Ceyhan WWTP",
         "operation": "Weekend construction work on new sludge press building. 12-person crew on site. High noise environment. Saturday 10:00.",
         "protocol": "Construction zone active. PPE required. Noise level exceeds 85dB — hearing protection mandatory. Restricted access to operational areas.",
@@ -64,7 +64,7 @@ SCENES = [
         "chunk_idx": 3,
         "chunk_time": "15-20 sn",
         "human_present": False,
-        "expected": "İnsan YOK → alarm YOK",
+        "expected": "No human → no alarm",
         "location": "Secondary clarifier pool edge, Ceyhan WWTP",
         "operation": "Secondary clarifier sludge scraper bridge running normal cycle. Automatic operation. No personnel in restricted zone.",
         "protocol": "Pool edge restricted zone. Scraper bridge active — no personnel permitted within 2 meters of pool edge during bridge operation.",
@@ -76,7 +76,7 @@ SCENES = [
         "chunk_idx": 5,
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → alarm VER + CONFINED SPACE RESCUE",
+        "expected": "Human present → trigger alarm + CONFINED SPACE RESCUE",
         "location": "Underground sewer gallery, manhole access point MH-07, Ceyhan WWTP",
         "operation": "Confined space entry permit issued for gallery inspection. Single worker with respirator. Entry logged at 09:45. Buddy system in place — surface attendant monitoring.",
         "protocol": (
@@ -95,7 +95,7 @@ SCENES = [
         "chunk_idx": 5,
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → ALARM + ESTOP + EMERGENCY",
+        "expected": "Human present → ALARM + ESTOP + EMERGENCY",
         "location": "Primary clarifier pool, Ceyhan WWTP",
         "operation": "Saturday construction work on new press building. Heavy machinery operating adjacent to clarifier pool. Worker observed climbing pool wall at approximately 09:52. Clarifier bridge scraper in automatic operation. No safety observer assigned to pool perimeter.",
         "protocol": (
@@ -121,11 +121,11 @@ def read_wav(path):
     with open(path, 'rb') as f:
         riff = f.read(4)
         if riff != b'RIFF':
-            raise ValueError("WAV dosyası değil")
+            raise ValueError("Not a WAV file")
         f.read(4)
         wave = f.read(4)
         if wave != b'WAVE':
-            raise ValueError("WAVE formatı değil")
+            raise ValueError("Not WAVE format")
         sr, num_channels, bits_per_sample, data_bytes = 16000, 1, 16, b''
         while True:
             chunk_id = f.read(4)
@@ -265,12 +265,12 @@ def evaluate(scene, response):
 
     if human_present:
         if has_true:
-            return "✅ GEÇTİ", "İnsanı tespit etti"
+            return "✅ PASSED", "Human detected"
         else:
             return "❌ KAÇIRDI", "False Negative — insanı duyamadı"
     else:
         if has_false:
-            return "✅ GEÇTİ", "Doğru: insan yok dedi"
+            return "✅ PASSED", "Doğru: insan yok dedi"
         else:
             return "❌ YANLIŞ ALARM", "False Positive — yanlış alarm verdi"
 
@@ -295,7 +295,7 @@ def main():
         sid = scene["scene_id"]
         print(f"{'─' * 65}")
         print(f"  {sid} — {scene['title']}")
-        print(f"  Chunk: {scene['chunk_time']} | İnsan: {'EVET' if scene['human_present'] else 'HAYIR'}")
+        print(f"  Chunk: {scene['chunk_time']} | Human: {'YES' if scene['human_present'] else 'NO'}")
         print(f"  Beklenen: {scene['expected']}")
         print(f"{'─' * 65}")
 
@@ -335,12 +335,12 @@ def main():
     print(f"\n{'═' * 65}")
     print(f"  PROTOCOL MODU — ÖZET SONUÇLAR")
     print(f"{'═' * 65}")
-    print(f"  {'Sahne':<8} {'İnsan':<8} {'Sonuç':<20} {'Detay'}")
+    print(f"  {'Scene':<8} {'Human':<8} {'Result':<20} {'Detail'}")
     print(f"  {'─' * 58}")
 
     for r in results:
         scene_data = next(s for s in SCENES if s["scene_id"] == r["scene"])
-        human = "EVET" if scene_data["human_present"] else "HAYIR"
+        human = "YES" if scene_data["human_present"] else "NO"
         print(f"  {r['scene']:<8} {human:<8} {r['result']:<20} {r['detail']}")
 
     # 3 mod karşılaştırması
@@ -349,20 +349,20 @@ def main():
     print(f"{'─' * 65}")
     print(f"  BARE modda    : S1 ✅, S2 ❌, S3 ✅, S4 ❌, S5 ❌")
     print(f"  CONTEXT modda : (yarın test edilecek)")
-    print(f"  PROTOCOL modda: sonuçlar yukarıda")
+    print(f"  PROTOCOL mode: results above")
 
     passed_critical = sum(
         1 for r in results
-        if r["scene"] in ["S2", "S4", "S5"] and "GEÇTİ" in r["result"]
+        if r["scene"] in ["S2", "S4", "S5"] and "PASSED" in r["result"]
     )
-    total_passed = sum(1 for r in results if "GEÇTİ" in r["result"])
+    total_passed = sum(1 for r in results if "PASSED" in r["result"])
 
     print(f"\n  Toplam başarı     : {total_passed}/5")
     print(f"  Kritik sahne başarı: {passed_critical}/3")
 
     if passed_critical == 3:
         print(f"\n  🎉 PROTOCOL mod TÜM kritik sahneleri kurtardı!")
-        print(f"  Güvenlik protokolü AI'ın hayat kurtarmasını sağlıyor.")
+        print(f"  Safety protocol enables AI to save lives.")
     elif passed_critical > 0:
         print(f"\n  👍 PROTOCOL mod bazı sahneleri kurtardı.")
     else:
@@ -377,7 +377,7 @@ def main():
         print(f"\n{'═' * 65}")
         print(f"  ★ S5 — BÜYÜK SORU: HAYATTA KALIR MIYDI? ★")
         print(f"{'═' * 65}")
-        if "GEÇTİ" in s5_result["result"]:
+        if "PASSED" in s5_result["result"]:
             print(f"  Model tespit yaptı. Tespit zamanı: 25-30 saniye.")
             print(f"  Düşme anı: 20. saniye. Gecikme: ~5-10 saniye.")
             print(f"")
@@ -392,11 +392,11 @@ def main():
         else:
             print(f"  ★ WOULD NOT HAVE SURVIVED ★")
             print(f"  Güvenlik protokolü bile yetmedi.")
-            print(f"  Model, 95dB gürültü altındaki çığlığı duyamadı.")
+            print(f"  Model could not hear the scream under 95dB noise.")
             print(f"")
             print(f"  Bu önemli bir bulgu: Mevcut edge AI modelleri,")
-            print(f"  aşırı gürültülü endüstriyel ortamlarda henüz")
-            print(f"  hayat kurtaracak seviyede değil.")
+            print(f"  in extremely noisy industrial environments, not yet")
+            print(f"  not at a life-saving level.")
             print(f"  Ancak bu, bu tür sistemlerin geliştirilmesinin")
             print(f"  ne kadar acil olduğunu gösteriyor.")
 

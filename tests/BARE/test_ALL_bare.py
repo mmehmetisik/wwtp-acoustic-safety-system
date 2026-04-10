@@ -1,12 +1,12 @@
 """
-TEST — BARE MODU (Tüm Sahneler)
+TEST — BARE MODE (All Scenes)
 =================================
 En düşük bağlam seviyesi. Modele sadece ses gönderiliyor.
 Lokasyon yok, operasyon bilgisi yok, güvenlik protokolü yok.
-"Al bunu dinle, ne duyuyorsun?"
+"Take this and listen, what do you hear?"
 
-Bu mod gerçek hayattaki durumu simüle ediyor:
-İnsan kulağı gibi — ne olduğunu bilmeden, sadece duyarak karar ver.
+This mode simulates the real-world situation:
+Like the human ear — decide only by listening, with no context.
 
 Kullanım:
   python tests/test_ALL_bare.py
@@ -35,16 +35,16 @@ SCENES = [
         "chunk_idx": 0,       # 0-5 saniye
         "chunk_time": "0-5 sn",
         "human_present": False,
-        "expected": "İnsan YOK → alarm YOK",
+        "expected": "No human → no alarm",
     },
     {
         "scene_id": "S2",
-        "title": "İnşaat Alanı — İnsan Bağırıyor",
+        "title": "Construction Zone — Human Shouting",
         "file": "S2_construction_human.wav",
         "chunk_idx": 5,       # 25-30 saniye — bağırma başlıyor
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → alarm VER",
+        "expected": "Human present → trigger alarm",
     },
     {
         "scene_id": "S3",
@@ -53,7 +53,7 @@ SCENES = [
         "chunk_idx": 3,       # 15-20 saniye — metalik sesler
         "chunk_time": "15-20 sn",
         "human_present": False,
-        "expected": "İnsan YOK → alarm YOK",
+        "expected": "No human → no alarm",
     },
     {
         "scene_id": "S4",
@@ -62,7 +62,7 @@ SCENES = [
         "chunk_idx": 5,       # 25-30 saniye — maskeli ses
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → alarm VER",
+        "expected": "Human present → trigger alarm",
     },
     {
         "scene_id": "S5",
@@ -71,7 +71,7 @@ SCENES = [
         "chunk_idx": 5,       # 25-30 saniye — çığlık başlıyor
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → ALARM + ESTOP",
+        "expected": "Human present → ALARM + ESTOP",
     },
 ]
 
@@ -84,11 +84,11 @@ def read_wav(path):
     with open(path, 'rb') as f:
         riff = f.read(4)
         if riff != b'RIFF':
-            raise ValueError("WAV dosyası değil")
+            raise ValueError("Not a WAV file")
         f.read(4)
         wave = f.read(4)
         if wave != b'WAVE':
-            raise ValueError("WAVE formatı değil")
+            raise ValueError("Not WAVE format")
         sr, num_channels, bits_per_sample, data_bytes = 16000, 1, 16, b''
         while True:
             chunk_id = f.read(4)
@@ -146,7 +146,7 @@ def extract_chunk_as_wav(path, chunk_idx, chunk_sec=5):
 
 
 # ═══════════════════════════════════════════════════════════════
-# BARE MODU PROMPT — Hiçbir bağlam yok, sadece "dinle ve söyle"
+# BARE MODU PROMPT — No context, just listen and report
 # ═══════════════════════════════════════════════════════════════
 
 BARE_PROMPT = (
@@ -209,12 +209,12 @@ def evaluate(scene, response):
 
     if human_present:
         if has_true:
-            return "✅ GEÇTİ", "İnsanı tespit etti"
+            return "✅ PASSED", "Human detected"
         else:
             return "❌ KAÇIRDI", "False Negative — insanı duyamadı"
     else:
         if has_false:
-            return "✅ GEÇTİ", "Doğru: insan yok dedi"
+            return "✅ PASSED", "Doğru: insan yok dedi"
         else:
             return "❌ YANLIŞ ALARM", "False Positive — yanlış alarm verdi"
 
@@ -240,7 +240,7 @@ def main():
         sid = scene["scene_id"]
         print(f"{'─' * 65}")
         print(f"  {sid} — {scene['title']}")
-        print(f"  Chunk: {scene['chunk_time']} | İnsan: {'EVET' if scene['human_present'] else 'HAYIR'}")
+        print(f"  Chunk: {scene['chunk_time']} | Human: {'YES' if scene['human_present'] else 'NO'}")
         print(f"  Beklenen: {scene['expected']}")
         print(f"{'─' * 65}")
 
@@ -279,18 +279,18 @@ def main():
     print(f"\n{'═' * 65}")
     print(f"  BARE MODU — ÖZET SONUÇLAR")
     print(f"{'═' * 65}")
-    print(f"  {'Sahne':<8} {'İnsan':<8} {'Sonuç':<20} {'Detay'}")
+    print(f"  {'Scene':<8} {'Human':<8} {'Result':<20} {'Detail'}")
     print(f"  {'─' * 58}")
 
     for r in results:
         scene_data = next(s for s in SCENES if s["scene_id"] == r["scene"])
-        human = "EVET" if scene_data["human_present"] else "HAYIR"
+        human = "YES" if scene_data["human_present"] else "NO"
         print(f"  {r['scene']:<8} {human:<8} {r['result']:<20} {r['detail']}")
 
-    passed = sum(1 for r in results if "GEÇTİ" in r["result"])
+    passed = sum(1 for r in results if "PASSED" in r["result"])
     critical = sum(
         1 for r in results
-        if r["scene"] in ["S2", "S4", "S5"] and "GEÇTİ" in r["result"]
+        if r["scene"] in ["S2", "S4", "S5"] and "PASSED" in r["result"]
     )
     print(f"\n  Toplam başarı      : {passed}/5")
     print(f"  Kritik sahne başarı: {critical}/3")
@@ -301,7 +301,7 @@ def main():
         print(f"\n{'─' * 65}")
         print(f"  S5 HAYATTA KALMA VERDİKTİ (BARE)")
         print(f"{'─' * 65}")
-        if "GEÇTİ" in s5["result"]:
+        if "PASSED" in s5["result"]:
             print(f"  ★ PROBABLE SURVIVAL — Bağlam olmadan bile tespit yaptı!")
         else:
             print(f"  ★ WOULD NOT HAVE SURVIVED — Bağlam olmadan duyamadı.")

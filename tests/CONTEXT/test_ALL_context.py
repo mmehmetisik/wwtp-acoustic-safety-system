@@ -1,5 +1,5 @@
 """
-TEST — CONTEXT MODU (Tüm Sahneler)
+TEST — CONTEXT MODE (All Scenes)
 ====================================
 BARE moddan farkı: Modele lokasyon ve operasyon bağlamı veriliyor.
 "Sen Ceyhan Arıtma Tesisi'ndeki X lokasyonunu dinliyorsun,
@@ -24,7 +24,7 @@ AUDIO_DIR  = os.path.join("dataset", "audio")
 CHUNK_SEC  = 5
 
 # ═══════════════════════════════════════════════════════════════
-# SAHNE TANIMLARI — Her sahne için dosya, chunk ve bağlam bilgisi
+# SCENE DEFINITIONS — File, chunk and context info for each scene
 # ═══════════════════════════════════════════════════════════════
 
 SCENES = [
@@ -35,19 +35,19 @@ SCENES = [
         "chunk_idx": 0,       # 0-5 saniye
         "chunk_time": "0-5 sn",
         "human_present": False,
-        "expected": "İnsan YOK → alarm YOK",
+        "expected": "No human → no alarm",
         # CONTEXT modu bağlam bilgisi (scene_config.json'dan)
         "location": "Pump station, basement level, Ceyhan WWTP",
         "operation": "Routine wastewater pumping. Duty pump 1 and 2 running at 85% capacity. Saturday morning shift.",
     },
     {
         "scene_id": "S2",
-        "title": "İnşaat Alanı — İnsan Bağırıyor",
+        "title": "Construction Zone — Human Shouting",
         "file": "S2_construction_human.wav",
         "chunk_idx": 5,       # 25-30 saniye — bağırma başlıyor
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → alarm VER",
+        "expected": "Human present → trigger alarm",
         "location": "Construction site adjacent to aeration tanks, Ceyhan WWTP",
         "operation": "Weekend construction work on new sludge press building. 12-person crew on site. High noise environment. Saturday 10:00.",
     },
@@ -58,7 +58,7 @@ SCENES = [
         "chunk_idx": 3,       # 15-20 saniye — metalik sesler
         "chunk_time": "15-20 sn",
         "human_present": False,
-        "expected": "İnsan YOK → alarm YOK",
+        "expected": "No human → no alarm",
         "location": "Secondary clarifier pool edge, Ceyhan WWTP",
         "operation": "Secondary clarifier sludge scraper bridge running normal cycle. Automatic operation. No personnel in restricted zone.",
     },
@@ -69,7 +69,7 @@ SCENES = [
         "chunk_idx": 5,       # 25-30 saniye — maskeli ses
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → alarm VER",
+        "expected": "Human present → trigger alarm",
         "location": "Underground sewer gallery, manhole access point MH-07, Ceyhan WWTP",
         "operation": "Confined space entry permit issued for gallery inspection. Single worker with respirator. Entry logged at 09:45. Buddy system in place — surface attendant monitoring.",
     },
@@ -80,7 +80,7 @@ SCENES = [
         "chunk_idx": 5,       # 25-30 saniye — çığlık başlıyor
         "chunk_time": "25-30 sn",
         "human_present": True,
-        "expected": "İnsan VAR → ALARM + ESTOP",
+        "expected": "Human present → ALARM + ESTOP",
         "location": "Primary clarifier pool, Ceyhan WWTP",
         "operation": "Saturday construction work on new press building. Heavy machinery operating adjacent to clarifier pool. Worker observed climbing pool wall at approximately 09:52. Clarifier bridge scraper in automatic operation. No safety observer assigned to pool perimeter.",
     },
@@ -95,11 +95,11 @@ def read_wav(path):
     with open(path, 'rb') as f:
         riff = f.read(4)
         if riff != b'RIFF':
-            raise ValueError("WAV dosyası değil")
+            raise ValueError("Not a WAV file")
         f.read(4)
         wave = f.read(4)
         if wave != b'WAVE':
-            raise ValueError("WAVE formatı değil")
+            raise ValueError("Not WAVE format")
         sr, num_channels, bits_per_sample, data_bytes = 16000, 1, 16, b''
         while True:
             chunk_id = f.read(4)
@@ -163,7 +163,7 @@ def extract_chunk_as_wav(path, chunk_idx, chunk_sec=5):
 def build_context_prompt(scene):
     """
     CONTEXT modu: Modele lokasyon ve operasyon bilgisi veriliyor.
-    BARE moddan farkı tam olarak bu — model nerede olduğunu biliyor.
+    This is the difference from BARE — the model knows where it is.
     """
     return (
         f"You are an AI acoustic safety monitoring system integrated into SCADA "
@@ -232,15 +232,15 @@ def evaluate(scene, response):
     has_false = '"human_detected": false' in r or '"human_detected":false' in r
 
     if human_present:
-        # İnsan var — model tespit etmeli
+        # Human present — model should detect
         if has_true:
-            return "✅ GEÇTİ", "İnsanı tespit etti"
+            return "✅ PASSED", "Human detected"
         else:
             return "❌ KAÇIRDI", "False Negative — insanı duyamadı"
     else:
-        # İnsan yok — model alarm vermemeli
+        # No human — model should not alarm
         if has_false:
-            return "✅ GEÇTİ", "Doğru: insan yok dedi"
+            return "✅ PASSED", "Doğru: insan yok dedi"
         else:
             return "❌ YANLIŞ ALARM", "False Positive — yanlış alarm verdi"
 
@@ -264,11 +264,11 @@ def main():
         sid = scene["scene_id"]
         print(f"{'─' * 65}")
         print(f"  {sid} — {scene['title']}")
-        print(f"  Chunk: {scene['chunk_time']} | İnsan: {'EVET' if scene['human_present'] else 'HAYIR'}")
+        print(f"  Chunk: {scene['chunk_time']} | Human: {'YES' if scene['human_present'] else 'NO'}")
         print(f"  Beklenen: {scene['expected']}")
         print(f"{'─' * 65}")
 
-        # Ses dosyası kontrolü
+        # Audio file check
         audio_path = os.path.join(AUDIO_DIR, scene["file"])
         if not os.path.exists(audio_path):
             print(f"  [HATA] Dosya bulunamadı: {audio_path}\n")
@@ -310,12 +310,12 @@ def main():
     print(f"\n{'═' * 65}")
     print(f"  CONTEXT MODU — ÖZET SONUÇLAR")
     print(f"{'═' * 65}")
-    print(f"  {'Sahne':<8} {'İnsan':<8} {'Sonuç':<20} {'Detay'}")
+    print(f"  {'Scene':<8} {'Human':<8} {'Result':<20} {'Detail'}")
     print(f"  {'─' * 58}")
 
     for r in results:
         scene_data = next(s for s in SCENES if s["scene_id"] == r["scene"])
-        human = "EVET" if scene_data["human_present"] else "HAYIR"
+        human = "YES" if scene_data["human_present"] else "NO"
         print(f"  {r['scene']:<8} {human:<8} {r['result']:<20} {r['detail']}")
 
     # BARE ile karşılaştırma
@@ -327,7 +327,7 @@ def main():
 
     passed_critical = sum(
         1 for r in results
-        if r["scene"] in ["S2", "S4", "S5"] and "GEÇTİ" in r["result"]
+        if r["scene"] in ["S2", "S4", "S5"] and "PASSED" in r["result"]
     )
     print(f"  Kritik sahnelerde başarı: {passed_critical}/3")
 
@@ -338,13 +338,13 @@ def main():
     else:
         print(f"  ⚠️  CONTEXT mod yetmedi. PROTOCOL mod ile deneyelim.")
 
-    # S5 hayatta kalma verdikti
+    # S5 survival verdict
     s5_result = next((r for r in results if r["scene"] == "S5"), None)
     if s5_result:
         print(f"\n{'─' * 65}")
         print(f"  S5 HAYATTA KALMA VERDİKTİ (CONTEXT)")
         print(f"{'─' * 65}")
-        if "GEÇTİ" in s5_result["result"]:
+        if "PASSED" in s5_result["result"]:
             print(f"  ★ PROBABLE SURVIVAL — Bağlam bilgisi ile tespit yapıldı!")
             print(f"  O gün bu sistem olsaydı, adam büyük ihtimalle HAYATTA KALIRDI.")
         else:

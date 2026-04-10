@@ -75,7 +75,7 @@ class ProjectTreeVisualizer:
                     tree_str += f"{prefix}{connector}{file_icon} {item.name}\n"
 
         except PermissionError:
-            tree_str += f"{prefix}[İzin Hatası]\n"
+            tree_str += f"{prefix}[Permission Error]\n"
 
         return tree_str
 
@@ -197,7 +197,7 @@ class ProjectTreeVisualizer:
 """
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(html_content)
-        print(f"✅ HTML dosyası oluşturuldu: {output_file}")
+        print(f"✅ HTML file created: {output_file}")
 
     def save_as_markdown(self, tree_content, output_file="project_structure.md"):
         """Tree yapısını Markdown olarak kaydet"""
@@ -219,7 +219,7 @@ class ProjectTreeVisualizer:
 """
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(md_content)
-        print(f"✅ Markdown dosyası oluşturuldu: {output_file}")
+        print(f"✅ Markdown file created: {output_file}")
 
     def save_as_json(self, output_file="project_structure.json"):
         """Proje yapısını JSON olarak kaydet"""
@@ -253,7 +253,7 @@ class ProjectTreeVisualizer:
 
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(structure, f, indent=2, ensure_ascii=False)
-        print(f"✅ JSON dosyası oluşturuldu: {output_file}")
+        print(f"✅ JSON file created: {output_file}")
 
     def print_tree(self):
         """Tree yapısını konsola yazdır"""
@@ -298,17 +298,17 @@ def main():
     parser.add_argument(
         '--html',
         action='store_true',
-        help='HTML dosyası olarak kaydet'
+        help='Save as HTML file'
     )
     parser.add_argument(
         '--markdown',
         action='store_true',
-        help='Markdown dosyası olarak kaydet'
+        help='Save as Markdown file'
     )
     parser.add_argument(
         '--json',
         action='store_true',
-        help='JSON dosyası olarak kaydet'
+        help='Save as JSON file'
     )
     parser.add_argument(
         '--all-formats',
@@ -320,11 +320,11 @@ def main():
 
     # Dizin kontrolü
     if not Path(args.path).exists():
-        print(f"❌ Hata: '{args.path}' dizini bulunamadı!")
+        print(f"❌ Error: '{args.path}' directory not found!")
         return
 
     if not Path(args.path).is_dir():
-        print(f"❌ Hata: '{args.path}' bir dizin değil!")
+        print(f"❌ Error: '{args.path}' is not a directory!")
         return
 
     # Visualizer oluştur
