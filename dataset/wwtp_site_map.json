@@ -204,23 +204,12 @@
   },
 
   "model_capabilities_note": {
-    "description": "As of March 2026, only Gemini models support native audio file analysis via API. This benchmark tests 8 Gemini models. Other model families excluded due to lack of audio modality support.",
-    "audio_capable_models": [
-      "Gemini 3.1 Pro Preview",
-      "Gemini 3.1 Flash-Lite Preview",
-      "Gemini 3 Pro Preview",
-      "Gemini 3 Flash Preview",
-      "Gemini 2.5 Pro",
-      "Gemini 2.5 Flash",
-      "Gemini 2.0 Flash",
-      "Gemini 2.0 Flash Lite"
+    "description": "Gemma 4 E4B and E2B support native audio and vision modalities. This project uses spectrogram vision (not raw audio) for detection. E4B is the minimum viable model for Chain-of-Thought reasoning in safety-critical tasks.",
+    "models_tested": [
+      "Gemma 4 E4B (4B params) — primary model, 91.0/100, CoT functional",
+      "Gemma 4 E2B (2B params) — comparison model, 2.0/100, CoT not functional"
     ],
-    "excluded_families": {
-      "Anthropic": "No native audio file API support",
-      "Qwen": "No native audio file API support",
-      "DeepSeek": "No native audio file API support",
-      "Gemma": "No native audio file API support"
-    },
-    "industry_finding": "In 2026, industrial acoustic AI capability remains concentrated in a single model family. This itself is a benchmark finding — the sector's readiness gap is measurable."
+    "runtime": "Ollama v0.20.0, local inference, RTX 3060 6GB, temperature=0",
+    "key_finding": "E4B achieves 91.0/100 with zero false positives. E2B scores 2.0/100 with 37 false positives. The extra 2B parameters enable structured CoT reasoning — the critical capability for safety systems."
   }
 }
