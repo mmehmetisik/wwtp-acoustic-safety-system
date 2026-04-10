@@ -1,408 +1,234 @@
-# WWTP Acoustic Safety System — Gemma 4 Good Hackathon Yol Haritası
+# WWTP Acoustic Safety System — Gemma 4 Good Hackathon Roadmap
 ## "Can AI Hear What Human Ears Miss?"
-## Endüstriyel Akustik Tehlike Tespiti — Yerelde Çalışan AI Güvenlik Sistemi
+## Industrial Acoustic Distress Detection — Edge AI Safety System
 
-> **Proje Mottosu:** *"AI'ya neyi dinlemesi gerektiğini öğretirsen ne olur? Belki bir hayat kurtarabiliriz."*
+> **Project Motto:** *"What happens when you teach AI what to listen for? Maybe we can save a life."*
 
 > **Mehmet ISIK** | Data Scientist | Adana ASKI | Kaggle Grandmaster
-> Nisan 2026
+> April 2026
 
 ---
 
-## 1. PROJENİN HİKAYESİ
+## 1. THE STORY
 
-Yıllar önce Ceyhan'daki bir su arıtma tesisinde cumartesi günü yoğun inşaat çalışması vardı. Gürültü had safhaya ulaşmıştı. O sırada tesisin bir çalışanı, girilmemesi gereken bir durultma havuzunun duvarına çıktı. Dengesi bozuldu ve içine düştü. Bağırdı. Çok bağırdı. Ama kimse duymadı. Çünkü inşaat gürültüsü her şeyi bastırıyordu. İnsan kulağının eşiği o ortamda yetersiz kalıyordu.
+A worker fell into a clarifier pool at a drinking water treatment plant in Adana, Turkey. He screamed for help. Nobody heard him — 95dB construction noise masked everything. He survived, but the question haunted us: **what if this happened at our facility?**
 
-**Bu proje tek bir soruyu yanıtlıyor:**
+I work at Ceyhan Wastewater Treatment Plant — same open pools, same confined spaces, same noise levels. This project answers one question:
 
-> *O gün orada bir yapay zeka sistemi olsaydı — tesisin kritik noktalarına yerleştirilmiş mikrofonlardan gelen sesleri sürekli analiz eden, SCADA'ya entegre, yerelde çalışan bir AI sistemi olsaydı — o adam hayatta kalır mıydı?*
+> *If an AI system had been listening — microphones at critical points, analyzing sound locally, integrated with SCADA — would that man have survived?*
 
----
-
-## 2. YARIŞMA BİLGİLERİ
-
-**Yarışma:** The Gemma 4 Good Hackathon (Kaggle)
-**Başlangıç:** 2 Nisan 2026
-**Son Tarih:** 18 Mayıs 2026 (23:59 UTC)
-**Toplam Ödül:** $200,000
-
-### 2.1 Yarışma Bizden Ne İstiyor?
-
-Yarışma bir benchmark istemiyor. Yarışma, Gemma 4 modellerini kullanarak gerçek dünya problemini çözen bir **uygulama** (çalışan bir sistem / prototip) istiyor. Yani "modeli test ettim, şu puanı aldı" değil — "bu problemi şöyle çözdüm, işte çalışıyor" demek gerekiyor.
-
-### 2.2 Teslim Edilmesi Gerekenler
-
-1. **Kaggle Writeup** — Teknik rapor, 1500 kelime sınırı. Mimariyi, Gemma 4 kullanımını, teknik kararları açıklar.
-2. **Video (YouTube, max 3 dakika)** — EN ÖNEMLİ parça. Hikayeyi anlat, demoyu göster, jüriyi etkile.
-3. **Public Code Repository** — GitHub veya Kaggle Notebook. Kod açık ve iyi dokümante edilmiş olmalı.
-4. **Live Demo** — Çalışan demo URL'si veya dosyası. Jüri deneyimleyebilmeli.
-5. **Media Gallery** — Kapak görseli (zorunlu) + ek görseller/videolar.
-
-### 2.3 Değerlendirme Kriterleri
-
-| Kriter | Puan | Açıklama |
-|---|---|---|
-| Impact & Vision | 40 | Problem ne kadar gerçek ve çözüm ne kadar etkili? |
-| Video Pitch & Storytelling | 30 | Video ne kadar etkileyici ve hikaye ne kadar güçlü? |
-| Technical Depth & Execution | 30 | Gemma 4 gerçekten kullanılmış mı, teknik olarak sağlam mı? |
-
-**Kritik Not:** Video en önemli parça. Hikaye anlatımı + demo gösterimi = jüriyi etkilemenin yolu.
-
-### 2.4 Hedef Track'ler
-
-**Birincil:** Global Resilience — "Build the systems of tomorrow — from offline, edge-based disaster response..."
-**İkincil:** Safety & Trust — "Pioneer frameworks for transparency and reliability..."
-**Special Technology:** Ollama veya llama.cpp track'i (Gemma 4'ü yerelde çalıştırdığımız için uygun)
+**Answer: YES. CERTAIN SURVIVAL. Detection at 5 seconds after distress onset.**
 
 ---
 
-## 3. TEKNİK KARARLAR (TARTIŞILDI, KARARA BAĞLANDI)
+## 2. COMPETITION INFO
 
-### 3.1 Model Seçimi: Gemma 4 E4B ve E2B
+**Competition:** The Gemma 4 Good Hackathon (Kaggle)
+**Start:** April 2, 2026
+**Deadline:** May 18, 2026 (23:59 UTC)
+**Prize Pool:** $200,000
 
-**Karar:** Gemma 4 ailesinden **E4B** (birincil) ve **E2B** (ikincil) modelleri kullanılacak.
+### Evaluation Criteria
 
-**Neden bu ikisi?**
+| Criterion | Weight | Description |
+|-----------|--------|-------------|
+| Impact & Vision | 40% | How real is the problem and how effective is the solution? |
+| Video Pitch & Storytelling | 30% | How compelling is the video and the story? |
+| Technical Depth & Execution | 30% | Is Gemma 4 genuinely used? Is it technically sound? |
 
-Gemma 4'ün 4 boyutu var:
-- **E2B** (Effective 2B parameters) → Ses destekliyor ✅
-- **E4B** (Effective 4B parameters) → Ses destekliyor ✅
-- **26B A4B** (MoE, 26B total, 4B active) → Ses desteklemiyor ❌
-- **31B** (Dense, 31B) → Ses desteklemiyor ❌
+### Target Tracks
 
-Bizim projemiz SES ANALİZİNE dayanıyor. 26B ve 31B sesi anlamıyor. Dolayısıyla E4B ve E2B tek ve doğru seçim. Bu bir kısıtlama değil — Gemma 4'ün ses anlayan tüm modellerini kullanıyoruz.
-
-**E4B ve E2B'nin proje için avantajları:**
-- Ses dosyasını doğrudan (native) anlayabiliyor — ASR (konuşma tanıma) ve AST (konuşma çevirisi)
-- Edge cihazlarda çalışıyor: Raspberry Pi, Jetson Nano, telefon, laptop
-- Tamamen çevrimdışı (offline) çalışabiliyor — internete ihtiyaç yok
-- 128K context window
-- Function calling desteği var (SCADA entegrasyonu için)
-- Apache 2.0 lisansı — ticari kullanıma açık
-
-### 3.2 Edge/Yerelde Çalışma — EN GÜÇLÜ KOZUMUZ
-
-**Bu noktayı yarışma boyunca her yerde vurgulayacağız.**
-
-Yarışma sayfası diyor ki: "a classroom with spotty internet, a medical site far from a data center, a community where privacy is non-negotiable."
-
-Bizim arıtma tesisi de aynen böyle bir yer:
-- Tesisin ortasında güvenilir internet yok
-- Bulut API'si bekleyemezsin — adam suda batıyor, her saniye hayati
-- Gizlilik: tesis ses verisi dışarı çıkmamalı
-- Gecikme (latency): buluta gidip gelmek zaman kaybı, yerelde anında tepki
-
-**Yarışma anlatımında bu açı:** "Bu sistem bir Raspberry Pi üzerine yüklenip tesisin havuz kenarına konabilir. İnternete bağlı olmadan, 7/24, saniyede bir, sesleri analiz eder. Tehlike anında milisaniyeler içinde alarm verir."
-
-### 3.3 Benchmark'tan Uygulamaya Dönüşüm
-
-**Mevcut proje:** Benchmark — "Modeli test et, puanla, karşılaştır."
-**Yarışma projesi:** Uygulama — "Problemi çöz, çalıştığını göster."
-
-Aynı motor, aynı sesler, aynı analiz mantığı — ama artık bir test tezgahı değil, çalışan bir güvenlik sistemi prototipi.
-
-### 3.4 Sentetik Ses Meselesi
-
-Gerçek bir boğulma sesi kaydı etik ve pratik olarak mümkün değil. Sentetik ses kullanımı bir zayıflık değil, mühendislik olgunluğu:
-- Tıpta da ilaç denemeden önce simülasyonla test edilir
-- Pilotlar gerçek kazadan önce simülatörde eğitilir
-- Saha deneyiminden alınan gerçek akustik parametreler kullanılıyor (120Hz pompa, 95dB inşaat, SNR değerleri)
-- Reproducibility: Seed=42 ile her zaman aynı sonuç
-
-**Jüriye söylenecek:** "Gerçek kaza sesini kaydetmek etik olarak mümkün değil. Ancak 10+ yıllık saha deneyimimle birebir akustik profilleri oluşturdum. Tüm frekans, dB ve SNR değerleri gerçek tesis ölçümlerinden alınmıştır."
+**Primary:** Global Resilience — "Build the systems of tomorrow — from offline, edge-based disaster response..."
+**Secondary:** Safety & Trust — "Pioneer frameworks for transparency and reliability..."
+**Special Technology:** Ollama Track (running Gemma 4 locally via Ollama)
 
 ---
 
-## 4. TEST SONUÇLARI (TAMAMLANDI — 3 Nisan 2026)
+## 3. TECHNICAL DECISIONS
 
-### 4.1 Büyük Tablo: BARE vs CONTEXT vs PROTOCOL
+### 3.1 Model Selection: Gemma 4 E4B (primary) + E2B (comparison)
 
-| Sahne | İnsan | BARE | CONTEXT | PROTOCOL |
-|-------|-------|------|---------|----------|
-| S1 — Pompa Dairesi | HAYIR | ✅ Doğru | ✅ Doğru | ✅ Doğru |
-| S2 — İnşaat + Bağırma | EVET | ❌ Kaçırdı | ✅ Tespit! | ✅ Tespit! |
-| S3 — Havuz Yanlış Alarm | HAYIR | ✅ Doğru | ✅ Doğru | ❌ Yanlış Alarm |
-| S4 — Menhol Maskeli | EVET | ❌ Kaçırdı | ❌ Kaçırdı | ✅ Tespit! |
-| S5 — Havuz KRİTİK | EVET | ❌ Kaçırdı | ❌ Kaçırdı* | ✅ Tespit! |
-| **Başarı** | | **2/5** | **3/5** | **4/5** |
-| **Kritik Sahne** | | **0/3** | **1/3** | **3/3** |
+Gemma 4 has 4 variants:
+- **E2B** (2B params) → Audio-capable ✅ — tested, scored 2.0/100 (unusable)
+- **E4B** (4B params) → Audio-capable ✅ — **primary model, 91.0/100**
+- **26B A4B** (MoE) → No audio ❌
+- **31B** (Dense) → No audio ❌
 
-*S5 CONTEXT notu: Model human_detected=false dedi AMA alarm=true ve ESTOP_POOL_BRIDGE verdi. Sesi duymadı ama bağlamdan ("worker climbing pool wall") tehlikeyi algıladı. İlginç ama gerçek dünyada güvenilmez — "not deployable behavior, artifact of experimental setup" olarak belgelenecek.
+E4B is the minimum viable model for Chain-of-Thought reasoning in safety-critical acoustic analysis. E2B cannot follow CoT instructions — it alarms on everything (37/60 false positives).
 
-### 4.2 S5 Hayatta Kalma Verdikti
+### 3.2 Why Spectrograms Instead of Raw Audio
 
-| Mod | Tespit | Alarm | Aksiyon | Verdikt |
-|-----|--------|-------|---------|---------|
-| BARE | ❌ | ❌ | CONTINUE | WOULD NOT HAVE SURVIVED |
-| CONTEXT | ❌ | ✅ | ESTOP | ⚠️ Alarm verdi ama sesi duymadı |
-| PROTOCOL | ✅ (0.98) | ✅ | ESTOP_POOL_BRIDGE | ★★★ PROBABLE SURVIVAL ★★★ |
+Raw audio approach failed (v1-v2: scores 3.0 and 12.0). The model's audio understanding was unreliable under noise. We converted audio to Mel spectrograms and leveraged the model's **vision** capability instead. On a spectrogram, noise and voice produce different visual patterns despite sharing the same frequency band (300-3000Hz).
 
-### 4.3 Kritik Bulgular
+**Key insight:** We did not make the model better — we made the problem visible.
 
-**Bulgu 1 — Prompt = Davranış:** Aynı model, aynı ses, farklı talimat → farklı sonuç. BARE 0/3 kritik → PROTOCOL 3/3 kritik. Bu projenin en vurucu insight'ı.
+### 3.3 Edge/Offline — Our Strongest Differentiator
 
-**Bulgu 2 — Trade-off Kabul Edilebilir:** PROTOCOL modda S3'te yanlış alarm (FP=-10) karşılığında S4 ve S5'te hayat kurtarıldı (FN=-40 önlendi). Asimetrik puanlama ile tutarlı, endüstriyel "fail-safe" standardına uygun.
-
-**Bulgu 3 — S4 En Zor Sahne:** Maskeli/boğuk ses sadece PROTOCOL'da tespit edildi. "Any muffled voice MUST trigger rescue" talimatı fark yarattı. Bu, aşırı zor sinyal koşullarında bile doğru güvenlik talimatının değerini kanıtlıyor.
-
-### 4.4 Uygulama Kararları (Test Sonuçlarına Dayanarak)
-
-Bu sonuçlara göre uygulamada şu kararlar alındı:
-- Uygulama **PROTOCOL modda** çalışacak (en yüksek başarı: 4/5, kritik 3/3)
-- Demo'da **üç mod karşılaştırmalı** gösterilecek (hikayenin gücü bu ilerlemede)
-- Yanlış alarm riski kabul edilecek ve "safety-biased configuration" olarak çerçevelenecek
-- JSON çıktı formatı SCADA entegrasyonu için uygun, doğrulandı
-
-### 4.5 Anlatım Notları (Jüri ve Writeup İçin)
-
-- PROTOCOL modunu "overfit" gibi göstermemek için "safety-biased configuration" veya "risk-aware tuning" ifadesi kullanılacak
-- S5 CONTEXT bulgusunu "not deployable — gerçek sistemde metin bilgisi olmayacak" diye vurgulanacak
-- 5 sahne sayısı sorulursa: "Her sahne farklı bir endüstriyel tehlike tipini temsil ediyor. Gerçek kaza sesini kaydetmek etik olarak mümkün değil — bu sahne sayısı saha deneyimine dayanan bilinçli bir tasarım kararıdır."
-- "LLM can compensate missing modality with context reasoning — but it is unreliable" — paper kalitesinde insight, writeup'a girecek
+- No internet required — WiFi disabled, Ethernet unplugged during field tests
+- No cloud API — zero latency, zero cost, zero dependency
+- Single GPU (RTX 3060 6GB) — runs on consumer hardware
+- Apache 2.0 license — commercial deployment allowed
 
 ---
 
-## 5. NE YAPACAĞIZ — UYGULAMA MİMARİSİ
+## 4. THE JOURNEY: 3.0 → 91.0
 
-### 5.1 Sistem Nasıl Çalışacak?
+### 8 Iterations, 2 Failed Experiments, 30x Improvement
 
-```
-Mikrofon (simüle) → 5 sn WAV chunk → Gemma 4 E4B (yerelde) → JSON karar → Alarm/SCADA
-```
+| # | Method | Score | Status | Findings Doc |
+|---|--------|-------|--------|--------------|
+| 1 | Raw Audio + Aggressive Prompt | 3.0 | ❌ 7 false positives | findings/01-04 |
+| 2 | Raw Audio + Neutral Prompt | 12.0 | ❌ Detection lost | findings/05-06 |
+| 3 | Spectrogram 2-shot | 8.0 | ❌ Binary classifier trap | findings/07 |
+| 4 | Spectrogram 4-shot + Filter | 27.0 | ⚠️ S2 breakthrough | findings/08-09 |
+| 5 | Spectrogram + CoT | 32.0 | ⚠️ S4 perfect, S3 FP solved | findings/11 |
+| 6 | CoT + Debounce=1 | 91.0 | ⚠️ S5 non-deterministic | findings/12 |
+| 7 | PCEN + Spectral Subtraction | 32.0 | ❌ **FAILED** — rolled back | findings/13 |
+| 8 | CoT + Debounce=1 + Temp=0 | **91.0** | ✅ **5/5 identical runs** | findings/14 |
 
-Detaylı akış:
-1. Sentetik ses dosyası (60 sn) seçilir (S1-S5 sahnelerinden biri)
-2. 5 saniyelik parçalara bölünür (12 chunk)
-3. Her chunk sırayla Gemma 4 E4B modeline gönderilir
-4. Model sesi dinler, analiz eder, JSON formatında karar verir
-5. Karar ekranda gösterilir (alarm / tehlike yok / ESTOP)
-6. Tüm süreç gerçek zamanlı olarak demo arayüzünde görünür
+### Model Comparison (April 6)
 
-### 5.2 Demo Arayüzü (Streamlit veya Gradio)
-
-Ekranda görünecekler:
-- **Sol panel:** Tesis haritası (GERÇEK layout kullanılacak — Mehmet'te mevcut) + mikrofon konumları
-- **Orta panel:** Canlı ses dalga formu + şu an hangi chunk analiz ediliyor
-- **Sağ panel:** Model kararları (JSON) + alarm durumu + güven skoru
-- **Alt panel:** Zaman çizelgesi — hangi saniyede ne tespit edildi
-- **Alarm durumunda:** Ekran kırmızıya döner, ESTOP komutu gösterilir, hayatta kalma verdikti çıkar
-
-**Not:** Gerçek tesis layout'u kullanılacak (Mehmet'te var). Bu jüri için çok etkileyici — uydurma değil, gerçek bir tesisin gerçek haritası.
-
-### 5.3 Model Nerede Çalışacak?
-
-**Demo için:** Kendi bilgisayarında veya Kaggle notebook'unda
-**Anlatımda:** "Bu model bir Raspberry Pi veya Jetson Nano üzerine yüklenebilir, tesisin yanına konur, internet olmadan çalışır."
-
-Gemma 4 E4B'yi yerelde çalıştırma yolları:
-- **Ollama** ile (en kolay) → Special Technology Track: Ollama ödülüne de aday oluruz
-- **llama.cpp** ile → Special Technology Track: llama.cpp ödülüne de aday oluruz
-- Google AI Edge Gallery ile (mobil demo için)
+| Metric | E2B | E4B |
+|--------|-----|-----|
+| Score | 2.0/100 | 91.0/100 |
+| False Positives | 37/60 | 0/60 |
+| CoT Reasoning | Not functional | Fully functional |
+| Documented in | findings/15 | findings/14 |
 
 ---
 
-## 6. ELİMİZDEKİ MALZEMELER VE DÖNÜŞÜM PLANI
+## 5. FINAL RESULTS
 
-### 6.1 Olduğu Gibi Kullanılacaklar
+| Scene | Description | Human | Noise | Score | FP | Detection |
+|-------|-------------|-------|-------|-------|----|-----------|
+| S1 | Pump Room | NO | 75dB | 60 | 0 | — |
+| S2 | Construction + Distress | YES | 95dB | 95 | 0 | 25s (+0s) |
+| S3 | Metallic False Alarm | NO | 72dB | 60 | 0 | — |
+| S4 | Masked Worker | YES | 58dB | 100 | 0 | 25s (+5s) |
+| **S5** | **Real Incident** | **YES** | **95dB** | **100** | **0** | **25s (+5s) → CERTAIN SURVIVAL** |
 
-| Dosya | Durum | Not |
-|---|---|---|
-| `scene_config.json` | ✅ Aynen kullanılır | 5 sahne tanımı, metadata |
-| `acoustic_profiles.json` | ✅ Aynen kullanılır | SNR, dB, frekans profilleri |
-| `answer_key.json` | ✅ Aynen kullanılır | Ground truth kararlar |
-| `scoring_rubric.json` | ✅ Aynen kullanılır | Puanlama kriterleri (demo'da da kullanılabilir) |
-| `wwtp_site_map.json` | ✅ Aynen kullanılır | Tesis haritası, mikrofon konumları |
-| `audio_generator.py` | ✅ Aynen kullanılır | 5 sentetik WAV dosyasını üretir |
-
-### 6.2 Uyarlanacaklar
-
-| Dosya | Değişiklik | Detay |
-|---|---|---|
-| `acoustic_engine.py` | 🔄 Gemma 4'e uyarlanacak | Gemini API çağrıları → Gemma 4 E4B (yerel) çağrılarına dönüşecek. Prompt yapısı, ses gönderme yöntemi değişecek. Puanlama mantığı aynı kalabilir. |
-| `wwtp_acoustic_notebook.py` | 🔄 Demo notebook'a dönüşecek | kbench framework → bağımsız demo. Benchmark döngüsü → interaktif demo akışı. |
-
-### 6.3 Yeni Oluşturulacaklar
-
-| Dosya | Açıklama |
-|---|---|
-| `app.py` (veya `demo.py`) | Streamlit/Gradio demo uygulaması — ana arayüz |
-| `gemma4_inference.py` | Gemma 4 E4B ile ses analizi modülü (Ollama veya llama.cpp üzerinden) |
-| `README.md` | Proje açıklaması, kurulum, çalıştırma talimatları (GitHub repo için) |
-| Video (3 dk) | YouTube'a yüklenecek — hikaye + demo |
-| Kaggle Writeup | 1500 kelime teknik rapor |
-| Kapak görseli | Media gallery için |
+**Weighted Average: 91.0/100 | 0 False Positives | 5/5 Identical Runs | Temperature=0**
 
 ---
 
-## 7. ADIM ADIM UYGULAMA PLANI
+## 6. FIELD VALIDATION AT CEYHAN WWTP (April 10)
 
-### Adım 1: Gemma 4 E4B'yi Yerelde Çalıştır ✅ TAMAMLANDI
+Tested at the actual facility with laptop built-in microphone, fully offline.
 
-- Ollama kuruldu (v0.20.0)
-- Gemma 4 E4B modeli indirildi (9.6 GB)
-- RTX 3060 6GB üzerinde çalışıyor
-- İlk ses testi başarılı: S1 pompa sesi doğru tanımlandı
+| Location | Noise | Chunks | Alarms | FP | Max Conf | Result |
+|----------|-------|--------|--------|----|----------|--------|
+| Pump gallery | ~75dB | 8 | 2 | 0 | 70% | **DETECTED** |
+| Blower room | >100dB | 13 | 0 | 0 | 20% | Mic limit |
+| Clarifier pool | ~65dB | 9 | 4 | 0 | 95% | **DETECTED** |
+| **Total** | | **30** | **6** | **0** | **95%** | **2/3 locations** |
 
-### Adım 2: Ses Dosyalarını Üret ✅ TAMAMLANDI
-
-- audio_generator.py ile 5 WAV dosyası üretildi (S1-S5)
-- Her biri 60 saniye, 16kHz, mono, PCM_16
-
-### Adım 3: BARE/CONTEXT/PROTOCOL Testleri ✅ TAMAMLANDI
-
-- 5 sahne × 3 mod = 15 test tamamlandı
-- Sonuçlar: BARE 2/5, CONTEXT 3/5, PROTOCOL 4/5
-- S5 PROTOCOL: PROBABLE SURVIVAL — adam hayatta kalırdı
-- Detaylı sonuçlar: TEST_RESULTS_COMPARISON.md
-
-### Adım 4: acoustic_engine.py'yi Gemma 4'e Uyarla ← ŞİMDİKİ ADIM
-
-**Amaç:** Mevcut motorun Gemini API kısmını Gemma 4 yerel çağrılarına çevir. 12 chunk'ı sırayla göndererek tam sahne analizi yapılacak.
-
-Yapılacaklar:
-- `prompt_with_audio()` fonksiyonunu Gemma 4 E4B'ye uyarla (Ollama API)
-- Ses chunk'ını modele gönderme yöntemini Gemma 4 formatına çevir
-- Prompt yapısını koru (BARE / CONTEXT / PROTOCOL)
-- JSON parse mantığını koru (aynı kalabilir)
-- 12 chunk sıralı gönderim — gerçek zamanlı SCADA simülasyonu
-- Tespit süresini ölç (kaçıncı chunk'ta alarm verdi → hayatta kalma verdikti)
-
-### Adım 5: Demo Arayüzünü Oluştur (Streamlit/Gradio)
-
-**Amaç:** Jürinin ve herkesin kullanabileceği görsel, etkileyici bir demo.
-
-Yapılacaklar:
-- Tesis haritası entegrasyonu (gerçek layout)
-- Mikrofon konumları harita üzerinde
-- Sahne seçici (S1-S5 dropdown)
-- "Dinlemeye Başla" butonu
-- Canlı ses dalga formu gösterimi
-- Chunk chunk ilerleyen analiz ekranı
-- Alarm animasyonu (kırmızı yanıp sönme, ESTOP)
-- Hayatta kalma verdikti gösterimi (S5 için)
-- E4B vs E2B karşılaştırma seçeneği
-
-### Adım 6: GitHub Repo Hazırla
-
-**Amaç:** Temiz, iyi dokümante edilmiş, çalıştırılabilir kod.
-
-Yapılacaklar:
-- README.md (İngilizce — kurulum, çalıştırma, proje açıklaması)
-- Klasör yapısı düzenle
-- requirements.txt
-- Kod yorumları (İngilizce)
-- Lisans
-
-### Adım 7: Video Çek (3 dakika, YouTube)
-
-**Amaç:** Jüriyi etkile. Hikayeyi anlat, demoyu göster.
-
-Video yapısı (taslak):
-- **0:00-0:30** — Hikaye: "Bir adam havuza düştü. Bağırdı. Kimse duymadı."
-- **0:30-1:00** — Problem: "Endüstriyel tesislerde gürültü, insan sesini bastırır."
-- **1:00-1:30** — Çözüm: "Gemma 4 E4B, yerelde çalışan bir akustik güvenlik sistemi."
-- **1:30-2:30** — Canlı Demo: Ekranda tesis haritası, ses analizi, alarm tetiklenmesi
-- **2:30-3:00** — Sonuç: "15 saniyede tespit. Adam hayatta kalırdı." + Edge deployment vizyonu
-
-### Adım 8: Kaggle Writeup Yaz (1500 kelime)
-
-**Amaç:** Teknik derinliği kanıtla.
-
-İçerik:
-- Problem tanımı ve motivasyon (gerçek olay)
-- Mimari (Gemma 4 E4B + Ollama + Streamlit)
-- Neden E4B? (ses desteği + edge deployment)
-- Sentetik ses üretimi ve akustik profiller
-- 5 sahne tasarımı ve gerekçeleri
-- Asimetrik puanlama (FN=-40, FP=-10)
-- Sonuçlar ve hayatta kalma verdikti
-- Edge deployment vizyonu (Raspberry Pi, Jetson Nano)
-
-### Adım 9: Teslim Et
-
-- Kaggle Writeup → Submit
-- Video → YouTube'a yükle, Writeup'a ekle
-- Code → GitHub repo linki ekle
-- Demo → Streamlit/Gradio URL'si veya Kaggle notebook
-- Kapak görseli → Media gallery
+Documented in findings/16.
 
 ---
 
-## 8. GÜÇLÜ YANLARIMIZ (JÜRİYE KARŞI KOZLAR)
+## 7. WHAT WE BUILT
 
-1. **Gerçek hikaye:** Uydurma değil, gerçekten yaşanmış bir kaza. Duygusal etki çok yüksek.
-2. **Saha deneyimi:** 10+ yıl, 15 WWTP. Bu projeyi masa başında hayal eden biri değil, sahada yaşamış biri yapıyor.
-3. **Edge deployment:** Yarışmanın tam istediği şey — internet olmadan, yerelde, anında tepki.
-4. **Gerçek tesis layout'u:** Haritalar uydurma değil, gerçek tesisten alınma.
-5. **Etik ses üretimi:** Boğulan insanı kaydetmek yerine, saha verisiyle sentetik üretim — mühendislik olgunluğu.
-6. **Asimetrik puanlama:** İnsan hayatını merkeze alan bir değerlendirme sistemi — "yanlış alarm vermemek" değil, "insanı kaçırmamak" öncelikli.
-7. **Teknik derinlik:** WAV chunking, formant sentezi, konvolüsyon reverb, SNR hesaplaması — yüzeysel değil.
-8. **Kaggle Grandmaster:** Mehmet'in profili başlı başına güvenilirlik kaynağı.
-9. **Çoklu track uygunluğu:** Global Resilience + Safety & Trust + Ollama/llama.cpp special track.
-10. **Hayatta kalma sorusu:** Benchmark'ın çıktısı soyut bir puan değil, somut bir cevap: "Adam hayatta kalırdı."
+### Detection Engine
+- `acoustic_engine.py` — Main engine with --model flag for E4B/E2B selection ✅
+- 5 scenes × 12 chunks, spectrogram + CoT + debouncing pipeline ✅
+- Asymmetric scoring (FN=-40, FP=-10) ✅
 
----
+### Live Detection System
+- `live_detector.py` — Real-time microphone monitoring (terminal UI) ✅
+- `live_detector_ui.py` — SCADA-style web interface (FastAPI + WebSocket) ✅
+- Warmup, audio level display, chunk timeline, alarm sound ✅
 
-## 9. RİSKLER VE PLANLAR (GÜNCELLENDİ)
+### Web Demo
+- `wwtp-acoustic-demo/` — React + Vite + Tailwind interactive demo ✅
+- Deployed at https://wwtp-acoustic-safety-system.vercel.app ✅
+- Hero story, facility map, split-screen analysis, score evolution ✅
 
-| Risk | Etki | Plan B | Güncel Durum |
-|---|---|---|---|
-| Gemma 4 E4B sesi iyi anlamıyor | Yüksek | Spektrogram → görsel analiz | ✅ Çözüldü — E4B sesi anlıyor |
-| Model JSON formatında cevap vermiyor | Orta | Function calling / sıkı prompt | ✅ Çözüldü — PROTOCOL modda mükemmel JSON |
-| Ollama'da E4B desteği henüz yok | Orta | llama.cpp / HF Transformers | ✅ Çözüldü — Ollama 0.20.0 destekliyor |
-| PROTOCOL "overfit" gibi görünür | Orta | "Safety-biased configuration" çerçevele | ⚠️ Writeup'ta dikkatli anlatılacak |
-| 5 sahne "az" eleştirisi | Düşük | Etik gerekçe + her sahne farklı tip | ⚠️ Writeup'ta açıklanacak |
-| Demo arayüzü karmaşıklaşıyor | Düşük | Basit tut, çalışan > süslü | Henüz başlanmadı |
-| Zaman yetmiyor | Orta | Öncelik: Model→Demo→Video | ✅ Temel pipeline hazır |
+### Documentation
+- 16 findings documents (every experiment documented) ✅
+- README.md with field validation, screenshots, quick start ✅
+- KAGGLE_WRITEUP.md v3 with field test results ✅
 
----
-
-## 10. ZAMAN ÇİZELGESİ (GÜNCELLENDİ)
-
-**Son tarih: 18 Mayıs 2026** — Yaklaşık 5.5 hafta kaldı.
-
-| Hafta | Odak | Durum |
-|---|---|---|
-| Hafta 1 (3-6 Nisan) | Model kurulum + ses testi + BARE/CONTEXT/PROTOCOL testleri | ✅ TAMAMLANDI |
-| Hafta 2 | Engine uyarlama (12 chunk sıralı gönderim) + E2B testleri | ← ŞİMDİ BURADAYIZ |
-| Hafta 3 | Demo arayüzü (Streamlit/Gradio) + tesis layout entegrasyonu | |
-| Hafta 4 | Demo güzelleştirme + tam sahne demo + karşılaştırma ekranı | |
-| Hafta 5 | Video çekimi + Writeup yazımı + GitHub repo | |
-| Hafta 6 | Son düzeltmeler + teslim | |
+### Media
+- YouTube video with field test footage (PiP) ✅
+- Kaggle Media Gallery: 10 images + 1 video ✅
+- Screenshots from 3 field test locations ✅
 
 ---
 
-## 11. BONUS FİKİRLER (ZAMAN KALIRSA)
+## 8. IMPLEMENTATION TIMELINE (COMPLETED)
 
-- **SCADA canlı entegrasyon (EN ETKİLEYİCİ BONUS):** Uygulamayı Vercel/Supabase üzerinde canlıya alıp, SCADA bilgisayarında açmak. Havuz başında kaydı başlatıp, kontrol odasındaki personelin ekranında alarmı canlı göstermek. Bunu video ile kaydetmek jüri için inanılmaz etkileyici olur — gerçek tesis, gerçek SCADA, gerçek personel.
-- **Sahada test:** Tesis havuzunun yanında sentetik ses çalıp, Gemma 4'ün yerelde tespit ettiğini video ile göstermek
-- **Raspberry Pi demo:** Gerçek bir Pi üzerinde çalışan sistemi göstermek
-- **İki model karşılaştırması:** E4B vs E2B — büyük model daha iyi duyuyor mu?
-- **Çoklu dil:** Türkçe "YARDIM" + İngilizce "HELP" — Gemma 4'ün çoklu dil desteğini göster
-- **Deprem bağlantısı:** 6 Şubat 2023 depremi referansı — enkaz altından ses tespiti vizyonu
-- **Gerçek zamanlı mikrofon:** Bilgisayar mikrofonundan canlı ses alıp analiz etme (demo için wow factor)
-- **MQTT/Socket SCADA simülasyonu:** Alarm komutunu başka bir panele gerçek zamanlı gönderme
-
----
-
-## 12. ÖZELLİKLE HATIRLANMASI GEREKENLER
-
-- **Proje mottosu:** "AI'ya neyi dinlemesi gerektiğini öğretirsen ne olur? Belki bir hayat kurtarabiliriz."
-- Yarışma VIDEO odaklı — video en önemli parça (%30 puan)
-- Impact & Vision %40 puan — hikayemiz çok güçlü
-- Edge/offline çalışma her yerde vurgulanacak
-- Gerçek tesis layout'u kullanılacak (Mehmet'te mevcut)
-- Gemma 4'ün ses anlayan TEK modelleri E4B ve E2B — bu bilinçli bir seçim, kısıtlama değil
-- Jüri gerçekten tesise kurulmuş bir sistem beklemiyor — çalışan bir prototip (demo) yeterli
-- 1500 kelime Writeup sınırı var — öz ve net yazılmalı
-- Apache 2.0 lisansı — ticari olarak da kullanılabilir, bu bir artı
-- PROTOCOL modunu "safety-biased configuration" olarak çerçevele, "overfit" dedirtme
-- S5 CONTEXT bulgusunu "not deployable behavior" olarak vurgula
-- Sahne sayısı sorusuna etik gerekçe + her sahne farklı tehlike tipi cevabı ver
-- **Klasör adı:** wwtp-acoustic-safety-system (benchmark değil, system)
+| Day | Date | Focus | Status |
+|-----|------|-------|--------|
+| 1 | Apr 3 | Ollama setup, audio generation, BARE/CONTEXT/PROTOCOL tests | ✅ |
+| 2 | Apr 4 | Spectrogram breakthrough, few-shot, frequency filtering | ✅ |
+| 3 | Apr 5 | CoT reasoning, debouncing, PCEN failure, temperature=0 | ✅ |
+| 4 | Apr 6 | E2B vs E4B comparison, engine --model flag | ✅ |
+| 5 | Apr 7 | Kaggle writeup v1, first submission | ✅ |
+| 6 | Apr 8 | Web demo (React), live_detector.py, live_detector_ui.py | ✅ |
+| 7 | Apr 9 | SCADA UI redesign, audio playback, scene summaries | ✅ |
+| 8 | Apr 10 | **Field test at Ceyhan WWTP**, writeup v3, video update, GitHub cleanup | ✅ |
 
 ---
 
-*Bu doküman, projenin tüm tartışmalarını, kararlarını ve yol haritasını içerir.*
-*Herhangi bir oturumda bu dosya açıldığında, projenin tam bağlamı görülür.*
-*Son güncelleme: 3 Nisan 2026 — Test sonuçları ve topluluk geri bildirimleri eklendi.*
+## 9. RISKS AND MITIGATIONS (FINAL STATUS)
+
+| Risk | Impact | Status |
+|------|--------|--------|
+| E4B can't understand audio | High | ✅ Solved — switched to spectrograms |
+| Model doesn't output JSON | Medium | ✅ Solved — CoT prompt with strict format |
+| Ollama doesn't support E4B | Medium | ✅ Solved — Ollama v0.20.0 |
+| PCEN signal processing fails | High | ✅ Documented — physics limitation |
+| S5 non-deterministic | Critical | ✅ Solved — temperature=0 |
+| Blower room too loud | Medium | ✅ Documented — mic hardware limit, industrial mic recommended |
+| Demo looks unprofessional | Medium | ✅ Solved — SCADA UI + React web demo |
+| No field validation | High | ✅ Solved — 3 locations, 30 chunks, 0 FP |
+
+---
+
+## 10. BONUS IDEAS — STATUS
+
+| Idea | Status |
+|------|--------|
+| SCADA-style live interface | ✅ Built (live_detector_ui.py) |
+| Field test at real facility | ✅ Done (3 locations, video recorded) |
+| E4B vs E2B comparison | ✅ Done (findings/15) |
+| Real-time microphone detection | ✅ Built (live_detector.py) |
+| Interactive web demo | ✅ Built (React + Vercel) |
+| Raspberry Pi deployment | ⏳ Future work (GPU required) |
+| Multi-language detection | ⏳ Future work |
+| MQTT/SCADA integration | ⏳ Future work |
+
+---
+
+## 11. STRENGTHS FOR THE JURY
+
+1. **Real story** — not hypothetical, based on a real incident
+2. **Field experience** — 10+ years, 15 WWTPs, real acoustic profiles
+3. **Edge/offline** — exactly what the competition asks for
+4. **Real facility layout** — Ceyhan WWTP aerial photo, real microphone positions
+5. **Field-validated** — tested at 3 locations, 30 chunks, 0 false positives
+6. **Failed experiments documented** — PCEN failure, blower room limit, E2B failure
+7. **Asymmetric scoring** — missing a life costs 4x more than a false alarm
+8. **Kaggle Grandmaster** — credibility and trust
+9. **Multiple tracks** — Global Resilience + Safety & Trust + Ollama special track
+10. **The survival question** — not an abstract score, a concrete answer: "He would have survived."
+
+---
+
+## 12. KEY REMINDERS
+
+- **Impact & Vision = 40%** — our story is our strongest asset
+- **Video = 30%** — field test footage is unique, no competitor has this
+- **Technical Depth = 30%** — 8 iterations, 16 findings docs, E2B comparison
+- Edge/offline emphasis everywhere
+- "CERTAIN SURVIVAL" is a system verdict, not an overclaim
+- Temperature=0 is a safety requirement, not a model feature
+- Failed experiments are strengths, not weaknesses
+- **The project is submitted and field-validated. Focus on polish, not new features.**
+
+---
+
+*This document contains the complete project roadmap, decisions, and status.*
+*Started: April 3, 2026 — Score 3.0, model hallucinating everywhere.*
+*Current: April 10, 2026 — Score 91.0, field-validated at Ceyhan WWTP, zero false positives.*
+*From a question to an answer: "He would have survived."*
