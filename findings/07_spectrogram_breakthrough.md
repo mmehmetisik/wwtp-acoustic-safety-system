@@ -1,190 +1,169 @@
-# WWTP Acoustic Safety — Spektrogram Yaklaşımı Bulguları
-## "Modelin Kulağı Duymuyorsa, Gözüne Göster"
-> **Test Tarihi:** 4 Nisan 2026
+# WWTP Acoustic Safety — Spectrogram Approach Findings
+## "If the Model's Ear Can't Hear, Show Its Eye"
+> **Test Date:** April 4, 2026
 > **Model:** Gemma 4 E4B (Ollama v0.20.0, RTX 3060 6GB)
-> **Referans:** NeurIPS 2024 — "Vision Language Models Are Few-Shot Audio Spectrogram Classifiers"
+> **Reference:** NeurIPS 2024 — "Vision Language Models Are Few-Shot Audio Spectrogram Classifiers"
 
 ---
 
-## 1. NEDEN SPEKTROGRAM?
+## 1. WHY SPECTROGRAMS?
 
-### Duvara Çarptık
+### We Hit a Wall
 
-Ses tabanlı yaklaşımla (audio → model) üç farklı prompt versiyonu test edildi:
+Three different prompt versions were tested with the audio-based approach (audio → model):
 
-Agresif prompt: Model insan sesini DUYDU (S4: 0.85-0.90, S5: 0.85) ama halüsinasyon da yaptı (S1: 7 FP, S3: 7 FP). Pasif prompt: Halüsinasyon sıfırlandı ama model hiçbir şeyi duyamadı (60 chunk'ta 0 alarm). Nötr prompt: Dengeyi bulmaya çalıştık ama model çoğu chunk'ta duyamıyordu, bazen bir chunk'ta duyup diğerlerinde kaçırıyordu.
+Aggressive prompt: Model HEARD human voice (S4: 0.85-0.90, S5: 0.85) but also hallucinated (S1: 7 FP, S3: 7 FP). Passive prompt: Hallucinations zeroed out but model heard nothing (60 chunks, 0 alarms). Neutral prompt: Tried to find balance but model couldn't hear most chunks, occasionally detecting one chunk then missing others.
 
-Temel sorun: Gemma 4 E4B'nin ses anlama kapasitesi (ASR tabanlı) endüstriyel gürültü altında insan sesini güvenilir şekilde ayırt edemiyor. Bu modelin sınırı — prompt mühendisliği ile aşılamıyor.
+Core problem: Gemma 4 E4B's audio understanding capacity (ASR-based) cannot reliably distinguish human voice under industrial noise. This is the model's limit — not solvable through prompt engineering.
 
-### İlham: NeurIPS 2024 Makalesi
+### Inspiration: NeurIPS 2024 Paper
 
-NeurIPS 2024'te yayınlanan "Vision Language Models Are Few-Shot Audio Spectrogram Classifiers" makalesi şunu kanıtlıyor: Vision Language Model'ler (VLM'ler) sesi spektrogram görüntüsü olarak aldığında, ses sınıflandırma yapabiliyor. GPT-4o bu görevde insan uzmanlardan bile daha iyi performans gösteriyor. Few-shot örneklerle performans dramatik artıyor.
+The NeurIPS 2024 paper "Vision Language Models Are Few-Shot Audio Spectrogram Classifiers" proved that VLMs can classify audio when received as spectrogram images. GPT-4o outperformed human experts in this task. Performance improves dramatically with few-shot examples.
 
-### Hipotez
+### Hypothesis
 
-Gemma 4 E4B multimodal bir model — hem ses hem görüntü anlıyor. Ses anlama kapasitesi sınırlı ama görüntü anlama kapasitesi çok daha güçlü. Eğer ses dosyasını mel spektrogram görüntüsüne çevirirsek, model GÖRSEL olarak insan sesini mekanik sesten ayırt edebilir. Çünkü spektrogramda insan sesi belirgin formant bantları oluşturur, mekanik ses ise sabit çizgiler veya dikey darbeler oluşturur.
-
----
-
-## 2. SPEKTROGRAM ANALİZİ — GÖRSEL FARKLAR
-
-Her sahnenin spektrogramı üretildi ve gözle incelendi. Farklar çok net:
-
-S1 (pompa, insan YOK): Sadece düşük frekanslarda (0-512Hz) sabit yatay bantlar. 5 saniye boyunca hiçbir değişiklik yok. Üst frekanslar tamamen boş (siyah). Tipik mekanik gürültü paterni.
-
-S2 (inşaat + bağırma, insan VAR): Geniş bant gürültü arka planı üzerinde 512-1024Hz aralığında parlak eğimli çizgiler — konuşma formantları. Kıvrımlı, kısa süreli, düzensiz aralıklı. Makinelerde bu patern oluşmaz.
-
-S3 (metalik sesler, insan YOK): Dikey parlak çizgiler (metalik darbeler) ve altta sabit yatay bant (motor hum). Formant eğrisi yok ama dikey darbeler yanıltıcı olabilir.
-
-S4 (maskeli ses, insan VAR): En net görünen — 512-2048Hz aralığında üst üste yığılmış yatay bantlar (harmonik yapı), merdiven deseni gibi. Klasik insan sesi harmonik yapısı. Bu patern S1 ve S3'te kesinlikle yok.
-
-S5 (boğulma, insan VAR): 512-1024Hz aralığında kıvrımlı parlak noktalar ve formant yapıları. S2'ye benzer ama daha dağınık ve kesintili — boğulma efektinin doğal sonucu.
+Gemma 4 E4B is multimodal — it understands both audio and images. Audio understanding is limited but vision understanding is much stronger. If we convert audio to mel spectrogram images, the model can VISUALLY distinguish human voice from mechanical noise. Because on a spectrogram, human voice creates distinct formant bands while mechanical noise creates flat lines or vertical spikes.
 
 ---
 
-## 3. TEST AŞAMALARI
+## 2. SPECTROGRAM ANALYSIS — VISUAL DIFFERENCES
 
-### Aşama 1: Zero-Shot Spektrogram (Sıfır Örnek)
+Each scene's spectrogram was generated and visually inspected. Differences are striking:
 
-İlk denemede spektrogram görüntüsü modele hiçbir örnek verilmeden gönderildi. Model görüntüyü analiz etti, formant paternlerini tanımladı (reasoning'de "formants characteristic of human speech" dedi) ama confidence skorunu ters yönde kullandı — 0.90 "insan yok, eminim" anlamında verdi.
+**S1 (pump, no human):** Only steady horizontal bands at low frequencies (0-512Hz). No change across 5 seconds. Upper frequencies completely empty (black). Typical mechanical noise pattern.
 
-Prompt düzeltildi — confidence yönü netleştirildi. Bu sefer model formant görmediğini söyledi, tüm sahnelere düşük confidence verdi. Zero-shot yaklaşım tutarsız sonuçlar üretti.
+**S2 (construction + shouting, human present):** Bright curved lines at 512-1024Hz on top of broadband noise background — speech formants. Curved, short-duration, irregularly spaced. Machines never produce this pattern.
 
-### Aşama 2: Thinking Mode Sorunu
+**S3 (metallic sounds, no human):** Vertical bright lines (metallic impacts) and steady horizontal band at bottom (motor hum). No formant curves but vertical spikes can be misleading.
 
-Gemma 4 E4B'nin "thinking mode" özelliği API yanıtlarını karmaşıklaştırdı. Model cevabını `content` alanı yerine `thinking` alanına yazıyordu. `content` boş kalıyordu. Çözüm: API çağrısına `"think": False` parametresi eklendi. Bu sorunu tamamen çözdü.
+**S4 (masked voice, human present):** Most visible — stacked horizontal bands at 512-2048Hz (harmonic structure), staircase pattern. Classic human voice harmonic structure. This pattern is definitely absent in S1 and S3.
 
-### Aşama 3: Few-Shot Spektrogram (Örnekli) — DÖNÜM NOKTASI
-
-NeurIPS makalesindeki yaklaşım uygulandı. Modele iki örnek gösterildi:
-
-Örnek 1 (temiz): S1 pompa dairesi spektrogramı — "Bu temiz, sadece makine sesi. Düşük frekanslarda sabit bantlar var, formant yok."
-
-Örnek 2 (insan sesli): S4 maskeli ses spektrogramı — "Bu insan sesli. 512-2048Hz aralığında eğimli/yığılmış formant bantları görüyorsun."
-
-Sonra model yeni spektrogramları sınıfladı.
+**S5 (drowning, human present):** Curved bright spots and formant structures at 512-1024Hz. Similar to S2 but more scattered and intermittent — natural result of drowning effects.
 
 ---
 
-## 4. FEW-SHOT SPEKTROGRAM SONUÇLARI
+## 3. TEST STAGES
 
-| Sahne | İnsan | Alarm | Conf | Tip | Doğru mu? | Reasoning |
-|-------|-------|-------|------|-----|-----------|-----------|
-| S1 (30-35s) | YOK | ---- | 0.10 | none | ✅ DOĞRU | "Only steady low-frequency noise bands" |
-| S2 (30-35s) | VAR | 🚨 | 0.90 | speech | ✅ DOĞRU | "Strong distinct formant patterns of human speech" |
-| S3 (30-35s) | YOK | 🚨 | 0.90 | shouting | ❌ YANLIŞ | "Rhythmic formant patterns" (metalik sesi insan sandı) |
-| S4 (35-40s) | VAR | 🚨 | 0.90 | speech | ✅ DOĞRU | "Strong distinct formant patterns of human speech" |
-| S5 (25-30s) | VAR | 🚨 | 0.90 | shouting | ✅ DOĞRU | "Rhythmic formant patterns at beginning and end" |
-| S5 (30-35s) | VAR | 🚨 | 0.90 | speech | ✅ DOĞRU | "Rhythmic formant patterns across duration" |
-| S5 (40-45s) | VAR | 🚨 | 0.90 | shouting | ✅ DOĞRU | "Rhythmic formant patterns across duration" |
+### Stage 1: Zero-Shot Spectrogram (No Examples)
 
-**Başarı oranı: 7 testten 6 doğru (%85.7)**
+First attempt: spectrogram image sent to model with no examples. Model analyzed the image, identified formant patterns (reasoning mentioned "formants characteristic of human speech") but used confidence score in reverse direction — 0.90 meaning "no human, I'm sure."
 
----
+Prompt corrected — confidence direction clarified. This time model said it saw no formants, gave low confidence to all scenes. Zero-shot approach produced inconsistent results.
 
-## 5. SES TABANLI vs SPEKTROGRAM KARŞILAŞTIRMASI
+### Stage 2: Thinking Mode Issue
 
-### Tespit Performansı
+Gemma 4 E4B's "thinking mode" complicated API responses. Model wrote its answer in the `thinking` field instead of `content`. The `content` field was empty. Solution: Added `"think": False` parameter to API call. This completely resolved the issue.
 
-| Sahne | Ses + Agresif | Ses + Nötr | Spektrogram Few-Shot |
-|-------|--------------|------------|----------------------|
-| S1 (insan yok) | ❌ 7 FP | ✅ 0 FP | ✅ 0 FP |
-| S2 (insan var) | Tespit var ama FP'li | 1 chunk 0.90 | ✅ 0.90 alarm |
-| S3 (insan yok) | ❌ 7 FP | ✅ 0 FP | ❌ 1 FP (0.90) |
-| S4 (insan var) | 0.85-0.90 ama FP'li | 0 alarm | ✅ 0.90 alarm |
-| S5 (insan var) | 1 chunk 0.85 | 0 alarm | ✅ 3 chunk 0.90 |
+### Stage 3: Few-Shot Spectrogram (With Examples) — TURNING POINT
 
-### Hız Karşılaştırması
+The NeurIPS approach was applied. Model was shown two examples:
 
-| Yöntem | Chunk Süresi (ort.) | 12 Chunk Toplam |
-|--------|---------------------|-----------------|
-| Ses + Agresif prompt | ~37 saniye | ~7.4 dakika |
-| Ses + Nötr prompt | ~25 saniye | ~5.0 dakika |
-| Spektrogram few-shot | ~6 saniye | ~1.2 dakika |
+Example 1 (clean): S1 pump room spectrogram — "This is clean, only machine noise. Steady bands at low frequencies, no formants."
 
-Spektrogram yaklaşımı ses tabanlıya göre **6 kat daha hızlı**. 5 saniyelik sesi 6 saniyede analiz etmek — neredeyse gerçek zamanlı. Bu edge deployment için kritik bir avantaj.
+Example 2 (human voice): S4 masked voice spectrogram — "This has human voice. You can see curved/stacked formant bands at 512-2048Hz."
 
-### Güvenilirlik
-
-| Yöntem | Non-determinizm | Tutarlılık |
-|--------|----------------|------------|
-| Ses tabanlı | Yüksek — aynı chunk farklı çalıştırmada farklı sonuç | Düşük |
-| Spektrogram | Düşük — görüntü deterministik, model tutarlı karar veriyor | Yüksek |
+Then the model classified new spectrograms.
 
 ---
 
-## 6. NEDEN ÇALIŞIYOR?
+## 4. FEW-SHOT SPECTROGRAM RESULTS
 
-### Modelin İç Mimarisi
+| Scene | Human | Alarm | Conf | Type | Correct? | Reasoning |
+|-------|-------|-------|------|------|----------|-----------|
+| S1 (30-35s) | NO | — | 0.10 | none | CORRECT | "Only steady low-frequency noise bands" |
+| S2 (30-35s) | YES | ALARM | 0.90 | speech | CORRECT | "Strong distinct formant patterns of human speech" |
+| S3 (30-35s) | NO | ALARM | 0.90 | shouting | WRONG | "Rhythmic formant patterns" (mistook metallic for human) |
+| S4 (35-40s) | YES | ALARM | 0.90 | speech | CORRECT | "Strong distinct formant patterns of human speech" |
+| S5 (25-30s) | YES | ALARM | 0.90 | shouting | CORRECT | "Rhythmic formant patterns at beginning and end" |
+| S5 (30-35s) | YES | ALARM | 0.90 | speech | CORRECT | "Rhythmic formant patterns across duration" |
+| S5 (40-45s) | YES | ALARM | 0.90 | shouting | CORRECT | "Rhythmic formant patterns across duration" |
 
-Gemma 4 E4B multimodal bir model — hem ses hem görüntü işleyebiliyor. Ama bu iki kapasite eşit değil. Ses anlama (ASR) küçük bir modülde, temiz konuşma tanıma için optimize edilmiş. Görüntü anlama (Vision) çok daha büyük ve güçlü bir modülde, karmaşık görsel patern tanıma için eğitilmiş. Spektrogram yaklaşımı modelin zayıf kulağını atlayıp güçlü gözünü kullanıyor.
-
-### Formant Paternleri Görsel Olarak Belirgin
-
-İnsan sesi spektrogramda benzersiz görsel desenler oluşturuyor — eğimli formant bantları, harmonik merdiven yapıları, düzensiz zaman aralıklı kısa patlamalar. Mekanik sesler ise sabit yatay çizgiler, dikey darbeler, uniform enerji dağılımı oluşturuyor. Bu iki patern görsel olarak çok farklı — tıpkı yüz tanıma gibi, model görsel paterni ayırt edebiliyor.
-
-### Few-Shot Kalibrasyon Etkisi
-
-Zero-shot'ta model spektrogramı genel olarak analiz ediyordu ama bizim spesifik endüstriyel bağlamda neyin "temiz" neyin "insan sesli" olduğunu bilmiyordu. İki örnek bu kalibrasyonu sağladı. Bu NeurIPS makalesindeki bulguyla birebir uyumlu — few-shot örnekler performansı dramatik artırıyor çünkü modele "bu bağlamda neyi aramalısın" gösteriliyor.
-
----
-
-## 7. TEK SORUN: S3 FALSE POSITIVE
-
-S3 (metalik sesler, insan yok) spektrogramında model "rhythmic formant patterns" gördüğünü iddia etti ve 0.90 confidence ile yanlış alarm verdi. Bu sorunun nedeni metal scraping sesinin bilerek insan konuşma ritmine benzetilmiş olması — düzensiz yoğunluk değişimleri, 300-3000Hz aralığında. Spektrogramda da bu benzerlik görünüyor.
-
-Olası çözümler: S3 spektrogramını üçüncü bir "temiz ama yanıltıcı" örneği olarak few-shot örneklerine eklemek. Debouncing katmanı ile ardışık alarm kontrolü yapmak. Farklı bir spektrogram parametresi kullanmak (örneğin frekans aralığını daraltmak).
+**Success rate: 6 out of 7 correct (85.7%)**
 
 ---
 
-## 8. YOLCULUK ÖZETİ — İLMEK İLMEK
+## 5. AUDIO-BASED vs SPECTROGRAM COMPARISON
 
-Bu projenin teknik yolculuğu adım adım bir keşif süreciydi:
+### Detection Performance
 
-**Adım 1 — Formant sentezi ile başladık.** Model sentetik çığlığı duyamadı (S5'te 12 chunk sıfır sinyal). Kök neden: formant sesleri modelin ASR eğitim verisindeki konuşma paternleriyle eşleşmiyordu.
+| Scene | Audio + Aggressive | Audio + Neutral | Spectrogram Few-Shot |
+|-------|-------------------|----------------|---------------------|
+| S1 (no human) | 7 FP | 0 FP | 0 FP |
+| S2 (human) | Detection with FPs | 1 chunk at 0.90 | 0.90 alarm |
+| S3 (no human) | 7 FP | 0 FP | 1 FP (0.90) |
+| S4 (human) | 0.85-0.90 with FPs | 0 alarm | 0.90 alarm |
+| S5 (human) | 1 chunk at 0.85 | 0 alarm | 3 chunks at 0.90 |
 
-**Adım 2 — TTS'e geçtik.** Model "Help! Yardım!" sesini tanıdı (S2'de "shouting_help", S5'te 0.85). Kök neden çözüldü — gerçek konuşma paterni modelin tanıyabildiği bir format.
+### Speed Comparison
 
-**Adım 3 — Prompt mühendisliği yaptık.** Üç versiyon test ettik. Agresif prompt halüsinasyon yarattı, pasif prompt tespiti öldürdü, nötr prompt dengeledi ama tutarsız. Altın bulgu: "AI'ya ne söylediğin, ne kadar söylediğinden daha önemli."
+| Method | Avg Chunk Time | 12-Chunk Total |
+|--------|---------------|----------------|
+| Audio + Aggressive prompt | ~37 seconds | ~7.4 minutes |
+| Audio + Neutral prompt | ~25 seconds | ~5.0 minutes |
+| Spectrogram few-shot | **~6 seconds** | **~1.2 minutes** |
 
-**Adım 4 — Duvara çarptık.** Ses tabanlı yaklaşımın sınırına ulaştık. Model bazen duyuyor bazen duymuyor, LLM non-determinizmi güvenlik sistemi için kabul edilemez.
+Spectrogram approach is **6x faster** than audio-based. Analyzing 5 seconds of audio in 6 seconds — nearly real-time. This is a critical advantage for edge deployment.
 
-**Adım 5 — Spektrogram hipotezi.** NeurIPS 2024 makalesinden esinlenerek "modelin kulağı yetersizse gözünü kullan" hipotezini kurduk.
+### Reliability
 
-**Adım 6 — Zero-shot spektrogram.** Model formantları gördü ama tutarsız karar verdi. Thinking mode API sorunu çözüldü.
-
-**Adım 7 — Few-shot spektrogram.** DÖNÜM NOKTASI. İki örnek ile model %85.7 doğrulukla sınıflandırma yaptı. S5'te üç farklı chunk'ta 0.90 confidence. 6 kat hız artışı. Tutarlı ve güvenilir sonuçlar.
-
----
-
-## 9. SAHADA KULLANILABİLİRLİK
-
-Spektrogram yaklaşımı sahada tamamen kullanılabilir:
-
-Ek donanım gerekmiyor — aynı mikrofon, aynı edge cihaz. Ses → spektrogram dönüşümü 0.1 saniye sürüyor (librosa ile). İnternet gerekmiyor — tüm işlem lokalde. Toplam analiz süresi: 0.1s (spektrogram) + 6s (model) = 6.1 saniye per chunk. Bu 5 saniyelik ses için neredeyse gerçek zamanlı.
-
-Akış: Mikrofon → 5sn ses al → spektrogram üret (0.1s) → modele gönder (6s) → karar → aksiyon
-
----
-
-## 10. YARIŞMA KURALLARI
-
-Spektrogram yaklaşımı yarışma kurallarını İHLAL ETMİYOR. Yarışma "Gemma 4 kullan, topluma faydalı bir proje yap" diyor. Gemma 4 zaten multimodal — hem ses hem görüntü anlıyor. Modelin vision kapasitesini kullanmak kuralları ihlal etmek değil, modelin gücünü doğru kullanmak. Hatta bu teknik derinlik göstergesi: "Modelin ses anlama kapasitesini test ettik, sınırlarını bulduk. Sonra aynı modelin vision kapasitesini kullanarak spektrogram yaklaşımıyla bu sınırı aştık."
+| Method | Non-determinism | Consistency |
+|--------|----------------|-------------|
+| Audio-based | High — same chunk gives different results across runs | Low |
+| Spectrogram | Low — image is deterministic, model decisions are consistent | High |
 
 ---
 
-## 11. SONRAKI ADIMLAR
+## 6. WHY DOES IT WORK?
 
-1. S3 false positive çözümü (ek few-shot örnek veya debouncing)
-2. Spektrogram yaklaşımını motora entegre etme (acoustic_engine.py)
-3. 12 chunk tam sahne testi (few-shot spektrogram modu)
-4. JSON davranış export özelliği
-5. E2B model karşılaştırma testleri
-6. Demo arayüzü (spektrogram görselleştirmeli)
-7. Kaggle writeup ve video
+### Model Architecture
+
+Gemma 4 E4B is multimodal — handles both audio and images. But these two capabilities are not equal. Audio understanding (ASR) is in a small module, optimized for clean speech recognition. Vision understanding is in a much larger and stronger module, trained for complex visual pattern recognition. The spectrogram approach bypasses the model's weak ear and uses its strong eye.
+
+### Formant Patterns Are Visually Distinct
+
+Human voice creates unique visual patterns on spectrograms — curved formant bands, harmonic staircase structures, irregularly-timed short bursts. Mechanical sounds create flat horizontal lines, vertical spikes, uniform energy distribution. These two patterns are visually very different — like face recognition, the model can distinguish the visual pattern.
+
+### Few-Shot Calibration Effect
+
+In zero-shot, the model analyzed spectrograms generally but didn't know what "clean" vs "human voice" means in our specific industrial context. Two examples provided this calibration. This aligns with the NeurIPS paper findings — few-shot examples dramatically improve performance because they show the model "what to look for in this context."
 
 ---
 
-*Bu doküman spektrogram yaklaşımının keşif sürecini ve sonuçlarını içerir.*
-*Proje için dönüm noktası niteliğinde bir bulgu.*
-*Son güncelleme: 4 Nisan 2026*
+## 7. SINGLE ISSUE: S3 FALSE POSITIVE
+
+In S3 (metallic sounds, no human), the model claimed to see "rhythmic formant patterns" and gave a 0.90 confidence false alarm. The cause: metallic scraping sounds were intentionally designed to resemble human speech rhythm — irregular intensity changes in the 300-3000Hz range. This similarity is visible in the spectrogram.
+
+Possible solutions: Add S3 spectrogram as a third "clean but misleading" few-shot example. Apply debouncing for consecutive alarm verification. Use different spectrogram parameters (e.g., narrow the frequency range).
+
+---
+
+## 8. THE JOURNEY SUMMARY
+
+**Step 1 — Formant synthesis.** Model couldn't hear (S5: 12 chunks zero signal). Root cause: formant sounds didn't match model's ASR training data.
+
+**Step 2 — TTS transition.** Model heard "Help! Yardim!" (S2: "shouting_help", S5: 0.85). Root cause solved — real speech patterns.
+
+**Step 3 — Prompt engineering.** Three versions tested. Aggressive hallucinated, passive killed detection, neutral was inconsistent. Key finding: "What you tell AI matters more than how much you tell it."
+
+**Step 4 — Hit the wall.** Audio approach reached its limit. Non-determinism unacceptable for safety systems.
+
+**Step 5 — Spectrogram hypothesis.** Inspired by NeurIPS 2024: "if the model's ear can't hear, show its eye."
+
+**Step 6 — Zero-shot spectrogram.** Model saw formants but made inconsistent decisions. API thinking mode issue resolved.
+
+**Step 7 — Few-shot spectrogram.** TURNING POINT. Two examples → 85.7% accuracy. S5 detected in three chunks at 0.90. 6x speed improvement. Consistent and reliable.
+
+---
+
+## 9. FIELD DEPLOYABILITY
+
+The spectrogram approach is fully deployable in the field:
+
+No additional hardware needed — same microphone, same edge device. Audio → spectrogram conversion takes 0.1 seconds (via librosa). No internet required — all processing local. Total analysis time: 0.1s (spectrogram) + 6s (model) = 6.1 seconds per chunk. Nearly real-time for 5-second audio.
+
+Pipeline: Microphone → 5s audio → spectrogram (0.1s) → model (6s) → decision → action
+
+---
+
+*This document records the spectrogram breakthrough — the project's turning point.*
+*Last updated: April 4, 2026*
