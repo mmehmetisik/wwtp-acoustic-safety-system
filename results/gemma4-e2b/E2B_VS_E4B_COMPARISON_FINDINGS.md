@@ -1,181 +1,165 @@
-# WWTP Acoustic Safety — Gemma 4 E2B vs E4B Model Karşılaştırması
-## 2 Milyar mı, 4 Milyar mı? Edge AI İçin Minimum Model Boyutu
-> **Test Tarihi:** 6 Nisan 2026
-> **Modeller:** Gemma 4 E2B (2B parametre) vs Gemma 4 E4B (4B parametre)
-> **Runtime:** Ollama v0.20.0, RTX 3060 6GB, tamamen yerel
-> **Koşullar:** Aynı ses dosyaları, aynı spektrogram, aynı few-shot örnekler, aynı CoT prompt, aynı debouncing, aynı temperature=0. Tek fark: model boyutu.
+# WWTP Acoustic Safety — Gemma 4 E2B vs E4B Model Comparison
+## 2 Billion vs 4 Billion? Minimum Model Size for Edge AI Safety
+> **Test Date:** April 6, 2026
+> **Models:** Gemma 4 E2B (2B parameters) vs Gemma 4 E4B (4B parameters)
+> **Runtime:** Ollama v0.20.0, RTX 3060 6GB, fully local
+> **Conditions:** Same audio files, same spectrograms, same few-shot examples, same CoT prompt, same debouncing, same temperature=0. Only difference: model size.
 
 ---
 
-## 1. NEDEN BU TESTİ YAPTIK?
+## 1. WHY THIS TEST?
 
-Yarışma (Gemma 4 Good Hackathon) özellikle "E2B and E4B models for edge-based solutions" diyor. Biz tüm optimizasyonu E4B üzerinde yaptık ve 91.0/100 skora ulaştık. Ama kritik bir soru vardı: "Aynı pipeline daha küçük modelle çalışır mı?"
+The competition (Gemma 4 Good Hackathon) specifically mentions "E2B and E4B models for edge-based solutions." We optimized everything on E4B and reached 91.0/100. But a critical question remained: "Does the same pipeline work with a smaller model?"
 
-Bu soru sadece akademik değil — pratik. E2B daha küçük (2B vs 4B parametre), daha hızlı (chunk başı ~6s vs ~7s), daha az RAM kullanıyor. Eğer E2B de çalışsaydı, Raspberry Pi Zero gibi çok daha ucuz donanımlara deploy edilebilirdi. Ama çalışmadı — ve neden çalışmadığı projenin en öğretici bulgularından biri.
+This question is not just academic — it's practical. E2B is smaller (2B vs 4B parameters), faster (~6s vs ~7s per chunk), uses less RAM. If E2B also worked, it could be deployed on much cheaper hardware like Raspberry Pi Zero. But it didn't work — and why it failed is one of the project's most instructive findings.
 
 ---
 
-## 2. SONUÇLAR — FELAKET SEVİYESİNDE FARK
+## 2. RESULTS — CATASTROPHIC DIFFERENCE
 
-### Ana Skor Tablosu
+### Main Score Table
 
-| Sahne | Açıklama | İnsan | E4B Skor | E4B FP | E2B Skor | E2B FP |
-|-------|----------|-------|----------|--------|----------|--------|
-| S1 | Pompa dairesi (sessiz, insan yok) | YOK | **60** | 0 | **0** | 12 |
-| S2 | İnşaat + bağırma | VAR | **95** | 0 | **0** | 5 |
-| S3 | Metalik ses (insan yok) | YOK | **60** | 0 | **0** | 12 |
-| S4 | Maskeli işçi (zayıf sinyal) | VAR | **100** | 0 | **0** | 4 |
-| S5 | GERÇEK KAZA (boğulma) | VAR | **100** | 0 | **5** | 4 |
+| Scene | Description | Human | E4B Score | E4B FP | E2B Score | E2B FP |
+|-------|------------|-------|----------|--------|----------|--------|
+| S1 | Pump room (quiet, no human) | NO | **60** | 0 | **0** | 12 |
+| S2 | Construction + shouting | YES | **95** | 0 | **0** | 5 |
+| S3 | Metallic sound (no human) | NO | **60** | 0 | **0** | 12 |
+| S4 | Masked worker (weak signal) | YES | **100** | 0 | **0** | 4 |
+| S5 | REAL INCIDENT (drowning) | YES | **100** | 0 | **5** | 4 |
 | **WGT AVG** | | | **91.0** | **0** | **2.0** | **37** |
 
-### Detaylı Karşılaştırma
+### Detailed Comparison
 
-| Metrik | E2B (2B) | E4B (4B) | Fark |
-|--------|----------|----------|------|
+| Metric | E2B (2B) | E4B (4B) | Difference |
+|--------|----------|----------|------------|
 | Weighted Average | 2.0 | 91.0 | **45.5x** |
-| Toplam False Positive | 37/60 | 0/60 | **∞ iyileşme** |
-| Toplam Doğru Tespit | Anlamsız (her yere alarm) | 8/60 (hedefli) | — |
-| S5 Survival Verdict | "CERTAIN" ama sahte | CERTAIN (gerçek) | — |
-| CoT Reasoning | Çalışmıyor | Çalışıyor | Kritik fark |
-| Chunk Başı Süre | ~6.2s | ~7.0s | E2B %12 hızlı |
-| Tutarlılık | Tutarlı (ama tutarlı yanlış) | 7/7 tutarlı doğru | — |
+| Total False Positives | 37/60 | 0/60 | **Infinite improvement** |
+| Total Correct Detections | Meaningless (alarms everywhere) | 8/60 (targeted) | — |
+| S5 Survival Verdict | "CERTAIN" but fake | CERTAIN (real) | — |
+| CoT Reasoning | Not functional | Functional | Critical difference |
+| Time per Chunk | ~6.2s | ~7.0s | E2B 12% faster |
+| Consistency | Consistent (but consistently wrong) | 7/7 consistently correct | — |
 
 ---
 
-## 3. E2B NE YAPTI? (Detaylı Analiz)
+## 3. WHAT DID E2B DO? (Detailed Analysis)
 
-### E2B'nin Davranışı: "Her Şeye Alarm Ver"
+### E2B's Behavior: "Alarm on Everything"
 
-E2B 5 sahnede toplam 60 chunk analiz etti. 60 chunk'ın **60'ında** alarm verdi. Her sahnede, her chunk'ta, insan olsun olmasın, gürültü olsun olmasın — 0.90-0.95 confidence ile "speech" tespit ettiğini iddia etti.
+E2B analyzed 60 chunks across 5 scenes. It alarmed on **all 60**. Every scene, every chunk, human or not, noise or not — it claimed to detect "speech" at 0.90-0.95 confidence.
 
-Bu, benchmark tasarımındaki "naive baseline — always alarm" senaryosunun birebir karşılığı. `answer_key.json`'daki hesaplamaya göre naive always-alarm baseline'ın tahmini skoru: 20. E2B bunun bile altında kaldı: **2.0**.
+This is the exact equivalent of the "naive baseline — always alarm" scenario in the benchmark design. According to `answer_key.json` calculations, the naive always-alarm baseline estimated score is 20. E2B scored below even that: **2.0**.
 
-### Sahne Bazlı Analiz
+### Per-Scene Analysis
 
-**S1 — Pompa Dairesi (İnsan YOK):**
-E4B: 12 chunk, 0 alarm, 0 FP → 60/100.
-E2B: 12 chunk, 12 alarm, 12 FP → 0/100.
-E2B sadece pompa sesi olan sahnede 12 kez "speech" dedi. CoT talimatını ("dikey çizgi = mekanik, yatay bant = formant") tamamen görmezden geldi.
+**S1 — Pump Room (No Human):**
+E4B: 12 chunks, 0 alarms, 0 FP → 60/100.
+E2B: 12 chunks, 12 alarms, 12 FP → 0/100.
+E2B said "speech" 12 times on a scene with only pump noise. It completely ignored the CoT instruction ("vertical lines = mechanical, horizontal bands = formant").
 
-**S2 — İnşaat + İnsan Sesi:**
-E4B: İnsan olmayan 5 chunk'ta sessiz, chunk 6'da alarm (doğru), chunk 12'de alarm (doğru) → 95/100.
-E2B: 12 chunk'ın 12'sinde alarm. İnsan olmayan chunk 1-5'te de alarm (5 FP). İnsan var mı yok mu fark etmiyor → 0/100.
+**S2 — Construction + Human Voice:**
+E4B: Silent on 5 non-human chunks, alarm at chunk 6 (correct), alarm at chunk 12 (correct) → 95/100.
+E2B: Alarm on all 12 chunks. Also alarmed on chunks 1-5 with no human (5 FP). Human or not makes no difference → 0/100.
 
-**S3 — Metalik Ses (İnsan YOK):**
-E4B: 12 chunk, 0 alarm, 0 FP → 60/100. CoT "dikey çizgi = metalik darbe" kuralını uyguladı.
-E2B: 12 chunk, 12 alarm, 12 FP → 0/100. Metalik sesi insan sesi sandı. CoT kuralı çalışmadı.
+**S3 — Metallic Sound (No Human):**
+E4B: 12 chunks, 0 alarms, 0 FP → 60/100. CoT applied "vertical lines = metallic impact" rule.
+E2B: 12 chunks, 12 alarms, 12 FP → 0/100. Mistook metallic for human. CoT rule did not work.
 
-**S4 — Maskeli İşçi:**
-E4B: İnsan olmayan 5 chunk'ta sessiz, chunk 6-12'de 5 doğru alarm → 100/100.
-E2B: 12 chunk'ın 12'sinde alarm. İnsan öncesi 4 chunk'ta FP. Doğru tespit var ama FP'ler yüzünden skor 0 → 0/100.
+**S4 — Masked Worker:**
+E4B: Silent on 5 non-human chunks, 5 correct alarms on chunks 6-12 → 100/100.
+E2B: Alarm on all 12. Pre-human 4 chunks had FP. Detection exists but unreliable due to FPs → 0/100.
 
-**S5 — Gerçek Kaza:**
-E4B: Chunk 6'da 0.75 ile tek doğru alarm, CERTAIN SURVIVAL → 100/100.
-E2B: 12 chunk'ın 12'sinde alarm. İnsan öncesi 4 chunk'ta FP. Tespit var ama güvenilmez → 5/100.
-E2B'nin S5'te "CERTAIN SURVIVAL" vermesi yanıltıcı — zaten chunk 1'den itibaren alarm veriyor, yani düşme olmasa da alarm verirdi. Bu tespit değil, rastgele alarm.
-
----
-
-## 4. NEDEN E2B BAŞARISIZ OLDU?
-
-### 4.1 CoT Reasoning Kapasitesi Yetersiz
-
-E4B'nin başarısı Chain-of-Thought 3 adımlı akıl yürütmeye dayanıyor: (1) dikey çizgileri ara → metalik, alarm verme; (2) eğimli yatay bantları ara → formant; (3) sadece formant varsa alarm ver. Bu üç adımlı mantık zinciri E4B'de çalışıyor ama E2B'de çalışmıyor. E2B prompt'taki talimatları takip edemiyor — "SADECE formant görürsen alarm ver" kuralını anlayamıyor.
-
-2 milyar parametre bu seviyede talimat takibi (instruction following) için yetersiz. E2B muhtemelen prompt'un sadece "alarm", "human", "speech" gibi anahtar kelimeleri yakalayıp her spektrograma "speech detected" cevabı veriyor.
-
-### 4.2 Few-Shot Kalibrasyon Çalışmıyor
-
-E4B'ye 4 referans spektrogram gösterdiğimizde (3 temiz + 1 insan), model bu örneklerden öğrenip farklı paternleri ayırt ediyor. E2B aynı örnekleri görüyor ama ayırt etme kapasitesi yok — her spektrogramı "insan var" olarak sınıflandırıyor.
-
-### 4.3 Vision Analiz Kapasitesi Düşük
-
-Spektrogramdaki görsel paternleri (dikey çizgiler vs eğimli bantlar vs düz gürültü) ayırt etmek sofistike görsel analiz gerektiriyor. E2B'nin vision modülü bu inceliği yakalayamıyor. E4B'nin ekstra 2 milyar parametresi tam da bu görsel akıl yürütme kapasitesini sağlıyor.
+**S5 — Real Incident:**
+E4B: Single correct alarm at chunk 6 with 0.75, CERTAIN SURVIVAL → 100/100.
+E2B: Alarm on all 12. Pre-human 4 chunks had FP. Detection exists but unreliable → 5/100.
+E2B's "CERTAIN SURVIVAL" is misleading — it was already alarming from chunk 1, so it would alarm even without a fall. This is not detection, it's random alarm.
 
 ---
 
-## 5. BU BULGUNUN WRITEUP İÇİN DEĞERİ
+## 4. WHY DID E2B FAIL?
 
-Bu karşılaştırma writeup'ın en güçlü teknik argümanlarından biri olacak. İşte neden:
+### 4.1 Insufficient CoT Reasoning Capacity
 
-### 5.1 Model Seçiminin Bilinçli Olduğunu Kanıtlıyor
+E4B's success relies on Chain-of-Thought 3-step reasoning: (1) look for vertical lines → mechanical, don't alarm; (2) look for curved horizontal bands → formant; (3) only alarm if formant present. This three-step logic chain works in E4B but not in E2B. E2B cannot follow prompt instructions — it cannot understand "ONLY alarm if you see formants."
 
-Jüri "neden E4B seçtiniz?" diye sorduğunda cevap hazır: "Çünkü test ettik. E2B aynı pipeline ile 2.0 alıyor, E4B 91.0 alıyor. Fark 45.5 kat. E2B CoT reasoning yapamıyor."
+2 billion parameters are insufficient for this level of instruction following. E2B likely only captures keywords like "alarm", "human", "speech" from the prompt and responds "speech detected" to every spectrogram.
 
-### 5.2 "Daha Küçük Model Daha İyi" Yanılgısını Çürütüyor
+### 4.2 Few-Shot Calibration Doesn't Work
 
-Edge AI'da genellikle "küçük model = iyi" algısı var. Bu test, görev karmaşıklığının minimum model boyutu belirlediğini kanıtlıyor. Basit sınıflandırma için E2B yeterli olabilir, ama kural tabanlı akıl yürütme (CoT) için E4B minimum.
+When E4B is shown 4 reference spectrograms (3 clean + 1 human), it learns from these examples and distinguishes different patterns. E2B sees the same examples but lacks the capacity to differentiate — it classifies every spectrogram as "human present."
 
-### 5.3 Yarışma Kriterlerine Tam Uyuyor
+### 4.3 Insufficient Vision Analysis Capacity
 
-Yarışma "E2B and E4B models for edge-based solutions" diyor. İki modeli de test etmek tam beklentiye uyar. Ayrıca Ollama special track için "best project that utilizes and showcases the capabilities of Gemma 4 running locally via Ollama" — iki modelin karşılaştırması Ollama'nın kapasitesini gösteriyor.
-
-### 5.4 Writeup'ta Nasıl Kullanılmalı
-
-Writeup'ta şu şekilde bir paragraf çok etkili olur:
-
-> "We tested both Gemma 4 E2B (2B parameters) and E4B (4B parameters) with identical pipeline configuration. E2B scored 2.0/100 with 37 false positives across 60 chunks — it alarmed on everything, including silent pump rooms and metallic sounds. E4B scored 91.0/100 with zero false positives. The critical difference: E4B can follow Chain-of-Thought reasoning instructions ('only alarm if formant pattern detected'), while E2B cannot. This establishes E4B as the minimum viable model for safety-critical acoustic reasoning on edge devices."
-
-### 5.5 Jüri Savunması İçin Hazır Cevap
-
-**Soru:** "Neden daha küçük modeli kullanmadınız? Edge'de küçük model daha iyi değil mi?"
-
-**Cevap:** "E2B'yi test ettik. Aynı prompt, aynı veriler — 2.0/100 skor, 37 false positive. Bir güvenlik sisteminde her 5 saniyede yanlış alarm çalan sistem kullanılamaz. E4B'nin ekstra 2B parametresi CoT reasoning kapasitesini veriyor — bu fark hayat kurtarıyor. Edge'de küçük model iyi ama görev karmaşıklığı minimum boyutu belirliyor."
+Distinguishing visual patterns in spectrograms (vertical lines vs curved bands vs flat noise) requires sophisticated visual analysis. E2B's vision module cannot capture this subtlety. E4B's extra 2 billion parameters provide exactly this visual reasoning capacity.
 
 ---
 
-## 6. HIZA KARŞILAŞTIRMASI
+## 5. VALUE FOR THE WRITEUP
 
-| Metrik | E2B | E4B |
+This comparison is one of the writeup's strongest technical arguments:
+
+### 5.1 Proves Model Selection Was Deliberate
+When the jury asks "why E4B?", the answer is ready: "Because we tested both. E2B scores 2.0 with the same pipeline, E4B scores 91.0. The gap is 45.5x. E2B cannot do CoT reasoning."
+
+### 5.2 Disproves "Smaller Model = Better" Misconception
+In edge AI, "smaller model = better" is a common assumption. This test proves that task complexity determines minimum model size. For simple classification E2B may suffice, but for rule-based reasoning (CoT), E4B is the minimum.
+
+### 5.3 Aligns Perfectly with Competition Criteria
+The competition mentions "E2B and E4B models for edge-based solutions." Testing both models exactly matches expectations. Also for the Ollama special track: "best project that utilizes and showcases the capabilities of Gemma 4 running locally via Ollama" — comparing two models showcases Ollama's capabilities.
+
+---
+
+## 6. SPEED COMPARISON
+
+| Metric | E2B | E4B |
 |--------|-----|-----|
-| İlk chunk (cold start) | 26.4s | 26.3s |
+| First chunk (cold start) | 26.4s | 26.3s |
 | Normal chunk | ~6.2s | ~7.0s |
-| Toplam (5 sahne) | 398s (6.6 dk) | 524s (8.7 dk) |
+| Total (5 scenes) | 398s (6.6 min) | 524s (8.7 min) |
 
-E2B %12 daha hızlı — ama bu hız avantajı anlamsız çünkü model çalışmıyor. Yanlış cevabı hızlı vermek, doğru cevabı yavaş vermekten daha kötü. Bir güvenlik sisteminde 0.8 saniye fark hayat kurtarmaz ama yanlış alarm güveni öldürür.
-
----
-
-## 7. İKİ MODELİN KARŞILAŞTIRMA MATRİSİ
-
-| Kriter | E2B | E4B | Kazanan |
-|--------|-----|-----|---------|
-| Skor (WGT AVG) | 2.0 | 91.0 | **E4B** (45.5x) |
-| False Positive | 37/60 | 0/60 | **E4B** |
-| CoT Reasoning | Çalışmıyor | Çalışıyor | **E4B** |
-| Few-Shot Learning | Çalışmıyor | Çalışıyor | **E4B** |
-| Hız (chunk/s) | 6.2s | 7.0s | E2B (%12) |
-| RAM Kullanımı | ~1.5GB | ~3GB | E2B |
-| Model Boyutu | 7.2GB | ~4GB disk | E2B |
-| Güvenilirlik | Güvenilmez | 7/7 tutarlı | **E4B** |
-| Edge Uyumluluğu | RPi Zero mümkün | RPi 4+ gerekli | E2B |
-| Güvenlik Sistemi İçin | **Kullanılamaz** | **Kullanılabilir** | **E4B** |
-
-**Sonuç:** E2B hız ve boyut avantajına rağmen bu görev için tamamen yetersiz. E4B edge deployment için minimum viable model.
+E2B is 12% faster — but this speed advantage is meaningless because the model doesn't work. Giving the wrong answer fast is worse than giving the right answer slow. In a safety system, 0.8 seconds difference doesn't save lives, but false alarms destroy trust.
 
 ---
 
-## 8. ÖNEMLİ İÇGÖRÜ
+## 7. COMPARISON MATRIX
 
-Bu test projenin temel felsefesini bir kez daha doğruladı: **"Performans artışı modeli büyüterek değil, girdi temsilini modelin güçlü yönleriyle hizalayarak elde edildi."** Ama bu cümlenin bir ön koşulu var — modelin minimum bir akıl yürütme kapasitesine sahip olması gerekiyor. E2B bu ön koşulu karşılamıyor. E4B karşılıyor.
+| Criterion | E2B | E4B | Winner |
+|-----------|-----|-----|--------|
+| Score (WGT AVG) | 2.0 | 91.0 | **E4B** (45.5x) |
+| False Positives | 37/60 | 0/60 | **E4B** |
+| CoT Reasoning | Not functional | Functional | **E4B** |
+| Few-Shot Learning | Not functional | Functional | **E4B** |
+| Speed (chunk) | 6.2s | 7.0s | E2B (12%) |
+| RAM Usage | ~1.5GB | ~3GB | E2B |
+| Reliability | Unreliable | 7/7 consistent | **E4B** |
+| Edge Compatibility | RPi Zero possible | RPi 4+ required | E2B |
+| Safety System Use | **Unusable** | **Usable** | **E4B** |
 
-Başka bir deyişle: spektrogram + CoT + debouncing pipeline'ı doğru araç ama bu aracı kullanabilecek minimum zeka E4B seviyesinde. E2B bu aracı kullanamıyor — talimatları anlayamıyor, örneklerden öğrenemiyor, görsel paternleri ayırt edemiyor.
+**Conclusion:** Despite E2B's speed and size advantages, it is completely inadequate for this task. E4B is the minimum viable model for edge deployment.
 
 ---
 
-## 9. SONUÇ
+## 8. KEY INSIGHT
+
+This test confirmed the project's core philosophy once again: **"Performance gains were achieved not by scaling the model, but by aligning input representation with the model's strengths."** But this statement has a prerequisite — the model must have a minimum reasoning capacity. E2B does not meet this prerequisite. E4B does.
+
+In other words: the spectrogram + CoT + debouncing pipeline is the right tool, but the minimum intelligence to use this tool is at the E4B level. E2B cannot use this tool — it cannot follow instructions, cannot learn from examples, cannot distinguish visual patterns.
+
+---
+
+## 9. CONCLUSION
 
 | Model | WGT AVG | FP | Verdict |
 |-------|---------|-----|---------|
-| Gemma 4 E2B | 2.0 | 37 | Kullanılamaz — her şeye alarm veriyor |
-| Gemma 4 E4B | 91.0 | 0 | CERTAIN SURVIVAL — 7/7 tutarlı |
+| Gemma 4 E2B | 2.0 | 37 | Unusable — alarms on everything |
+| Gemma 4 E4B | 91.0 | 0 | CERTAIN SURVIVAL — 7/7 consistent |
 
-E2B ile E4B arasındaki fark sadece parametre sayısı değil — reasoning kapasitesi. E4B "düşünebiliyor" (CoT), E2B "düşünemiyor." Güvenlik kritik sistemlerde bu fark hayat meselesi.
+The difference between E2B and E4B is not just parameter count — it's reasoning capacity. E4B can "think" (CoT), E2B cannot. In safety-critical systems, this difference is a matter of life and death.
 
-"Yanlış cevabı hızlı vermek, doğru cevabı yavaş vermekten daha kötüdür." Bu cümle edge AI model seçiminin özeti.
+"Giving the wrong answer fast is worse than giving the right answer slow." This sentence summarizes edge AI model selection.
 
 ---
 
-*Bu doküman Gemma 4 E2B vs E4B karşılaştırma test bulgularını içerir.*
-*E4B: 91.0/100, 0 FP, CERTAIN SURVIVAL | E2B: 2.0/100, 37 FP, kullanılamaz*
-*Son güncelleme: 6 Nisan 2026*
+*This document contains Gemma 4 E2B vs E4B comparison test findings.*
+*E4B: 91.0/100, 0 FP, CERTAIN SURVIVAL | E2B: 2.0/100, 37 FP, unusable*
+*Last updated: April 6, 2026*
