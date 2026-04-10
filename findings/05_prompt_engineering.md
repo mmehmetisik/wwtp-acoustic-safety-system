@@ -1,134 +1,117 @@
-# WWTP Acoustic Safety — Prompt Mühendisliği Bulguları
-## "AI'ya NE Söylediğin, NE KADAR Söylediğinden Daha Önemli"
-> **Test Tarihi:** 3 Nisan 2026
+# WWTP Acoustic Safety — Prompt Engineering Findings
+## "What You Tell AI Matters More Than How Much You Tell It"
+> **Test Date:** April 3, 2026
 > **Model:** Gemma 4 E4B (Ollama v0.20.0, RTX 3060 6GB)
-> **Ses:** TTS tabanlı (Google TTS + endüstriyel gürültü)
-> **Test Sayısı:** 3 farklı prompt versiyonu, toplam 15 sahne çalıştırması
+> **Audio:** TTS-based (Google TTS + industrial noise)
+> **Tests:** 3 prompt versions, 15 total scene runs
 
 ---
 
-## 1. PROMPT EVRİMİ — ÜÇ VERSİYON
+## 1. PROMPT EVOLUTION — THREE VERSIONS
 
-Bu proje boyunca üç farklı prompt yaklaşımı test edildi. Her biri aynı model ve aynı TTS sesler ile çalıştırıldı. Sonuçlar, prompt mühendisliğinin LLM tabanlı güvenlik sistemlerinde ne kadar kritik olduğunu kanıtlıyor.
+Three different prompt approaches were tested throughout this project. Each used the same model and same TTS audio. The results prove how critical prompt engineering is for LLM-based safety systems.
 
-### Versiyon 1 — Agresif PROTOCOL (~500 kelime)
+### Version 1 — Aggressive PROTOCOL (~500 words)
 
-Bu ilk prompt, modeli koruyucu bir güvenlik görevlisi gibi çalıştırmaya çalışıyordu. İçinde lokasyon bilgisi, operasyon detayı, sahne-spesifik güvenlik protokolü, 7 detaylı kural, hayatta kalma eşikleri ve şu kritik cümle vardı: "Missing a real human distress signal is catastrophically worse than a false alarm" — yani "insanı kaçırmak yanlış alarmdan kötü, şüphede alarm ver."
+This initial prompt tried to make the model act as a protective safety officer. It contained location information, operational details, scene-specific safety protocols, 7 detailed rules, survival thresholds, and this critical sentence: "Missing a real human distress signal is catastrophically worse than a false alarm" — essentially "if in doubt, alarm."
 
-Sonuçlar dramatik oldu. Model her seste insan sesi halüsinasyonu yaptı. Pompada "shouting_help" dedi (S1: 7 FP), metalik seste "muffled_call" dedi (S3: 7 FP), hatta S5'te adam daha düşmeden alarm verdi (distress öncesi 2 FP). Ama aynı zamanda gerçek insan sesini de tespit edebildi — S4'te maskeli sesi 0.85-0.90 confidence ile buldu, S5'te chunk 6'da çığlığı 0.85 ile duydu. Yani agresif prompt'un iki yüzü vardı: hem halüsinasyon yarattı hem de gerçek tespiti sağladı.
+Results were dramatic. The model hallucinated human voice on every sound. On pump noise it said "shouting_help" (S1: 7 FP), on metallic sounds it said "muffled_call" (S3: 7 FP), on S5 it alarmed before the person even fell (2 FP before distress). But it also detected real human voice — in S4 it found masked voice at 0.85-0.90 confidence, in S5 it heard the scream at chunk 6 with 0.85. The aggressive prompt had two faces: it caused hallucinations AND enabled real detection.
 
-### Versiyon 2 — Pasif PROTOCOL (~100 kelime)
+### Version 2 — Passive PROTOCOL (~100 words)
 
-Bu prompt, halüsinasyonu temizlemek amacıyla yazıldı. Tüm güvenlik baskısı kaldırıldı, kurallar 5 kısa maddeye indirildi ve şu kritik cümle eklendi: "If unsure whether a sound is human or mechanical, do NOT alarm" — yani "emin değilsen alarm VERME."
+This prompt was designed to eliminate hallucinations. All safety pressure was removed, rules reduced to 5 short items, and this critical sentence was added: "If unsure whether a sound is human or mechanical, do NOT alarm."
 
-Halüsinasyon tamamen temizlendi. S1'de 12 chunk boyunca sıfır alarm, confidence hep 1.00 ile "kesinlikle insan yok" dedi. S3'te de aynı mükemmel sonuç. Ama bedeli ağır oldu — model S2'de "Help! Yardım!" sesini duyamadı (12 chunk sıfır alarm), S4'te maskeli sesi duyamadı (12 chunk sıfır alarm), S5'te boğulan insanı duyamadı (12 chunk sıfır alarm). "Emin değilsen alarm verme" kuralı modeli tamamen kapattı.
+Hallucinations were completely eliminated. S1 showed zero alarms across 12 chunks, confidence always 1.00 — "definitely no human." S3 showed the same perfect result. But the cost was severe — the model could not hear "Help! Yardim!" in S2 (12 chunks zero alarm), could not hear the masked voice in S4 (12 chunks zero alarm), could not hear the drowning person in S5 (12 chunks zero alarm). The "do NOT alarm" instruction completely shut down the model.
 
-### Versiyon 3 — Nötr PROTOCOL (~120 kelime)
+### Version 3 — Neutral PROTOCOL (~120 words)
 
-Bu prompt, iki uç noktanın ortasını bulmak için tasarlandı. Ne "şüphede alarm ver" ne "şüphede alarm verme" diyor. Bunun yerine modele şunu söylüyor: "Duyduğunu dürüstçe raporla, güven skorunu kullan." Confidence kılavuzu ile modele bir çerçeve veriliyor — 0.8 üstü kesin insan sesi, 0.4-0.7 olası ses, 0-0.3 insan yok. Böylece model borderline sinyallerde alarm verebilir ama confidence'ı orta tutarak debouncing katmanına karar bırakır.
-
-Bu versiyonun test sonuçları bekleniyor.
+This prompt was designed to find the middle ground. It says neither "alarm when in doubt" nor "do not alarm when in doubt." Instead it tells the model: "Report what you hear honestly, use the confidence score." A confidence guide provides a framework — above 0.8 means definite human voice, 0.4-0.7 means possible voice, 0-0.3 means no human. This way the model can alarm on borderline signals but keeps confidence moderate, delegating the final decision to the debouncing layer.
 
 ---
 
-## 2. KARŞILAŞTIRMA TABLOSU
+## 2. COMPARISON TABLE
 
-### Agresif vs Pasif — Aynı Ses, Farklı Prompt
+### Aggressive vs Passive — Same Audio, Different Prompt
 
-| Sahne | İnsan | Agresif (500 kel) | Pasif (100 kel) | Fark |
-|-------|-------|-------------------|-----------------|------|
-| S1 — Pompa | YOK | 0/100 (7 FP) | **60/100** (0 FP) | Pasif halüsinasyonu temizledi |
-| S2 — İnşaat | VAR | 0/100 (FP'li tespit) | 0/100 (hiç duyamadı) | İkisinde de başarısız |
-| S3 — Havuz | YOK | 0/100 (7 FP) | **60/100** (0 FP) | Pasif halüsinasyonu temizledi |
-| S4 — Menhol | VAR | 5/100 (doğru tespit var) | 0/100 (hiç duyamadı) | Agresif en azından duydu |
-| S5 — Kritik | VAR | 5/100 (doğru tespit var) | 0/100 (hiç duyamadı) | Agresif en azından duydu |
+| Scene | Human | Aggressive (500 words) | Passive (100 words) | Difference |
+|-------|-------|----------------------|-------------------|------------|
+| S1 — Pump | NO | 0/100 (7 FP) | **60/100** (0 FP) | Passive eliminated hallucination |
+| S2 — Construction | YES | 0/100 (FP + detection) | 0/100 (heard nothing) | Both failed |
+| S3 — Pool | NO | 0/100 (7 FP) | **60/100** (0 FP) | Passive eliminated hallucination |
+| S4 — Manhole | YES | 5/100 (real detection) | 0/100 (heard nothing) | Aggressive at least heard |
+| S5 — Critical | YES | 5/100 (real detection) | 0/100 (heard nothing) | Aggressive at least heard |
 
-### Davranış Karşılaştırması — Chunk Bazında Detay
+### Chunk-Level Behavior Detail
 
-S4 Menhol sahnesinde agresif prompt'un davranışı: Chunk 6'da (25-30s) muffled_call, confidence 0.85, INITIATE_CONFINED_SPACE_RESCUE. Chunk 7'de (30-35s) muffled_call, confidence 0.90. Chunk 9'da (40-45s) muffled_call, confidence 0.90. Model maskeli sesi doğru zamanda, doğru aksiyonla, yüksek güvenle tespit etti.
+In S4 (Manhole), aggressive prompt behavior: Chunk 6 (25-30s) muffled_call at 0.85, INITIATE_CONFINED_SPACE_RESCUE. Chunk 7 (30-35s) muffled_call at 0.90. Chunk 9 (40-45s) muffled_call at 0.90. Model detected the masked voice at the correct time with the correct action and high confidence.
 
-Aynı S4 sahnesinde pasif prompt'un davranışı: 12 chunk boyunca hepsi "none", confidence hep 1.00 ile "kesinlikle insan yok." Model aynı sesi dinliyor ama "emin değilsen alarm verme" kuralı yüzünden hiçbir şeyi bildirmiyor.
+Same S4 with passive prompt: All 12 chunks "none", confidence always 1.00 — "definitely no human." The model listened to the same audio but reported nothing due to the "do NOT alarm" rule.
 
-S5 Kritik sahnesinde agresif prompt'un davranışı: Chunk 6'da (25-30s) muffled_call, confidence 0.85, [+5s]. Düşmeden 5 saniye sonra ilk gerçek tespit. Bu, eski formant sesle sıfır sinyal alırken TTS ile ilk kez elde edilen gerçek bir başarıydı.
+In S5 (Critical), aggressive prompt: Chunk 6 (25-30s) muffled_call at 0.85, [+5s]. First real detection 5 seconds after the fall. This was the first real detection ever achieved with TTS audio — previously zero signal with formant synthesis.
 
-Aynı S5 sahnesinde pasif prompt'un davranışı: 12 chunk boyunca sıfır sinyal. Model boğulan insanın TTS çığlığını bile duymadı.
+Same S5 with passive prompt: 12 chunks, zero signal. The model could not even hear the TTS scream.
 
-### Hız Karşılaştırması
+### Speed Comparison
 
-| Mod | Prompt Uzunluğu | Chunk Süresi (ort.) | Toplam Süre (5 sahne) |
-|-----|-----------------|---------------------|----------------------|
-| BARE | ~100 kelime | ~22 saniye | 22.4 dakika |
-| Pasif PROTOCOL | ~100 kelime | ~24 saniye | 25.0 dakika |
-| Agresif PROTOCOL | ~500 kelime | ~37 saniye | 37.1 dakika |
+| Mode | Prompt Length | Avg Chunk Time | Total (5 scenes) |
+|------|-------------|----------------|-------------------|
+| BARE | ~100 words | ~22 seconds | 22.4 minutes |
+| Passive PROTOCOL | ~100 words | ~24 seconds | 25.0 minutes |
+| Aggressive PROTOCOL | ~500 words | ~37 seconds | 37.1 minutes |
 
-Prompt uzunluğu doğrudan çıkarım süresini etkiliyor. Kısa prompt %35 daha hızlı çalışıyor. Bu edge deployment senaryosunda (Raspberry Pi, Jetson Nano) kritik bir fark — her saniye hayat kurtarabilir.
-
----
-
-## 3. ALTIN BULGULAR
-
-### Bulgu 1: "AI'ya NE Söylediğin, NE KADAR Söylediğinden Daha Önemli"
-
-Bu projenin en değerli keşfi bu cümlede özetleniyor. Aynı model, aynı ses dosyası, aynı donanım — tek değişken prompt. 500 kelimelik prompt 7 yanlış alarm üretirken, 100 kelimelik prompt sıfır yanlış alarm üretiyor. Ama 500 kelimelik prompt gerçek tehlikeyi tespit edebilirken, 100 kelimelik prompt hiçbir şeyi duyamıyor.
-
-Bu, LLM tabanlı güvenlik sistemleri için kritik bir tasarım prensibi: prompt uzunluğu ile halüsinasyon oranı arasında doğrudan bir ilişki var. Daha fazla kural yazmak modeli daha güvenli yapmıyor, aksine daha kırılgan yapıyor. Doğru kural sayısı ve doğru ifade biçimi, kural miktarından önemli.
-
-### Bulgu 2: Tek Kelime Tüm Davranışı Değiştirebilir
-
-"Do NOT alarm" cümlesi modeli tamamen kapattı. Tüm 60 chunk'ta (5 sahne × 12 chunk) tek bir alarm bile vermedi. Hepsi "none", confidence hepsi 1.00. Tek bir olumsuz talimat, modelin tüm algılama kapasitesini sıfırladı. Bu, prompt mühendisliğinin ne kadar hassas bir iş olduğunu gösteriyor.
-
-### Bulgu 3: LLM'leri Kendi Kararına Bırakmak Gerekiyor
-
-İki uç noktanın başarısızlığından çıkan ders şu: modele ne "alarm ver" ne "alarm verme" demek en doğrusu. Bunun yerine "duyduğunu raporla, güven skorunu kullan" demek, modeli kendi yargısıyla çalıştırıyor. Karar otoritesini modelden alıp post-processing katmanına (debouncing) vermek daha güvenilir — çünkü debouncing deterministik kurallara dayalı, halüsinasyona açık değil.
-
-### Bulgu 4: Çok Katmanlı Savunma Şart
-
-Tek katmanlı yaklaşım (sadece prompt VEYA sadece debouncing) yetersiz. Doğru mimari şu: prompt modele sesi dinletir ve dürüst raporlama yaptırır, debouncing katmanı düşük güvenli alarmları filtreler, ardışık onay kuralı sporadic halüsinasyonları eler. Bu üç katman birlikte çalışınca hem yanlış alarm azalır hem gerçek tespit korunur.
-
-### Bulgu 5: Tek Chunk Testi ile Tam Sahne Testi Farklı Şeyler Ölçer
-
-Tek chunk testinde PROTOCOL modu S4 ve S5'i 0.98 confidence ile tespit etmişti. Ama 12 chunk tam sahne testinde aynı prompt halüsinasyon patlaması yarattı. Tek chunk testi "model bu sesi anlıyor mu" sorusuna cevap verir ama "sistem güvenilir mi" sorusuna cevap vermez. Gerçek performans değerlendirmesi için tam sahne testi şart.
+Prompt length directly affects inference time. Short prompt runs 35% faster. This is critical for edge deployment scenarios (Raspberry Pi, Jetson Nano) — every second can save a life.
 
 ---
 
-## 4. PROMPT MÜHENDİSLİĞİ SPEKTRUMU
+## 3. KEY FINDINGS
 
-Bu proje boyunca prompt mühendisliğinde bir spektrum keşfedildi. Bir uçta agresif talimatlar var: "Her şeye alarm ver, kaçırma." Bu uçta yanlış alarm patlar. Diğer uçta pasif talimatlar var: "Emin değilsen alarm verme." Bu uçta hiçbir şeyi duyamaz. Ortada nötr yaklaşım var: "Duyduğunu raporla, güven skorunu kullan." Tatlı nokta burada olmalı — model kendi duyduğuna göre karar verir, kesinliği confidence skoruyla ifade eder, son kararı deterministik post-processing katmanı verir.
+### Finding 1: "What You Tell AI Matters More Than How Much You Tell It"
 
-Bu spektrum endüstriyel AI sistemleri için genel bir tasarım prensibi olarak sunulabilir. LLM tabanlı herhangi bir güvenlik sistemi (yangın, gaz kaçağı, izinsiz giriş) aynı dengeyle karşılaşacaktır.
+This project's most valuable discovery is summarized in this sentence. Same model, same audio, same hardware — only variable is the prompt. A 500-word prompt produces 7 false alarms, while a 100-word prompt produces zero. But the 500-word prompt can detect real danger, while the 100-word prompt hears nothing.
 
----
+This is a critical design principle for LLM-based safety systems: there is a direct relationship between prompt length and hallucination rate. Writing more rules does not make the model safer — it makes it more fragile.
 
-## 5. NÖTR PROMPT TESTİ
+### Finding 2: A Single Word Can Change All Behavior
 
-**Durum:** Nötr PROTOCOL prompt (~120 kelime) ile test çalışıyor.
+The "do NOT alarm" instruction completely shut down the model. Across all 60 chunks (5 scenes x 12 chunks), not a single alarm was produced. All "none", all confidence 1.00. A single negative instruction zeroed out the model's entire detection capacity.
 
-Prompt yaklaşımı: Ne "alarm ver" ne "alarm verme" — "duyduğunu raporla."
-Confidence kılavuzu eklendi: 0.8+ kesin, 0.4-0.7 olası, 0-0.3 yok.
-Debouncing katmanı 0.75 eşiği ile filtre yapacak.
+### Finding 3: Let the LLM Make Its Own Judgment
 
-**Beklentiler:** S1 ve S3'te düşük FP (pasif prompt'taki temizlik korunmalı), S4 ve S5'te orta-yüksek confidence ile tespit (agresif prompt'taki duyma kapasitesi geri gelmeli), debouncing ile son karar doğru olmalı.
+The lesson from both extremes: tell the model neither "alarm" nor "don't alarm." Instead, "report what you hear, use confidence scores." This lets the model work with its own judgment. Moving decision authority from the model to the post-processing layer (debouncing) is more reliable — debouncing relies on deterministic rules, not prone to hallucination.
 
-**Sonuçlar bu bölüme eklenecek.**
+### Finding 4: Multi-Layer Defense is Essential
 
----
+Single-layer approaches (prompt alone OR debouncing alone) are insufficient. The correct architecture: prompt makes the model listen and report honestly, debouncing filters low-confidence alarms, consecutive confirmation catches sporadic hallucinations. These three layers working together reduce false alarms while preserving real detection.
 
-## 6. TTS GEÇİŞİNİN ETKİSİ (ÖNCEKİ TEST VERİLERİ)
+### Finding 5: Single-Chunk Tests Measure Different Things Than Full-Scene Tests
 
-TTS geçişi prompt sorunlarından bağımsız olarak kanıtlanmış bir iyileştirme sağladı. Agresif prompt ile formant sesler kullanıldığında S5'te 12 chunk boyunca sıfır sinyal geliyordu. TTS seslere geçildiğinde aynı agresif prompt ile S5 chunk 6'da 0.85 confidence ile tespit yapıldı. S2'de model formant sesle hep "muffled_call" derken TTS sesle "shouting_help" dedi — gerçek konuşma paternini tanıdı. S4'te formant sesle BARE modda 0.70 alınırken, TTS sesle agresif PROTOCOL'da 0.85-0.90 alındı.
-
-Bu veriler TTS geçişinin başarılı olduğunu kesin olarak kanıtlıyor. Model gerçek konuşma paternlerini formant sentezinden çok daha iyi tanıyor.
+In single-chunk tests, PROTOCOL detected S4 and S5 at 0.98 confidence. But in 12-chunk full scene tests, the same prompt caused hallucination explosions. Single-chunk testing answers "can the model understand this sound?" but not "is the system reliable?" Full-scene testing is essential for real performance evaluation.
 
 ---
 
-## 7. PROJE DURUMU
+## 4. THE PROMPT ENGINEERING SPECTRUM
 
-Motor çalışıyor, TTS ses üretici çalışıyor, debouncing katmanı kanıtlanmış, distress timing doğru hesaplanıyor, JSON parse güvenilir. Prompt optimizasyonunda iki uç nokta test edildi ve belgelendi. Nötr prompt testi devam ediyor. Sonuca göre prompt finalize edilecek veya bir iterasyon daha yapılacak.
+A spectrum was discovered throughout this project. On one end: aggressive instructions ("alarm on everything"). This end produces false alarm explosions. On the other end: passive instructions ("do not alarm when unsure"). This end produces complete deafness. In the middle: neutral approach ("report what you hear, use confidence scores"). The sweet spot should be here — the model decides based on what it hears, expresses certainty through confidence scores, and the final decision is made by a deterministic post-processing layer.
 
-Prompt finalize olduktan sonra sıradaki adımlar: JSON export özelliği (her run sonrası detaylı davranış kaydı), E2B model karşılaştırma testleri, demo arayüzü tasarımı, video çekimi ve Kaggle writeup.
+This spectrum can be presented as a general design principle for industrial AI systems. Any LLM-based safety system (fire, gas leak, intrusion) will face the same balance.
 
 ---
 
-*Bu doküman prompt mühendisliği sürecinin tüm bulgularını ve keşiflerini içerir.*
-*Nötr prompt test sonuçları eklenecektir.*
-*Son güncelleme: 3 Nisan 2026*
+## 5. EFFECT OF TTS TRANSITION
+
+The TTS transition provided a proven improvement independent of prompt issues. With formant audio under aggressive prompt, S5 produced zero signal across 12 chunks. With TTS audio under the same aggressive prompt, S5 chunk 6 detected at 0.85 confidence. In S2, the model called formant audio "muffled_call" but called TTS audio "shouting_help" — it recognized the real speech pattern. In S4, formant audio yielded 0.70 in BARE mode, while TTS audio yielded 0.85-0.90 under aggressive PROTOCOL.
+
+These data conclusively prove the TTS transition was successful. The model recognizes real speech patterns far better than formant synthesis.
+
+---
+
+## 6. PROJECT STATUS
+
+Engine working, TTS audio generator working, debouncing layer proven, distress timing correct, JSON parsing reliable. Two prompt extremes tested and documented. Neutral prompt test in progress. Based on results, prompt will be finalized or another iteration will be performed.
+
+After prompt finalization, next steps: JSON export feature, E2B model comparison tests, demo interface design, video production, and Kaggle writeup.
+
+---
+
+*This document contains all prompt engineering findings and discoveries.*
+*Last updated: April 3, 2026*
