@@ -1,188 +1,163 @@
-# WWTP Acoustic Safety System — TTS + Prompt Optimizasyon Bulguları
-## Ses Kalitesi İyileştirme ve Prompt Dengeleme Süreci
-> **Test Tarihi:** 3 Nisan 2026
+# WWTP Acoustic Safety — TTS + Prompt Optimization Findings
+## Audio Quality Improvement and Prompt Balancing Process
+> **Test Date:** April 3, 2026
 > **Model:** Gemma 4 E4B (Ollama v0.20.0, RTX 3060 6GB)
-> **Ses Üretimi:** Google TTS + endüstriyel gürültü karışımı
+> **Audio Generation:** Google TTS + industrial noise mixing
 
 ---
 
-## 1. YAPILAN DEĞİŞİKLİKLER
+## 1. CHANGES MADE
 
-### 1.1 Ses Üretici: Formant → TTS Geçişi
+### 1.1 Audio Generator: Formant → TTS Transition
 
-**Sorun:** Formant sentezi matematiksel sinüs dalgaları üretiyordu. Gemma 4 E4B'nin ASR motoru gerçek insan konuşma paternlerini arıyor — formant sesi bunu sağlamıyordu. Model pompada "insan sesi" halüsinasyonu yaparken gerçek sentetik çığlığı duyamıyordu.
+**Problem:** Formant synthesis produced mathematical sine waves. Gemma 4 E4B's ASR engine looks for real human speech patterns — formant sounds did not match. The model hallucinated "human voice" on pump noise while missing actual synthetic screams.
 
-**Çözüm:** Google TTS (gTTS) ile gerçek konuşma sesleri üretildi:
-- S2: "Help! Help me!" (EN) + "Yardım! Yardım edin!" (TR), 3sn aralıkla
-- S4: "Help! Help me!" + "Yardım! Yardım edin!", maske filtresi (2000Hz LP) + galeri reverbi (1.2sn), 4sn aralıkla
-- S5: "Help! Help!", "Yardım!", "İmdat!", "Help me!", "Somebody!", "Yardım edin!" — boğulma efektleriyle (rastgele kesinti, su sesi, düzensiz zamanlama)
+**Solution:** Google TTS (gTTS) used to generate real speech voices:
+- S2: "Help! Help me!" (EN) + "Yardim! Yardim edin!" (TR), 3s intervals
+- S4: "Help! Help me!" + "Yardim! Yardim edin!", mask filter (2000Hz LP) + gallery reverb (1.2s), 4s intervals
+- S5: "Help! Help!", "Yardim!", "Imdat!", "Help me!", "Somebody!", "Yardim edin!" — with drowning effects (random interruption, water sounds, irregular timing)
 
-**Ek ses düzeltmeleri:**
-- motor_drone frekans aralığı 100-500Hz → 50-250Hz (insan ses aralığına girmemesi için)
-- TTS seslerden db_to_amp çarpımı kaldırıldı (ses seviyesi dengesizliğini önlemek için)
-- Pitch shift kaldırıldı (doğal ses, model tanıma için daha iyi)
-- S5 inşaat gürültüsü farklı seed ile üretiliyor (S2'den farklılaşma)
+**Additional audio fixes:**
+- Motor drone frequency range 100-500Hz → 50-250Hz (to avoid human voice range)
+- db_to_amp multiplication removed from TTS voices (to prevent volume imbalance)
+- Pitch shift removed (natural voice better for model recognition)
+- S5 construction noise generated with different seed (differentiation from S2)
 
-### 1.2 Motor: Alarm Debouncing Katmanı
+### 1.2 Engine: Alarm Debouncing Layer
 
-Endüstriyel SCADA standardı alarm onay sistemi eklendi:
-- Confidence < 0.75 → otomatik filtre
-- Tek izole alarm → "preliminary" (onaylanmamış)
-- Ardışık 2+ alarm (3-chunk penceresi) → "confirmed" (onaylanmış)
-- Confidence ≥ 0.95 + "screaming"/"shouting_help" → anında onay
+Industrial SCADA-standard alarm confirmation system added:
+- Confidence < 0.75 → automatic filter
+- Single isolated alarm → "preliminary" (unconfirmed)
+- 2+ consecutive alarms (3-chunk window) → "confirmed"
+- Confidence ≥ 0.95 + "screaming"/"shouting_help" → instant confirmation
 
-### 1.3 Motor: Distress Timing Düzeltmesi
+### 1.3 Engine: Distress Timing Fix
 
-Tehlike başlangıç zamanı artık üç kaynaktan okunuyor:
+Distress onset time now read from three sources:
 1. scene_config.json (distress_starts_sec / fall_event_sec)
-2. answer_key.json (aynı alanlar)
-3. audio_composition yapısından otomatik çıkarım (human_voice=true olan ilk zaman dilimi)
+2. answer_key.json (same fields)
+3. Automatic inference from audio_composition structure (first time segment with human_voice=true)
 
 ---
 
-## 2. TEST SONUÇLARI: TTS SESLERİ + PROTOCOL MODU
+## 2. TEST RESULTS: TTS AUDIO + PROTOCOL MODE
 
-### 2.1 TTS + PROTOCOL (Uzun Prompt) Sonuçları
+### 2.1 TTS + PROTOCOL (Long Prompt) Results
 
-| Sahne | İnsan | Ham Alarm | Debounce Sonrası | Skor | Analiz |
-|-------|-------|-----------|------------------|------|--------|
-| S1 | YOK | 7 alarm | 7 confirmed | 0/100 | PROTOCOL halüsinasyonu — pompa sesinde "shouting_help" diyor |
-| S2 | VAR (25s) | 4 alarm | 2 confirmed (FP) + 1 filtered | 0/100 | FP'ler distress öncesi, gerçek tespit chunk 6'da var ama FP puanı düşürdü |
-| S3 | YOK | 9 alarm | 7 confirmed | 0/100 | PROTOCOL halüsinasyonu — metalik seste "muffled_call" diyor |
-| S4 | VAR (20s) | 5 alarm | 5 confirmed (1 FP) | 5/100 | Model maskeli sesi DUYUYOR! Chunk 6-11 arası doğru tespit (0.85-0.90) |
-| S5 | VAR (20s) | 4 alarm | 3 confirmed (2 FP) | 5/100 | Model çığlığı DUYUYOR! Chunk 6'da +5s'de tespit (0.85) |
+| Scene | Human | Raw Alarms | After Debounce | Score | Analysis |
+|-------|-------|------------|----------------|-------|----------|
+| S1 | NO | 7 alarms | 7 confirmed | 0/100 | PROTOCOL hallucination — says "shouting_help" on pump noise |
+| S2 | YES (25s) | 4 alarms | 2 confirmed (FP) + 1 filtered | 0/100 | FPs before distress, real detection at chunk 6 but FPs lowered score |
+| S3 | NO | 9 alarms | 7 confirmed | 0/100 | PROTOCOL hallucination — says "muffled_call" on metallic sounds |
+| S4 | YES (20s) | 5 alarms | 5 confirmed (1 FP) | 5/100 | Model HEARS masked voice! Chunks 6-11 correct detection (0.85-0.90) |
+| S5 | YES (20s) | 4 alarms | 3 confirmed (2 FP) | 5/100 | Model HEARS the scream! Chunk 6 at +5s detection (0.85) |
 
-### 2.2 Kritik Gözlemler
+### 2.2 Critical Observations
 
-**TTS İŞE YARIYOR — Kanıtlar:**
+**TTS WORKS — Evidence:**
 
 S2 chunk 9 (40-45s): distress_type="shouting_help", confidence=0.90
-- Eski formant sesle model hep "muffled_call" diyordu
-- TTS ile model artık "shouting_help" olarak tanıyor — gerçek konuşma paternini ayırt ediyor
+- With old formant audio, model always said "muffled_call"
+- With TTS, model now correctly identifies "shouting_help" — distinguishing real speech patterns
 
-S4 chunk 6-11: Maskeli TTS sesini 0.85-0.90 confidence ile sürekli tespit ediyor
-- Eski formant sesle BARE modda sadece 0.70 alıyorduk (debouncing filtreliyordu)
-- TTS ile güven skoru 0.85-0.90'a çıktı — model gerçek konuşmayı daha güvenle tanıyor
+S4 chunks 6-11: Masked TTS voice detected at 0.85-0.90 confidence consistently
+- With old formant audio, BARE mode only achieved 0.70 (debouncing filtered it)
+- With TTS, confidence rose to 0.85-0.90 — model recognizes real speech more confidently
 
 S5 chunk 6 (25-30s): distress_type="muffled_call", confidence=0.85, [+5s]
-- Eski formant sesle S5'te 12 chunk boyunca SIFIR sinyal vardı
-- TTS ile model çığlığı DUYDU — düşmeden 5 saniye sonra
+- With old formant audio, S5 produced ZERO signal across 12 chunks
+- With TTS, model HEARD the scream — 5 seconds after the fall
 
-**PROTOCOL PROMPT HALÜSINASYONU DEVAM EDİYOR:**
+**PROTOCOL PROMPT HALLUCINATION CONTINUES:**
 
-S1'de 7 onaylanmış FP — pompa sesinde "shouting_help" halüsinasyonu
-S3'te 7 onaylanmış FP — metalik seste "muffled_call" halüsinasyonu
-S5'te 2 FP distress öncesi — inşaat gürültüsünde halüsinasyon
+S1: 7 confirmed FPs — "shouting_help" hallucination on pump noise
+S3: 7 confirmed FPs — "muffled_call" hallucination on metallic sounds
+S5: 2 FPs before distress — hallucination on construction noise
 
-Bu, izolasyon testindeki bulguyla tutarlı: BARE modda aynı seslerle sıfır FP.
-
----
-
-## 3. KÖK NEDEN: NEDEN PROTOCOL HALÜSINASYON YARATIYOR?
-
-### 3.1 Prompt Uzunluğu ve Dikkat Dağılması
-
-| Mod | Prompt Uzunluğu | S1 FP | S3 FP | Chunk Süresi |
-|-----|-----------------|-------|-------|--------------|
-| BARE | ~100 kelime | 0 | 0 | ~20sn |
-| PROTOCOL | ~400-500 kelime | 7 | 7 | ~35sn |
-
-Model uzun prompt'u işlerken:
-- Dikkat mekanizması (attention) sese değil metne kayıyor
-- "Şüphede alarm ver" kuralı her chunk'ta tetikleniyor
-- Model sesi dinlemek yerine prompt'taki senaryoları hayal ediyor
-
-### 3.2 Spesifik Sorunlu İfadeler
-
-Eski PROTOCOL prompt'undaki şu ifadeler halüsinasyonu tetikliyordu:
-- "Missing a real human distress signal is catastrophically worse than a false alarm" → Model alarm verme baskısı hissediyor
-- "If you detect any sound that COULD be human distress — alarm immediately" → "COULD" çok geniş, her ses "olabilir"
-- "any muffled voice pattern MUST trigger" → Model her boğuk seste tetikleniyor
-- Sahne-spesifik güvenlik protokolü metni → Ekstra 50-100 kelime daha ekliyordu
-
-### 3.3 Çözüm: Optimize Edilmiş Prompt
-
-Yeni PROTOCOL prompt ~100 kelime. Değişiklikler:
-- Sahne-spesifik protokol metni kaldırıldı
-- 7 kural → 5 kısa madde
-- "Şüphede alarm ver" → "Emin değilsen alarm VERME" (tam ters)
-- "COULD be human" → "actual human speech, words, or vocal patterns" (somut)
-- "any muffled voice" → "If you hear words like 'help', 'yardım'" (kelime bazlı)
-- Hayatta kalma eşikleri, aciliyet baskısı kaldırıldı
-
-**Yeni prompt felsefesi:** "AI'ya NE söylediğin, NE KADAR söylediğinden daha önemli."
+This is consistent with the isolation test finding: BARE mode produces zero FPs on the same audio.
 
 ---
 
-## 4. FORMANT → TTS KARŞILAŞTIRMA TABLOSU
+## 3. ROOT CAUSE: WHY DOES PROTOCOL CAUSE HALLUCINATIONS?
 
-| Metrik | Formant (Eski) | TTS (Yeni) | Fark |
-|--------|---------------|------------|------|
-| S4 BARE confidence | 0.70 (filtrelendi) | Test edilecek | TTS daha yüksek bekleniyor |
-| S5 BARE algılama | 0/12 chunk (sıfır sinyal) | Test edilecek | TTS ile sinyal var |
-| S5 PROTOCOL algılama | 0/12 (formant), 2/12 (TTS) | 1/12 (chunk 6, 0.85) | TTS ile ilk kez gerçek tespit |
-| S2 distress_type | "muffled_call" (yanlış) | "shouting_help" (doğru) | TTS ile doğru sınıflandırma |
-| S4 aksiyon | Karışık | INITIATE_CONFINED_SPACE_RESCUE | TTS ile doğru aksiyon |
-| Halüsinasyon tipi | "muffled_call" her yerde | Aynı sorun devam | Prompt kaynaklı, ses kaynaklı değil |
+### 3.1 Prompt Length and Attention Drift
 
----
+| Mode | Prompt Length | S1 FP | S3 FP | Chunk Duration |
+|------|-------------|-------|-------|----------------|
+| BARE | ~100 words | 0 | 0 | ~20s |
+| PROTOCOL | ~400-500 words | 7 | 7 | ~35s |
 
-## 5. ALTIN BULGULAR (Bu Süreçten Çıkan Önemli Keşifler)
+When processing long prompts, the model:
+- Attention mechanism shifts from audio to text
+- "When in doubt, alarm" rule triggers on every chunk
+- Model imagines scenarios from prompt instead of listening to audio
 
-### Bulgu 1: "AI'ya NE söylediğin, NE KADAR söylediğinden daha önemli"
-Aynı model, aynı ses — kısa prompt ile temiz karar, uzun prompt ile halüsinasyon patlaması. Daha fazla kural ≠ daha iyi sonuç. Az ve doğru kural = doğru sonuç. Bu LLM tabanlı güvenlik sistemleri için kritik bir tasarım prensibi.
+### 3.2 Specific Problematic Phrases
 
-### Bulgu 2: TTS Gerçek Konuşma Paternleri Fark Yaratıyor
-Formant sentezi ile model S5'te 12 chunk boyunca sıfır tespit yaptı. TTS ile aynı sahneyi 0.85 confidence ile tespit etti. Model matematiksel ses dalgası değil, gerçek konuşma ritmi arıyor. LLM tabanlı ses analizi için ses kalitesi kritik.
+These phrases in the old PROTOCOL prompt triggered hallucinations:
+- "Missing a real human distress signal is catastrophically worse than a false alarm" → Model feels pressure to alarm
+- "If you detect any sound that COULD be human distress — alarm immediately" → "COULD" is too broad
+- "any muffled voice pattern MUST trigger" → Model triggers on every muffled sound
+- Scene-specific safety protocol text → Added 50-100 extra words
 
-### Bulgu 3: LLM'lerde Halüsinasyon Prompt Uzunluğuyla Orantılı
-100 kelimelik prompt → 0 FP. 500 kelimelik prompt → 7 FP (aynı seste). Bu bilinen bir LLM davranışı ama endüstriyel güvenlik bağlamında ilk kez somut olarak ölçüldü. Prompt mühendisliği güvenlik-kritik sistemlerde hayati önem taşıyor.
+### 3.3 Solution: Optimized Prompt
 
-### Bulgu 4: Debouncing Katmanı Etkili Ama Yetersiz (Tek Başına)
-S3'te debouncing 4 FP'yi 0'a indirdi (eski testte). Ama PROTOCOL halüsinasyonu ardışık alarm ürettiğinde debouncing bunları "confirmed" olarak onaylıyor. Debouncing tek seferlik hataları yakalar ama sistematik halüsinasyonu yakalayamaz. Çözüm: prompt düzeltmesi + debouncing birlikte.
+New PROTOCOL prompt ~100 words. Changes:
+- Scene-specific protocol text removed
+- 7 rules → 5 short items
+- "When in doubt, alarm" → "If unsure, do NOT alarm" (reversed)
+- "COULD be human" → "actual human speech, words, or vocal patterns" (concrete)
+- "any muffled voice" → "If you hear words like 'help', 'yardim'" (word-based)
+- Survival thresholds and urgency pressure removed
 
-### Bulgu 5: Tek Chunk Test Sonuçları Yanıltıcı Olabilir
-Tek chunk PROTOCOL testinde S5 "0.98 confidence" vermişti. Ama 12-chunk testinde aynı PROTOCOL modu başarısız oldu. Gerçek performansı ölçmek için çok-chunk (tam sahne) testi şart. Tek chunk testi sadece "model bu sesi anlayabiliyor mu" sorusuna cevap verir, "sistem güvenilir mi" sorusuna cevap vermez.
-
----
-
-## 6. PROMPT OPTİMİZASYONU TESTİ
-
-**Durum:** Optimize edilmiş kısa PROTOCOL prompt ile test çalışıyor.
-
-**Beklentiler:**
-- S1: Temiz geçmesi bekleniyor (BARE'deki gibi 0 FP)
-- S2: İlk gerçek alarm chunk 6 (25-30s) bekleniyor
-- S3: Temiz geçmesi bekleniyor (BARE'deki gibi 0 FP)
-- S4: İlk gerçek alarm chunk 5-6 (20-30s) bekleniyor
-- S5: İlk gerçek alarm chunk 6 (25-30s) bekleniyor
-
-**Eğer başarılı olursa:**
-- TTS + kısa prompt kombinasyonu çalışıyor demektir
-- Demo arayüzüne geçilebilir
-- Roadmap güncellenir
-
-**Sonuçlar bu bölüme eklenecek.**
+**New prompt philosophy:** "What you tell AI matters more than how much you tell it."
 
 ---
 
-## 7. PROJE DURUMU
+## 4. FORMANT → TTS COMPARISON TABLE
 
-| Bileşen | Durum | Not |
-|---------|-------|-----|
-| Motor (acoustic_engine.py) | ✅ Çalışıyor | Ollama API, debouncing, timing düzeltmeleri |
-| Ses üretici (audio_generator_tts.py) | ✅ Çalışıyor | TTS tabanlı, 5 sahne üretildi |
-| BARE mod testi | ✅ Tamamlandı | S1: 60, S3: 60, S2/S4/S5: kaçırıldı |
-| PROTOCOL mod testi (eski prompt) | ✅ Tamamlandı | Halüsinasyon sorunu belgelendi |
-| TTS + eski PROTOCOL testi | ✅ Tamamlandı | TTS işe yarıyor, prompt sorunu devam |
-| Prompt optimizasyonu testi | 🔄 Çalışıyor | Sonuçlar bekleniyor |
-| Demo arayüzü | ⏳ Sırada | Prompt testi başarılı olursa başlanacak |
-| E2B karşılaştırma | ⏳ Sonra | E4B stabilize olduktan sonra |
-| Video çekimi | ⏳ Sonra | Demo hazır olunca |
-| Kaggle writeup | ⏳ Sonra | Tüm sonuçlar netleşince |
+| Metric | Formant (Old) | TTS (New) | Difference |
+|--------|--------------|-----------|------------|
+| S5 BARE detection | 0/12 chunks (zero signal) | To be tested | TTS has signal |
+| S5 PROTOCOL detection | 0/12 (formant) | 1/12 (chunk 6, 0.85) | First real detection with TTS |
+| S2 distress_type | "muffled_call" (wrong) | "shouting_help" (correct) | TTS enables correct classification |
+| S4 action | Mixed | INITIATE_CONFINED_SPACE_RESCUE | TTS enables correct action |
+| Hallucination type | "muffled_call" everywhere | Same issue continues | Prompt-caused, not audio-caused |
 
 ---
 
-*Bu doküman TTS geçişi ve prompt optimizasyonu sürecinin tüm bulgularını içerir.*
-*Prompt optimizasyonu test sonuçları eklenecektir.*
-*Son güncelleme: 3 Nisan 2026*
+## 5. KEY FINDINGS
+
+### Finding 1: "What you tell AI matters more than how much you tell it"
+Same model, same audio — short prompt produces clean decisions, long prompt produces hallucination explosion. More rules ≠ better results. Fewer, correct rules = correct results. This is a critical design principle for LLM-based safety systems.
+
+### Finding 2: TTS Real Speech Patterns Make a Difference
+With formant synthesis, model detected nothing in S5 across 12 chunks. With TTS, same scene detected at 0.85 confidence. The model looks for real speech rhythm, not mathematical waveforms. Audio quality is critical for LLM-based acoustic analysis.
+
+### Finding 3: LLM Hallucination is Proportional to Prompt Length
+100-word prompt → 0 FP. 500-word prompt → 7 FP (same audio). This is a known LLM behavior but measured for the first time in an industrial safety context. Prompt engineering is vital for safety-critical systems.
+
+### Finding 4: Debouncing is Effective But Insufficient Alone
+In S3, debouncing reduced 4 FPs to 0 (previous test). But when PROTOCOL hallucination produces consecutive alarms, debouncing confirms them as real. Debouncing catches one-off errors but cannot catch systematic hallucination. Solution: prompt fix + debouncing together.
+
+### Finding 5: Single-Chunk Test Results Can Be Misleading
+Single-chunk PROTOCOL test reported S5 at "0.98 confidence". But 12-chunk test with same PROTOCOL failed. Multi-chunk (full scene) testing is essential to measure real performance.
+
+---
+
+## 6. PROJECT STATUS
+
+| Component | Status | Note |
+|-----------|--------|------|
+| Engine (acoustic_engine.py) | Working | Ollama API, debouncing, timing fixes |
+| Audio generator (audio_generator_tts.py) | Working | TTS-based, 5 scenes generated |
+| BARE mode test | Completed | S1: 60, S3: 60, S2/S4/S5: missed |
+| PROTOCOL mode test (old prompt) | Completed | Hallucination issue documented |
+| TTS + old PROTOCOL test | Completed | TTS works, prompt issue continues |
+| Prompt optimization test | In progress | Results pending |
+| Demo interface | Pending | After prompt test succeeds |
+
+---
+
+*This document contains all TTS transition and prompt optimization findings.*
+*Last updated: April 3, 2026*
