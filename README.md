@@ -11,6 +11,8 @@
 ![Model](https://img.shields.io/badge/Model-Gemma%204%20E4B-purple?style=for-the-badge)
 ![Runtime](https://img.shields.io/badge/Runtime-Ollama%20(Offline)-orange?style=for-the-badge)
 
+**🎬 [Live Web Demo](https://wwtp-acoustic-safety-system.vercel.app) · 📺 [Field Test Video](https://www.youtube.com/watch?v=_9wYBELt0rU) · 📄 [Hackathon Writeup](https://www.kaggle.com/competitions/gemma-4-good-hackathon/writeups/can-ai-hear-what-human-ears-miss-acoustic-safety) · 📊 [Dataset on Kaggle](https://www.kaggle.com/datasets/mehmetisik/wwtp-acoustic-safety-benchmark)**
+
 ---
 
 ## The Story
@@ -70,6 +72,10 @@ Both Gemma 4 audio-capable models were tested with identical pipeline configurat
 
 ## Field Validation at Ceyhan WWTP
 
+[![Field Test at Ceyhan WWTP](https://img.youtube.com/vi/_9wYBELt0rU/maxresdefault.jpg)](https://www.youtube.com/watch?v=_9wYBELt0rU)
+
+▶️ **[Watch the full field test on YouTube](https://www.youtube.com/watch?v=_9wYBELt0rU)**
+
 The system was tested at the actual facility with a laptop's built-in microphone — fully offline (WiFi disabled, ethernet unplugged).
 
 | Location | Noise Level | Chunks | Alarms | FP | Max Confidence | Result |
@@ -108,10 +114,12 @@ The blower room (>100dB) exceeded the laptop microphone's physical capacity — 
 
 ---
 
-## Live Demo
+## Resources
 
-**Web Demo:** [https://wwtp-acoustic-safety-system.vercel.app](https://wwtp-acoustic-safety-system.vercel.app)
-Interactive demo with chunk-by-chunk analysis, spectrograms, audio playback, and survival verdict animation.
+- 🎬 **Web Demo:** [https://wwtp-acoustic-safety-system.vercel.app](https://wwtp-acoustic-safety-system.vercel.app) — Interactive demo with chunk-by-chunk analysis, spectrograms, audio playback, and survival verdict animation.
+- 📺 **Field Test Video:** [Watch on YouTube](https://www.youtube.com/watch?v=_9wYBELt0rU) — Real-world test at Ceyhan WWTP, fully offline.
+- 📄 **Hackathon Writeup:** [Can AI Hear What Human Ears Miss? — Kaggle](https://www.kaggle.com/competitions/gemma-4-good-hackathon/writeups/can-ai-hear-what-human-ears-miss-acoustic-safety) — Full submission for Gemma 4 Good Hackathon 2026.
+- 📊 **Dataset:** [WWTP Acoustic Safety Benchmark on Kaggle](https://www.kaggle.com/datasets/mehmetisik/wwtp-acoustic-safety-benchmark) — 5 synthetic scenes with scoring rubric and facility layout.
 
 **Live Detector (real-time microphone):**
 ```bash
