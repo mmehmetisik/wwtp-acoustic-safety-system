@@ -863,39 +863,66 @@ def compute_noise_profile(audio_dir, filename, sr=SAMPLE_RATE):
         return None
 
 
-def generate_fewshot_examples(audio_dir):
+# ── Few-shot referans havuzu ──────────────────────────────────
+# Her rol için aday (dosya, chunk_idx, açıklama) listesi; chunk_idx 0 tabanlıdır.
+# İlk adaylar Nisan 2026 ölçümündeki eski setin aynısıdır.
+# 🔴 Eski sette referanslar puanlanan sahnelerin içinden geliyordu: S4'ün 25–30 sn
+# chunk'ı hem "insan" referansıydı hem de S4'te puanlanıyordu (log'da c06, %90 alarm).
+# Bir sahne değerlendirilirken o sahnenin dosyasından referans alınmaz; sıradaki aday kullanılır.
+# Yedek adayların hepsi kendi sahnelerinde insan sesi başlamadan önceki (temiz) ya da
+# insan sesi olan (insan) bir pencereden seçildi; tests/test_referans_secimi.py bunu denetler.
+REFERANS_HAVUZU = (
+    ("temiz", (("S1_pump_room_normal.wav", 3, "S1 pump room (15-20s)"),
+               ("S4_manhole_masked.wav", 0, "S4 gallery noise only (0-5s)"))),
+    ("temiz", (("S2_construction_human.wav", 0, "S2 construction noise only (0-5s)"),
+               ("S5_pool_critical.wav", 0, "S5 construction noise only (0-5s)"))),
+    ("temiz", (("S3_pool_false_alarm.wav", 0, "S3 metallic sounds (0-5s)"),
+               ("S1_pump_room_normal.wav", 6, "S1 pump room (30-35s)"))),
+    ("insan", (("S4_manhole_masked.wav", 5, "S4 masked voice (25-30s)"),
+               ("S2_construction_human.wav", 5, "S2 voice under construction noise (25-30s)"))),
+)
+_REFERANS_ONBELLEGI = {}
+
+
+def referanslari_sec(haric_dosya=None):
+    """
+    Few-shot referanslarını seçer: sırayla 3 temiz + 1 insan.
+
+    haric_dosya: değerlendirilen sahnenin WAV dosyası; bu dosyadan referans alınmaz.
+    None verilirse eski set döner (yalnız Nisan 2026 ölçümünü yeniden üretmek için).
+
+    Dönüş: [(rol, dosya, chunk_idx, açıklama), ...]
+    """
+    secim = []
+    for rol, adaylar in REFERANS_HAVUZU:
+        uygun = [aday for aday in adaylar if aday[0] != haric_dosya]
+        if not uygun:
+            raise ValueError(f"'{haric_dosya}' dışlanınca '{rol}' rolü için referans kalmadı")
+        secim.append((rol,) + uygun[0])
+    return secim
+
+
+def generate_fewshot_examples(audio_dir, haric_dosya=None):
     """
     Generate few-shot reference spectrograms.
-    
+
     3 CLEAN examples (different noise types) + 1 HUMAN example.
+    haric_dosya: değerlendirilen sahnenin dosyası; referanslar bu dosyadan alınmaz.
     """
     print("  Generating few-shot reference spectrograms (voice-range filtered)...")
 
-    clean1 = generate_spectrogram_b64(audio_dir, "S1_pump_room_normal.wav", 3)
-    if clean1:
-        print("    ✓ Clean 1: S1 pump room (15-20s)")
-    else:
-        return None, None, None, None
+    goruntuler = []
+    for rol, dosya, chunk_idx, aciklama in referanslari_sec(haric_dosya):
+        anahtar = (audio_dir, dosya, chunk_idx)
+        if anahtar not in _REFERANS_ONBELLEGI:
+            _REFERANS_ONBELLEGI[anahtar] = generate_spectrogram_b64(audio_dir, dosya, chunk_idx)
+        b64 = _REFERANS_ONBELLEGI[anahtar]
+        if not b64:
+            return None, None, None, None
+        print(f"    ✓ {'Clean' if rol == 'temiz' else 'Human'}: {aciklama}")
+        goruntuler.append(b64)
 
-    clean2 = generate_spectrogram_b64(audio_dir, "S2_construction_human.wav", 0)
-    if clean2:
-        print("    ✓ Clean 2: S2 construction noise only (0-5s)")
-    else:
-        return None, None, None, None
-
-    clean3 = generate_spectrogram_b64(audio_dir, "S3_pool_false_alarm.wav", 0)
-    if clean3:
-        print("    ✓ Clean 3: S3 metallic sounds (0-5s)")
-    else:
-        return None, None, None, None
-
-    human1 = generate_spectrogram_b64(audio_dir, "S4_manhole_masked.wav", 5)
-    if human1:
-        print("    ✓ Human 1: S4 masked voice (25-30s)")
-    else:
-        return None, None, None, None
-
-    return clean1, clean2, clean3, human1
+    return tuple(goruntuler)
 
 
 def send_spectrogram_to_model(spectrogram_b64, fewshot_clean_b64,
@@ -1820,7 +1847,8 @@ def print_final_summary(all_scores):
 
 def run_full_evaluation(data_dir=None, audio_dir=None, model=None,
                         modes=None, on_chunk_result=None,
-                        stop_on_alarm=False, use_spectrogram=False):
+                        stop_on_alarm=False, use_spectrogram=False,
+                        sizintili_referans=False):
     """
     Run the complete evaluation: all scenes × all modes.
 
@@ -1832,6 +1860,9 @@ def run_full_evaluation(data_dir=None, audio_dir=None, model=None,
         on_chunk_result: callable — passed through to run_scene
         stop_on_alarm: bool — passed through to run_scene
         use_spectrogram: bool — use spectrogram+vision instead of raw audio
+        sizintili_referans: bool — eski referans setini tüm sahnelerde kullanır
+            (few-shot sızıntısı); yalnız Nisan 2026 ölçümünü yeniden üretmek için.
+            Varsayılan: her sahne kendi dosyası dışındaki referanslarla değerlendirilir.
 
     Returns:
         tuple: (grand_average, all_scores_list)
@@ -1852,24 +1883,28 @@ def run_full_evaluation(data_dir=None, audio_dir=None, model=None,
         print(f"\n  [ERROR] {conn['message']}")
         return 0.0, []
 
-    # ── Generate few-shot examples if spectrogram mode ────────
-    fewshot_examples = None
-    if use_spectrogram:
-        if not SPECTROGRAM_AVAILABLE:
-            print("\n  [ERROR] Spectrogram mode requires: pip install librosa matplotlib soundfile numpy")
-            return 0.0, []
-        result = generate_fewshot_examples(audio_dir)
-        if result[0] is None:
-            print("\n  [ERROR] Failed to generate few-shot examples")
-            return 0.0, []
-        # Pack as (clean_tuple, human) for send_spectrogram_to_model
-        fewshot_examples = ((result[0], result[1], result[2]), result[3])
-
     # ── Load data ─────────────────────────────────────────────
     scene_config, answer_key, scoring_rubric, acoustic_profiles, site_map = \
         load_all_data(data_dir)
 
     scenes = scene_config["scenes"]
+
+    # ── Generate few-shot examples if spectrogram mode ────────
+    # Varsayılan: her sahne için referanslar o sahnenin dosyası dışından seçilir.
+    sahne_referanslari = {}
+    if use_spectrogram:
+        if not SPECTROGRAM_AVAILABLE:
+            print("\n  [ERROR] Spectrogram mode requires: pip install librosa matplotlib soundfile numpy")
+            return 0.0, []
+        for scene in scenes:
+            haric = None if sizintili_referans else scene["file"]
+            print(f"\n  {scene['scene_id']}:")
+            result = generate_fewshot_examples(audio_dir, haric_dosya=haric)
+            if result[0] is None:
+                print("\n  [ERROR] Failed to generate few-shot examples")
+                return 0.0, []
+            # Pack as (clean_tuple, human) for send_spectrogram_to_model
+            sahne_referanslari[scene["scene_id"]] = ((result[0], result[1], result[2]), result[3])
 
     # ── Header ────────────────────────────────────────────────
     print(f"\n{LINE2}")
@@ -1880,6 +1915,8 @@ def run_full_evaluation(data_dir=None, audio_dir=None, model=None,
     print(f"  Model   : {model}")
     print(f"  Runtime : Ollama (local, offline)")
     print(f"  Method  : {'Spectrogram + Few-Shot Vision' if use_spectrogram else 'Raw Audio'}")
+    if use_spectrogram:
+        print(f"  Referans: {'ESKİ SET — referanslar puanlanan sahnelerden (sızıntılı)' if sizintili_referans else 'sahne dışı — değerlendirilen sahnenin dosyası kullanılmaz'}")
     print(f"  Scenes  : {len(scenes)} | Modes: {len(modes)} | Chunks: 12 × 5s")
     print(f"  Scoring : Asymmetric — FN: -40pts | FP: -10pts")
     print(f"  S5 Weight: 40% (real incident scene)")
@@ -1924,7 +1961,7 @@ def run_full_evaluation(data_dir=None, audio_dir=None, model=None,
                 on_chunk_result  = on_chunk_result,
                 stop_on_alarm    = stop_on_alarm,
                 use_spectrogram  = use_spectrogram,
-                fewshot_examples = fewshot_examples,
+                fewshot_examples = sahne_referanslari.get(scene_id),
             )
 
             run_time = time.time() - run_start
@@ -2008,7 +2045,13 @@ if __name__ == "__main__":
         print(f"  Mode: SPECTROGRAM (few-shot vision)")
         print(f"  Method: Audio → Mel Spectrogram → Image → Vision API")
 
-    grand, scores = run_full_evaluation(modes=modes, use_spectrogram=use_spec)
+    # --sizintili-referans: eski referans setiyle Nisan 2026 ölçümünü yeniden üretir.
+    sizintili = "--sizintili-referans" in flags
+    if use_spec and sizintili:
+        print(f"  UYARI: eski referans seti — referanslar puanlanan sahnelerden gelir (sızıntılı)")
+
+    grand, scores = run_full_evaluation(modes=modes, use_spectrogram=use_spec,
+                                        sizintili_referans=sizintili)
 
     print(f"\n  Final score: {grand:.1f}/100")
     sys.exit(0 if grand >= 50 else 1)
