@@ -1,0 +1,20 @@
+Ollama server version: 0.40.17 | model: gemma4:e4b | temperature 0, think false
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+Target window: S4_manhole_masked.wav, 25-30 s (the legacy human-voice reference itself)
+Target image byte-identical to the human reference: True
+
+--- Test 1: engine request (4 references + target), target = human reference ---
+{"human_detected": false, "confidence": 0.2, "distress_type": "none", "alarm": false, "action": "CONTINUE_MONITORING", "notify": [], "reasoning": "The spectrogram shows scattered energy and some potential transients, but no clear, sustained, curved formant bands characteristic of human speech."}
+time: 99.3 s (first call includes model load)
+
+--- Test 2: single-image description, prompt: "Describe this image in two sentences: what kind of chart is it, and what patterns do you see?" ---
+
+[gemma4:e4b | model under test | prompt tokens: 184]
+This image is a **line chart** displaying data over time, characterized by a fluctuating, somewhat erratic pattern. The line shows significant ups and downs, suggesting volatile or cyclical changes in the measured variable across the observed period.
+
+[qwen3.5:4b | control model | prompt tokens: 383]
+This is a voice-range spectrogram displaying frequency content over time for audio signals between 300 Hz and 3000 Hz. The chart shows distinct horizontal bands of energy at regular intervals—approximately every 170 Hz—which are characteristic of periodic speech sounds like vowels, with brighter colors indicating higher amplitude or louder segments.
