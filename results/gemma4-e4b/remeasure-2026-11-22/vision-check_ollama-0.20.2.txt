@@ -1,0 +1,17 @@
+Ollama server version: 0.20.2 | model: gemma4:e4b | temperature 0, think false
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+Target window: S4_manhole_masked.wav, 25-30 s (the legacy human-voice reference itself)
+Target image byte-identical to the human reference: True
+
+--- Test 1: engine request (4 references + target), target = human reference ---
+{"human_detected": true, "confidence": 0.9, "distress_type": "speech_call", "alarm": true, "action": "INITIATE_CONFINED_SPACE_RESCUE", "notify": [], "reasoning": "Clear, curved formant bands visible between 500-2000Hz, characteristic of human speech, despite some transient noise."}
+time: 156.5 s (first call includes model load)
+
+--- Test 2: single-image description, prompt: "Describe this image in two sentences: what kind of chart is it, and what patterns do you see?" ---
+
+[gemma4:e4b | model under test | prompt tokens: 282]
+This image is a voice-range spectrogram, which visually represents the frequency content of sound over time. The spectrogram shows distinct vertical patterns of energy, indicating speech sounds or vocalizations occurring at different times, with varying frequencies and intensities.

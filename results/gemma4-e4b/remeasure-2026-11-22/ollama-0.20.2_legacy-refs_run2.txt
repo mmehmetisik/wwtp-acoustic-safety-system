@@ -1,0 +1,369 @@
+[sarmalayıcı] 2 Ollama adresi localhost:11435 yapıldı
+
+  WWTP Acoustic Safety System — Engine Test
+  Model: gemma4:e4b
+  Running full evaluation...
+
+  Running modes: ['PROTOCOL']
+  Mode: SPECTROGRAM (few-shot vision)
+  Method: Audio → Mel Spectrogram → Image → Vision API
+  UYARI: eski referans seti — referanslar puanlanan sahnelerden gelir (sızıntılı)
+
+  S1:
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+
+  S2:
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+
+  S3:
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+
+  S4:
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+
+  S5:
+  Generating few-shot reference spectrograms (voice-range filtered)...
+    ✓ Clean: S1 pump room (15-20s)
+    ✓ Clean: S2 construction noise only (0-5s)
+    ✓ Clean: S3 metallic sounds (0-5s)
+    ✓ Human: S4 masked voice (25-30s)
+
+═════════════════════════════════════════════════════════════════
+  WWTP ACOUSTIC SAFETY SYSTEM
+  Can AI Hear What Human Ears Miss?
+═════════════════════════════════════════════════════════════════
+  Plant   : Ceyhan WWTP, Adana, Turkey
+  Model   : gemma4:e4b
+  Runtime : Ollama (local, offline)
+  Method  : Spectrogram + Few-Shot Vision
+  Referans: ESKİ SET — referanslar puanlanan sahnelerden (sızıntılı)
+  Scenes  : 5 | Modes: 1 | Chunks: 12 × 5s
+  Scoring : Asymmetric — FN: -40pts | FP: -10pts
+  S5 Weight: 40% (real incident scene)
+═════════════════════════════════════════════════════════════════
+
+█████████████████████████████████████████████████████████████████
+  MODE: PROTOCOL
+  Audio + context + full safety protocol.
+  Safety-biased: prefer false alarm over missed detection.
+█████████████████████████████████████████████████████████████████
+
+═════════════════════════════════════════════════════════════════
+  RUN 1/5: PROTOCOL | S1 | Pump Room — Normal Operation
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S1 | PROTOCOL+ SPECTROGRAM | S1_pump_room_normal.wav
+  Human: False | Distress onset: N/A
+  Model: gemma4:e4b
+  ─────────────────────────────────────────────────────────────────
+  [S1|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.8s | parse:ok
+  [S1|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.8s | parse:ok
+  [S1|PROTOCOL|c03|10-15s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S1|PROTOCOL|c04|15-20s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+  [S1|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S1|PROTOCOL|c06|25-30s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S1|PROTOCOL|c07|30-35s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S1|PROTOCOL|c08|35-40s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S1|PROTOCOL|c09|40-45s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.7s | parse:ok
+  [S1|PROTOCOL|c10|45-50s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S1|PROTOCOL|c11|50-55s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.7s | parse:ok
+  [S1|PROTOCOL|c12|55-60s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.8s | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S1|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.8s | parse:ok
+  [S1|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.8s | parse:ok
+  [S1|PROTOCOL|c03|10-15s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S1|PROTOCOL|c04|15-20s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+  [S1|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S1|PROTOCOL|c06|25-30s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S1|PROTOCOL|c07|30-35s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S1|PROTOCOL|c08|35-40s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S1|PROTOCOL|c09|40-45s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.7s | parse:ok
+  [S1|PROTOCOL|c10|45-50s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S1|PROTOCOL|c11|50-55s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.7s | parse:ok
+  [S1|PROTOCOL|c12|55-60s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.8s | parse:ok
+
+  Summary: 0 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S1 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  +40/40
+  Time to Detection  :    0/30
+  False Alarm Control:   20/20
+  Action Quality     :    0/10
+  ──────────────────────────────
+  TOTAL              :   60/100
+  First alarm        : NO DETECTION
+
+  Run time: 83.3s (1.4 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 2/5: PROTOCOL | S2 | Construction Zone — Human Distress Under Noise
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S2 | PROTOCOL+ SPECTROGRAM | S2_construction_human.wav
+  Human: True | Distress onset: 25s
+  Model: gemma4:e4b
+  ─────────────────────────────────────────────────────────────────
+  [S2|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.6s | parse:ok
+  [S2|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.2s | parse:ok
+  [S2|PROTOCOL|c03|10-15s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S2|PROTOCOL|c04|15-20s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S2|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 8.6s | parse:ok
+  [S2|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.75 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 8.7s [+0s] | parse:ok
+  [S2|PROTOCOL|c07|30-35s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.6s | parse:ok
+  [S2|PROTOCOL|c08|35-40s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S2|PROTOCOL|c09|40-45s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.7s | parse:ok
+  [S2|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S2|PROTOCOL|c11|50-55s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S2|PROTOCOL|c12|55-60s] 🚨 ALARM     | conf:0.90 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 7.3s [+30s] | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S2|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.6s | parse:ok
+  [S2|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.2s | parse:ok
+  [S2|PROTOCOL|c03|10-15s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S2|PROTOCOL|c04|15-20s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S2|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 8.6s | parse:ok
+  [S2|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.75 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 8.7s [+0s] | parse:ok
+  [S2|PROTOCOL|c07|30-35s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.6s | parse:ok
+  [S2|PROTOCOL|c08|35-40s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S2|PROTOCOL|c09|40-45s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.7s | parse:ok
+  [S2|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S2|PROTOCOL|c11|50-55s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S2|PROTOCOL|c12|55-60s] 🚨 CONFIRMED | conf:0.90 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 7.3s [+30s] | parse:ok
+
+  Summary: 2 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S2 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  +40/40
+  Time to Detection  :   30/30
+  False Alarm Control:   20/20
+  Action Quality     :    5/10
+  ──────────────────────────────
+  TOTAL              :   95/100
+  First alarm at     : 25s (chunk 6)
+
+  Run time: 90.7s (1.5 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 3/5: PROTOCOL | S3 | Pool Edge — Metallic Sound (False Alarm)
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S3 | PROTOCOL+ SPECTROGRAM | S3_pool_false_alarm.wav
+  Human: False | Distress onset: N/A
+  Model: gemma4:e4b
+  ─────────────────────────────────────────────────────────────────
+  [S3|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.8s | parse:ok
+  [S3|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 8.3s | parse:ok
+  [S3|PROTOCOL|c03|10-15s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+  [S3|PROTOCOL|c04|15-20s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+  [S3|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S3|PROTOCOL|c06|25-30s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.3s | parse:ok
+  [S3|PROTOCOL|c07|30-35s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S3|PROTOCOL|c08|35-40s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.1s | parse:ok
+  [S3|PROTOCOL|c09|40-45s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 17.8s | parse:ok
+  [S3|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 20.0s | parse:ok
+  [S3|PROTOCOL|c11|50-55s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 11.1s | parse:ok
+  [S3|PROTOCOL|c12|55-60s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S3|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.8s | parse:ok
+  [S3|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 8.3s | parse:ok
+  [S3|PROTOCOL|c03|10-15s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+  [S3|PROTOCOL|c04|15-20s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+  [S3|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S3|PROTOCOL|c06|25-30s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.3s | parse:ok
+  [S3|PROTOCOL|c07|30-35s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S3|PROTOCOL|c08|35-40s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.1s | parse:ok
+  [S3|PROTOCOL|c09|40-45s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 17.8s | parse:ok
+  [S3|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 20.0s | parse:ok
+  [S3|PROTOCOL|c11|50-55s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 11.1s | parse:ok
+  [S3|PROTOCOL|c12|55-60s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+
+  Summary: 0 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S3 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  +40/40
+  Time to Detection  :    0/30
+  False Alarm Control:   20/20
+  Action Quality     :    0/10
+  ──────────────────────────────
+  TOTAL              :   60/100
+  First alarm        : NO DETECTION
+
+  Run time: 119.0s (2.0 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 4/5: PROTOCOL | S4 | Manhole Gallery — Masked Worker, Weak Signal
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S4 | PROTOCOL+ SPECTROGRAM | S4_manhole_masked.wav
+  Human: True | Distress onset: 20s
+  Model: gemma4:e4b
+  ─────────────────────────────────────────────────────────────────
+  [S4|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S4|PROTOCOL|c02|05-10s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S4|PROTOCOL|c03|10-15s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S4|PROTOCOL|c04|15-20s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S4|PROTOCOL|c05|20-25s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S4|PROTOCOL|c06|25-30s] 🚨 ALARM     | conf:0.90 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 7.9s [+5s] | parse:ok
+  [S4|PROTOCOL|c07|30-35s] 🚨 ALARM     | conf:0.90 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 9.1s [+10s] | parse:ok
+  [S4|PROTOCOL|c08|35-40s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.0s | parse:ok
+  [S4|PROTOCOL|c09|40-45s] 🚨 ALARM     | conf:0.90 | shouting         | INITIATE_CONFINED_SPACE_RESCUE | 9.2s [+20s] | parse:ok
+  [S4|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.0s | parse:ok
+  [S4|PROTOCOL|c11|50-55s] 🚨 ALARM     | conf:0.90 | shouting         | INITIATE_CONFINED_SPACE_RESCUE | 8.2s [+30s] | parse:ok
+  [S4|PROTOCOL|c12|55-60s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S4|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S4|PROTOCOL|c02|05-10s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S4|PROTOCOL|c03|10-15s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S4|PROTOCOL|c04|15-20s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S4|PROTOCOL|c05|20-25s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S4|PROTOCOL|c06|25-30s] 🚨 CONFIRMED | conf:0.90 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 7.9s [+5s] | parse:ok
+  [S4|PROTOCOL|c07|30-35s] 🚨 CONFIRMED | conf:0.90 | speech_call      | INITIATE_CONFINED_SPACE_RESCUE | 9.1s [+10s] | parse:ok
+  [S4|PROTOCOL|c08|35-40s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.0s | parse:ok
+  [S4|PROTOCOL|c09|40-45s] 🚨 CONFIRMED | conf:0.90 | shouting         | INITIATE_CONFINED_SPACE_RESCUE | 9.2s [+20s] | parse:ok
+  [S4|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 8.0s | parse:ok
+  [S4|PROTOCOL|c11|50-55s] 🚨 CONFIRMED | conf:0.90 | shouting         | INITIATE_CONFINED_SPACE_RESCUE | 8.2s [+30s] | parse:ok
+  [S4|PROTOCOL|c12|55-60s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+
+  Summary: 4 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S4 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  +40/40
+  Time to Detection  :   30/30
+  False Alarm Control:   20/20
+  Action Quality     :   10/10
+  ──────────────────────────────
+  TOTAL              :  100/100
+  First alarm at     : 25s (chunk 6)
+
+  Run time: 93.0s (1.5 min)
+
+═════════════════════════════════════════════════════════════════
+  RUN 5/5: PROTOCOL | S5 | Clarifier Pool — REAL INCIDENT SCENARIO
+═════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  S5 | PROTOCOL+ SPECTROGRAM | S5_pool_critical.wav
+  Human: True | Distress onset: 20s
+  Model: gemma4:e4b
+  ─────────────────────────────────────────────────────────────────
+  [S5|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S5|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S5|PROTOCOL|c03|10-15s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 8.4s | parse:ok
+  [S5|PROTOCOL|c04|15-20s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S5|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S5|PROTOCOL|c06|25-30s]    ----      | conf:0.30 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S5|PROTOCOL|c07|30-35s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S5|PROTOCOL|c08|35-40s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.6s | parse:ok
+  [S5|PROTOCOL|c09|40-45s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+  [S5|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+  [S5|PROTOCOL|c11|50-55s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.6s | parse:ok
+  [S5|PROTOCOL|c12|55-60s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+
+  ─────────────────────────────────────────────────────────────────
+  ALARM CONFIRMATION (Debouncing)
+  ─────────────────────────────────────────────────────────────────
+  [S5|PROTOCOL|c01|00-05s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.1s | parse:ok
+  [S5|PROTOCOL|c02|05-10s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S5|PROTOCOL|c03|10-15s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 8.4s | parse:ok
+  [S5|PROTOCOL|c04|15-20s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.9s | parse:ok
+  [S5|PROTOCOL|c05|20-25s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.3s | parse:ok
+  [S5|PROTOCOL|c06|25-30s]    ----      | conf:0.30 | none             | CONTINUE_MONITORING            | 7.0s | parse:ok
+  [S5|PROTOCOL|c07|30-35s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 6.9s | parse:ok
+  [S5|PROTOCOL|c08|35-40s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 6.6s | parse:ok
+  [S5|PROTOCOL|c09|40-45s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.5s | parse:ok
+  [S5|PROTOCOL|c10|45-50s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+  [S5|PROTOCOL|c11|50-55s]    ----      | conf:0.10 | none             | CONTINUE_MONITORING            | 7.6s | parse:ok
+  [S5|PROTOCOL|c12|55-60s]    ----      | conf:0.20 | none             | CONTINUE_MONITORING            | 7.4s | parse:ok
+
+  Summary: 0 confirmed, 0 preliminary (demoted), 0 filtered (low confidence)
+
+  ─────────────────────────────────────────────────────────────────
+  RESULT: S5 | PROTOCOL
+  ─────────────────────────────────────────────────────────────────
+  Detection Accuracy :  -40/40
+  Time to Detection  :    0/30
+  False Alarm Control:   20/20
+  Action Quality     :    0/10
+  ──────────────────────────────
+  TOTAL              :    0/100
+  First alarm        : NO DETECTION
+
+  ★ SURVIVAL VERDICT : WOULD NOT HAVE SURVIVED
+    No detection — AI system failed to identify distress
+
+  Run time: 88.1s (1.5 min)
+
+═════════════════════════════════════════════════════════════════
+  WWTP ACOUSTIC SAFETY SYSTEM — FINAL RESULTS
+  Model: gemma4:e4b | Local inference via Ollama
+═════════════════════════════════════════════════════════════════
+
+  MODE AVERAGES:
+  Mode             S1     S2     S3     S4     S5   WGT AVG
+  ──────────────────────────────────────────────────────────
+  BARE            ---    ---    ---    ---    ---       0.0
+  CONTEXT         ---    ---    ---    ---    ---       0.0
+  PROTOCOL         60     95     60    100      0      51.0
+
+  S5 SURVIVAL VERDICTS — The Answer:
+  Mode            Detection Verdict
+  ──────────────────────────────────────────────────
+  PROTOCOL        NO DETECT   WOULD NOT HAVE SURVIVED
+
+  GRAND WEIGHTED AVERAGE: 17.0/100
+  GRADE: FAIL
+
+  System: Gemma 4 E4B running locally via Ollama
+  No cloud dependency. No internet required.
+  Edge-deployable on Raspberry Pi / Jetson Nano.
+═════════════════════════════════════════════════════════════════
+
+  Total runs  : 5/5
+  Total time  : 474s (7.9 min)
+
+  "What happens when you teach AI what to listen for?"
+  "Maybe we can save a life."
+
+═════════════════════════════════════════════════════════════════
+
+
+  Final score: 17.0/100
